@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1100" height="360" viewBox="0 0 1100 360" role="img" aria-labelledby="title desc">
-  <title id="title">PRD Context Skill Kit workflow</title>
+  <title id="title">PRD Helper Skill Kit workflow</title>
   <desc id="desc">A workflow diagram showing source material moving through collect, refine, relate, generate, check, and context delta.</desc>
   <defs>
     <style>
@@ -18,8 +18,8 @@
     </marker>
   </defs>
   <rect class="bg" x="0" y="0" width="1100" height="360"/>
-  <text class="main" x="40" y="48">PRD Context Skill Kit</text>
-  <text class="sub" x="40" y="74">Turn scattered product context into traceable PRD and Agent context.</text>
+  <text class="main" x="40" y="48">PRD Helper Skill Kit</text>
+  <text class="sub" x="40" y="74">Turn scattered product input into traceable PRD and Agent context.</text>
 
   <rect class="panel" x="40" y="125" width="150" height="92"/>
   <text class="label" x="73" y="162">Raw Input</text>
@@ -28,19 +28,19 @@
 
   <rect class="accent" x="235" y="125" width="120" height="92"/>
   <text class="label" x="265" y="164">Collect</text>
-  <text class="sub" x="256" y="191">01-sources</text>
+  <text class="sub" x="256" y="191">01-collect</text>
 
   <rect class="accent" x="400" y="125" width="120" height="92"/>
   <text class="label" x="430" y="164">Refine</text>
-  <text class="sub" x="423" y="191">02-refined</text>
+  <text class="sub" x="423" y="191">02-refine</text>
 
   <rect class="accent" x="565" y="125" width="120" height="92"/>
   <text class="label" x="596" y="164">Relate</text>
-  <text class="sub" x="584" y="191">03-relations</text>
+  <text class="sub" x="584" y="191">03-relate</text>
 
   <rect class="accent" x="730" y="125" width="120" height="92"/>
   <text class="label" x="758" y="164">Generate</text>
-  <text class="sub" x="751" y="191">04-generated</text>
+  <text class="sub" x="751" y="191">04-generate</text>
 
   <rect class="check" x="895" y="125" width="120" height="92"/>
   <text class="label" x="929" y="164">Check</text>

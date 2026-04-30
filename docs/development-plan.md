@@ -1,19 +1,19 @@
-# PRD Context Skill Kit 开发计划
+# PRD Helper Skill Kit 开发计划
 
 ## 版本路线图
 
 ### v0.1（当前版本）
 
-**目标**：通用 Skill + Markdown 工作流，跑通完整闭环。
+**目标**：通用 Skill + Markdown 工作流，跑通四环节完整闭环。
 
 **交付物**：
 - 通用 Skill 目录结构
 - SKILL.md 主入口
-- 四模块工作流（采集、精炼、关联、生成）
+- 四环节工作流（采集、精炼、关联、生成）
 - 检查规则和脚本
-- 14 个模板文件
+- 26 个模板文件
 - 4 类工具适配（Codex、Claude Code、Trae、Generic）
-- PRD helper 自举示例
+- 机器人巡检 Demo
 - 完整检查套件
 
 **状态**：已完成
@@ -97,10 +97,10 @@
 
 **交付物**：
 - README.md
-- skills/prd-context/SKILL.md
-- skills/prd-context/references/
-- skills/prd-context/assets/templates/
-- skills/prd-context/scripts/
+- skills/prd-helper/SKILL.md
+- skills/prd-helper/references/
+- skills/prd-helper/assets/templates/
+- skills/prd-helper/scripts/
 
 **验收标准**：
 - 符合通用 Skill 目录结构
@@ -113,10 +113,10 @@
 
 ---
 
-### 阶段二：建立四模块模板
+### 阶段二：建立四环节模板
 
 **交付物**：
-- 14 个模板文件
+- 26 个模板文件
 
 **验收标准**：
 - 每个模板有来源字段
@@ -164,17 +164,18 @@
 
 ---
 
-### 阶段五：跑通 PRD helper 自举案例
+### 阶段五：跑通机器人巡检 Demo
 
 **交付物**：
-- demo/prd-helper-demo/docs/prd-context/
+- demo/robot-inspection-demo/docs/prd-helper/
 
 **验收标准**：
-- 有 sources
-- 有 refined
-- 有 relations
-- 有 generated
-- 有 check
+- 有 01-collect
+- 有 02-refine
+- 有 03-relate
+- 有 04-generate
+- 有 05-check
+- 每个目录都有真实内容
 - 能看出上下文从原始材料演化到生成文档
 - 能看出检查发现了什么问题
 
