@@ -50,6 +50,75 @@ def extract_table_rows(content: str) -> list[dict]:
     return rows
 
 
+def check_collect_metadata(root_path: Path) -> dict:
+    """Check collected source files have required audit metadata."""
+    collect_dir = root_path / "01-collect"
+    required_fields = ["记录时间", "记录人", "责任人", "优先级"]
+
+    if not collect_dir.exists():
+        return {"exists": False, "files": []}
+
+    file_results = []
+    for md_file in sorted(collect_dir.glob("*.md")):
+        if md_file.name == "check.md":
+            continue
+        content = md_file.read_text()
+        missing = [
+            field
+            for field in required_fields
+            if not re.search(rf"^\s*-\s*{re.escape(field)}\s*：\s*\S+", content, re.MULTILINE)
+        ]
+        file_results.append({
+            "file": md_file.name,
+            "missing": missing,
+            "status": "PASS" if not missing else "FAIL",
+        })
+
+    return {"exists": True, "files": file_results}
+
+
+def check_refine_traceability(root_path: Path) -> dict:
+    """Check facts, decisions, and constraints have source traceability."""
+    refine_dir = root_path / "02-refine"
+    specs = {
+        "facts.md": ("fact", ["来源材料", "来源位置", "状态"]),
+        "decisions.md": ("decision", ["来源材料", "来源位置", "状态"]),
+        "constraints.md": ("constraint", ["来源材料", "来源位置", "状态"]),
+    }
+
+    if not refine_dir.exists():
+        return {"exists": False, "files": {}}
+
+    file_results = {}
+    for fname, (prefix, required_fields) in specs.items():
+        file_path = refine_dir / fname
+        if not file_path.exists():
+            file_results[fname] = {"exists": False, "items": []}
+            continue
+
+        content = file_path.read_text()
+        headings = list(re.finditer(rf"^#{{2,3}}\s+({prefix}[_-]\d+)", content, re.MULTILINE))
+        items = []
+        for i, heading in enumerate(headings):
+            start = heading.end()
+            end = headings[i + 1].start() if i + 1 < len(headings) else len(content)
+            block = content[start:end]
+            missing = [
+                field
+                for field in required_fields
+                if not re.search(rf"^\s*-\s*{re.escape(field)}\s*：\s*\S+", block, re.MULTILINE)
+            ]
+            items.append({
+                "id": heading.group(1),
+                "missing": missing,
+                "status": "PASS" if not missing else "FAIL",
+            })
+
+        file_results[fname] = {"exists": True, "items": items}
+
+    return {"exists": True, "files": file_results}
+
+
 def check_facts(root_path: Path) -> dict:
     """Check facts.md for completeness."""
     facts_file = root_path / "02-refine" / "facts.md"
@@ -178,10 +247,51 @@ def check_context_map(root_path: Path) -> dict:
     }
 
 
-def print_results(facts: dict, relations: dict, coverage: dict, context_map: dict):
+def print_results(
+    collect_metadata: dict,
+    refine_traceability: dict,
+    facts: dict,
+    relations: dict,
+    coverage: dict,
+    context_map: dict,
+):
     print("=" * 60)
     print("PRD Helper Relation Check")
     print("=" * 60)
+    print()
+
+    # Collect metadata check
+    print("--- Collect Metadata ---")
+    if collect_metadata["exists"]:
+        if collect_metadata["files"]:
+            for item in collect_metadata["files"]:
+                icon = "✅" if item["status"] == "PASS" else "❌"
+                detail = f" (missing: {', '.join(item['missing'])})" if item["missing"] else ""
+                print(f"  {icon} {item['file']}{detail}")
+        else:
+            print("  ❌ No collected source files found")
+    else:
+        print("  ❌ 01-collect/ not found")
+    print()
+
+    # Refine traceability check
+    print("--- Refine Traceability ---")
+    if refine_traceability["exists"]:
+        for fname, data in refine_traceability["files"].items():
+            if not data["exists"]:
+                print(f"  ❌ {fname} not found")
+                continue
+            if not data["items"]:
+                print(f"  ❌ {fname}: no tracked items")
+                continue
+            failed = [item for item in data["items"] if item["status"] == "FAIL"]
+            if failed:
+                for item in failed:
+                    print(f"  ❌ {fname}:{item['id']} missing {', '.join(item['missing'])}")
+            else:
+                print(f"  ✅ {fname}: {len(data['items'])} item(s) traceable")
+    else:
+        print("  ❌ 02-refine/ not found")
     print()
 
     # Facts check
@@ -250,16 +360,54 @@ def main():
         print(f"Error: Directory '{root}' does not exist.")
         sys.exit(1)
 
+    collect_metadata = check_collect_metadata(root_path)
+    refine_traceability = check_refine_traceability(root_path)
     facts = check_facts(root_path)
     relations = check_relations(root_path)
     coverage = check_fact_coverage(root_path)
     context_map = check_context_map(root_path)
 
-    print_results(facts, relations, coverage, context_map)
+    print_results(collect_metadata, refine_traceability, facts, relations, coverage, context_map)
 
     # Exit with non-zero if there are uncovered facts
     has_issues = False
+    if not collect_metadata["exists"] or not collect_metadata["files"]:
+        has_issues = True
+    else:
+        has_issues = has_issues or any(item["status"] == "FAIL" for item in collect_metadata["files"])
+    if not refine_traceability["exists"]:
+        has_issues = True
+    else:
+        for data in refine_traceability["files"].values():
+            if not data["exists"] or not data["items"]:
+                has_issues = True
+            elif any(item["status"] == "FAIL" for item in data["items"]):
+                has_issues = True
+    if not facts["exists"]:
+        has_issues = True
+    elif facts["with_source"] < facts["count"] or facts["with_status"] < facts["count"]:
+        has_issues = True
+    if not relations["exists"]:
+        has_issues = True
+    else:
+        for data in relations["files"].values():
+            if not data["exists"] or data["count"] == 0:
+                has_issues = True
     if coverage["checked"] and coverage["unmapped"]:
+        has_issues = True
+    if not context_map["exists"]:
+        has_issues = True
+    elif not all(
+        context_map[key]
+        for key in [
+            "has_facts",
+            "has_pages",
+            "has_features",
+            "has_rules",
+            "has_data",
+            "has_acceptance",
+        ]
+    ):
         has_issues = True
 
     sys.exit(1 if has_issues else 0)

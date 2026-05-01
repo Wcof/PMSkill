@@ -88,7 +88,7 @@ def check_directory_structure(root_path: Path) -> list[dict]:
             if len(md_files) == 0:
                 results.append({
                     "check": f"04-generate/{subdir} has content",
-                    "status": "WARN",
+                    "status": "FAIL",
                     "detail": "No .md files found",
                 })
             else:
@@ -212,12 +212,15 @@ def check_page_completeness(root_path: Path) -> list[dict]:
         return results
 
     required_sections = [
-        "页面目标",
-        "页面区域",
-        "字段",
-        "操作",
-        "状态",
-        "验收",
+        "## 1. 页面基本信息",
+        "## 2. 页面区域",
+        "## 3. 字段说明",
+        "## 4. 用户操作",
+        "## 5. 页面状态",
+        "## 6. 异常状态",
+        "## 8. 前端验收标准",
+        "## 9. 待确认问题",
+        "## 10. 来源说明",
     ]
 
     for md_file in pages_dir.glob("*.md"):
@@ -232,7 +235,7 @@ def check_page_completeness(root_path: Path) -> list[dict]:
         if missing:
             results.append({
                 "file": str(rel_path),
-                "status": "WARN",
+                "status": "FAIL",
                 "missing_sections": missing,
             })
         else:
@@ -254,10 +257,18 @@ def check_rule_completeness(root_path: Path) -> list[dict]:
         return results
 
     required_sections = [
-        "前置条件",
-        "执行步骤",
-        "异常",
-        "权限",
+        "## 1. 规则目标",
+        "## 2. 触发页面",
+        "## 3. 触发操作",
+        "## 4. 前置条件",
+        "## 5. 执行步骤",
+        "## 6. 状态变化",
+        "## 7. 异常分支",
+        "## 8. 权限规则",
+        "## 11. 关联数据对象",
+        "## 13. 验收标准",
+        "## 14. 待确认问题",
+        "## 15. 来源说明",
     ]
 
     for md_file in rules_dir.glob("*.md"):
@@ -272,7 +283,7 @@ def check_rule_completeness(root_path: Path) -> list[dict]:
         if missing:
             results.append({
                 "file": str(rel_path),
-                "status": "WARN",
+                "status": "FAIL",
                 "missing_sections": missing,
             })
         else:
@@ -342,7 +353,7 @@ def print_results(
     print("--- Page Completeness ---")
     if pages:
         for r in pages:
-            icon = "✅" if r["status"] == "PASS" else "⚠️"
+            icon = "✅" if r["status"] == "PASS" else "❌"
             missing = f" (missing: {', '.join(r['missing_sections'])})" if r["missing_sections"] else ""
             print(f"  {icon} {r['file']}{missing}")
     else:
@@ -353,7 +364,7 @@ def print_results(
     print("--- Rule Completeness ---")
     if rules:
         for r in rules:
-            icon = "✅" if r["status"] == "PASS" else "⚠️"
+            icon = "✅" if r["status"] == "PASS" else "❌"
             missing = f" (missing: {', '.join(r['missing_sections'])})" if r["missing_sections"] else ""
             print(f"  {icon} {r['file']}{missing}")
     else:
@@ -387,8 +398,17 @@ def main():
     has_unresolved = len(unresolved) > 0
     has_consolidation_fail = consolidation["checked"] and not consolidation["all_consolidated"]
     has_traceability_fail = any(r["status"] == "FAIL" for r in traceability)
+    has_page_fail = any(r["status"] == "FAIL" for r in pages)
+    has_rule_fail = any(r["status"] == "FAIL" for r in rules)
 
-    if has_structure_fail or has_unresolved or has_consolidation_fail or has_traceability_fail:
+    if (
+        has_structure_fail
+        or has_unresolved
+        or has_consolidation_fail
+        or has_traceability_fail
+        or has_page_fail
+        or has_rule_fail
+    ):
         sys.exit(1)
 
 
