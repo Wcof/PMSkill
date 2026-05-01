@@ -1,5 +1,7 @@
 # PRD Helper
 
+![一张图教会你 PRD Helper 项目](support/assets/prd-helper-project-overview.svg)
+
 ## 第一部分：怎么用（给小白）
 
 1. 把本仓库放到你使用的 Agent Skill 目录里。
@@ -51,7 +53,3 @@ PRDContextEngine/
 - `scripts/`：自动检查脚本（结构、关系、生成质量）。
 - `examples/`：可直接参考的示例项目。
 - `support/`：适配器文档、历史资料和辅助资产。
-
-## 一张图教会你 PRD Helper 项目
-
-![一张图教会你 PRD Helper 项目](support/assets/prd-helper-project-overview.svg)
