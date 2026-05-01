@@ -19,24 +19,24 @@
 
 ## 2. 决策来源追溯
 
-| 决策 | 来源材料 | 状态 |
-|------|---------|------|
-| decision_001 | 产品口述、会议纪要 | 已确认 |
-| decision_002 | 会议纪要 | 已确认 |
-| decision_003 | 产品口述、会议纪要 | 已确认 |
-| decision_004 | Agent 对话 | 已确认 |
-| decision_005 | 会议纪要 | 已确认 |
+| 决策 | 来源材料 | 来源位置 | 状态 |
+|------|---------|---------|------|
+| decision_001 | 产品口述、会议纪要 | product-voice.md、meeting-notes.md | 已确认 |
+| decision_002 | 会议纪要 | meeting-notes.md | 已确认 |
+| decision_003 | 产品口述、会议纪要 | product-voice.md、meeting-notes.md | 已确认 |
+| decision_004 | Agent 对话 | agent-session.md | 已确认 |
+| decision_005 | 会议纪要 | meeting-notes.md | 已确认 |
 
 ## 3. 约束来源追溯
 
-| 约束 | 来源材料 | 状态 |
-|------|---------|------|
-| constraint_001 | 产品口述 | 已确认 |
-| constraint_002 | 产品口述、会议纪要 | 已确认 |
-| constraint_003 | 会议纪要 | 已确认 |
-| constraint_004 | 原型说明 | 已确认 |
-| constraint_005 | 会议纪要 | 已确认 |
-| constraint_006 | 产品口述 | 已确认 |
+| 约束 | 来源材料 | 来源位置 | 状态 |
+|------|---------|---------|------|
+| constraint_001 | 产品口述 | product-voice.md | 已确认 |
+| constraint_002 | 产品口述、会议纪要 | product-voice.md、meeting-notes.md | 已确认 |
+| constraint_003 | 会议纪要 | meeting-notes.md | 已确认 |
+| constraint_004 | 原型说明 | prototype-notes.md | 已确认 |
+| constraint_005 | 会议纪要 | meeting-notes.md | 已确认 |
+| constraint_006 | 产品口述 | product-voice.md | 已确认 |
 
 ## 4. AI 推断标记检查
 
@@ -52,4 +52,4 @@
 
 ## 5. 结论
 
-所有关键内容均有来源追溯，AI 推断已明确标记，并覆盖机器人硬件接口、批量导入、现有数据结构和实时位置展示等未明确领域，无无依据结论。
+所有关键内容均有来源材料和来源位置追溯，AI 推断已明确标记，并覆盖机器人硬件接口、批量导入、现有数据结构和实时位置展示等未明确领域，无无依据结论。

@@ -61,7 +61,7 @@ Use this skill when the user provides:
 
 Save raw input to `docs/prd-helper/01-collect/`.
 
-Each source file must include material title, material type, source, recording time, recorder, raw content, related modules, and keywords.
+Each source file must include material title, material type, source, recording time, recorder, owner, priority, raw content, related modules, and keywords.
 
 After collecting, run collect check and output `01-collect/check.md`.
 
@@ -108,9 +108,9 @@ Generate structured documents in `docs/prd-helper/04-generate/`:
 
 After generating, run generate check and output `04-generate/check.md`.
 
-### Step 5: Check
+### Final Check
 
-Run final check in `docs/prd-helper/05-check/`:
+Check is not a fifth business module. After the four workflow steps are complete, run final check in `docs/prd-helper/05-check/`:
 
 - `full-check.md` - overall completeness check
 - `gap-check.md` - gap analysis

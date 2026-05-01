@@ -20,7 +20,7 @@
 2. **Refine（精炼）**：提取事实、背景、目标、决策、约束、冲突、问题到 `docs/prd-helper/02-refine/`
 3. **Relate（关联）**：建立关系到 `docs/prd-helper/03-relate/`
 4. **Generate（生成）**：输出文档到 `docs/prd-helper/04-generate/`
-5. **Check（检查）**：每步都输出 `check.md`，最终输出到 `docs/prd-helper/05-check/`
+5. **Final Check（最终检查，不是第五个业务环节）**：每步都输出 `check.md`，最终输出到 `docs/prd-helper/05-check/`
 
 **重要：不能直接从原始材料生成最终 PRD，必须保留 collect/refine/relate/generate 中间产物。**
 
