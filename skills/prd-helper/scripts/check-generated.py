@@ -110,6 +110,8 @@ def check_unresolved_content(root_path: Path) -> list[dict]:
         return results
 
     for md_file in gen_dir.rglob("*.md"):
+        if md_file == gen_dir / "check.md":
+            continue
         content = md_file.read_text()
         rel_path = md_file.relative_to(root_path)
 
@@ -165,6 +167,40 @@ def check_pending_questions_consolidation(root_path: Path) -> dict:
         "all_consolidated": has_consolidation,
         "pending_questions": pending_questions[:5],  # Show first 5
     }
+
+
+def check_traceability(root_path: Path) -> list[dict]:
+    """Check if generated docs keep source or relation traceability."""
+    results = []
+    gen_dir = root_path / "04-generate"
+
+    if not gen_dir.exists():
+        return results
+
+    trace_patterns = [
+        r"fact_\d+",
+        r"rule_\d+",
+        r"data_\d+",
+        r"acceptance_\d+",
+        r"来源说明",
+        r"来源事实",
+        r"关联规则",
+        r"关联数据",
+        r"关联验收",
+    ]
+
+    for md_file in gen_dir.rglob("*.md"):
+        if md_file == gen_dir / "check.md":
+            continue
+        content = md_file.read_text()
+        rel_path = md_file.relative_to(root_path)
+        has_trace = any(re.search(pattern, content) for pattern in trace_patterns)
+        results.append({
+            "file": str(rel_path),
+            "status": "PASS" if has_trace else "FAIL",
+        })
+
+    return results
 
 
 def check_page_completeness(root_path: Path) -> list[dict]:
@@ -253,6 +289,7 @@ def print_results(
     structure: list[dict],
     unresolved: list[dict],
     consolidation: dict,
+    traceability: list[dict],
     pages: list[dict],
     rules: list[dict],
 ):
@@ -289,6 +326,16 @@ def print_results(
             print(f"  ❌ {consolidation['pending_count']} pending questions NOT consolidated in 05-check")
     else:
         print("  ⚠️  Could not check consolidation")
+    print()
+
+    # Traceability
+    print("--- Traceability ---")
+    if traceability:
+        for r in traceability:
+            icon = "✅" if r["status"] == "PASS" else "❌"
+            print(f"  {icon} {r['file']}")
+    else:
+        print("  ℹ️  No generated files to check")
     print()
 
     # Page completeness
@@ -330,10 +377,19 @@ def main():
     structure = check_directory_structure(root_path)
     unresolved = check_unresolved_content(root_path)
     consolidation = check_pending_questions_consolidation(root_path)
+    traceability = check_traceability(root_path)
     pages = check_page_completeness(root_path)
     rules = check_rule_completeness(root_path)
 
-    print_results(structure, unresolved, consolidation, pages, rules)
+    print_results(structure, unresolved, consolidation, traceability, pages, rules)
+
+    has_structure_fail = any(r["status"] == "FAIL" for r in structure)
+    has_unresolved = len(unresolved) > 0
+    has_consolidation_fail = consolidation["checked"] and not consolidation["all_consolidated"]
+    has_traceability_fail = any(r["status"] == "FAIL" for r in traceability)
+
+    if has_structure_fail or has_unresolved or has_consolidation_fail or has_traceability_fail:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

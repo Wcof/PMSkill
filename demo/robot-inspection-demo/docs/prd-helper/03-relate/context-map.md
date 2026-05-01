@@ -75,3 +75,7 @@
 - assumption_001 → page_004、rule_004、data_004
 - assumption_002 → page_002、rule_002、data_002
 - assumption_003 → page_006、rule_006、data_009
+- assumption_004 → page_002、page_007、rule_007、data_007
+- assumption_005 → page_005、rule_005、data_005、acceptance_004
+- assumption_006 → data_003、data_004、data_005、data_006、data_007
+- assumption_007 → page_002、page_007、rule_007、data_007、agent-context/frontend-context.md

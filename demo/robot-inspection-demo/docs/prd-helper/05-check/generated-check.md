@@ -21,6 +21,8 @@
 - [x] 数据说明包含：对象、字段、关系、状态
 - [x] 验收标准包含：功能、页面、规则、异常、权限
 - [x] Agent 上下文包含：任务背景、相关页面/规则/数据、待确认问题
+- [x] 生成文档包含来源说明或 fact/rule/data/acceptance 关联标识
+- [x] 生成文档未遗漏待确认问题，待确认问题已传递到 05-check
 
 ## 3. 待确认问题保留检查
 
@@ -31,6 +33,20 @@
 | question_003 | 关联图 | ✅ |
 | question_004 | 页面说明、规则说明、Agent 上下文 | ✅ |
 
-## 4. 结论
+## 4. 溯源检查
+
+| 文档 | 溯源状态 |
+|------|---------|
+| overview/project-overview.md | ✅ |
+| pages/inspection-point-management.md | ✅ |
+| rules/inspection-point-rule.md | ✅ |
+| data/inspection-domain-data.md | ✅ |
+| acceptance/inspection-point-acceptance.md | ✅ |
+| agent-context/frontend-context.md | ✅ |
+| agent-context/backend-context.md | ✅ |
+| agent-context/test-context.md | ✅ |
+| agent-context/product-review-context.md | ✅ |
+
+## 5. 结论
 
 生成文档完整，内容可追溯，待确认问题已保留。
