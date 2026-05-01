@@ -97,17 +97,17 @@
 
 **交付物**：
 - README.md
-- skills/prd-helper/SKILL.md
-- skills/prd-helper/references/
-- skills/prd-helper/assets/templates/
-- skills/prd-helper/scripts/
+- repository root/SKILL.md
+- repository root/references/
+- repository root/modules/*/templates/
+- repository root/scripts/
 
 **验收标准**：
 - 符合通用 Skill 目录结构
 - SKILL.md 有 name 和 description
 - SKILL.md 保持轻量
 - 详细规则拆到 references
-- 模板拆到 assets/templates
+- 模板拆到 modules/*/templates
 
 **状态**：已完成
 
@@ -167,7 +167,7 @@
 ### 阶段五：跑通机器人巡检 Demo
 
 **交付物**：
-- demo/robot-inspection-demo/docs/prd-helper/
+- examples/robot-inspection/docs/prd-helper/
 
 **验收标准**：
 - 有 01-collect

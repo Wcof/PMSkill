@@ -1,4 +1,4 @@
-# PRD Helper Skill - Trae Project Rules
+# PRD Helper Skill - Codex Agent Instructions
 
 ## 项目说明
 
@@ -6,12 +6,12 @@
 
 ## 核心规则
 
-1. 遇到产品需求整理任务时，使用 PRD Helper Skill 流程。
-2. 必须按 collect、refine、relate、generate 执行，检查贯穿四环节。
-3. 必须保存原始材料。
-4. 必须输出 Context Delta。
-5. 不允许把 AI 推断当成确定事实。
-6. 不能直接从原始材料生成最终 PRD，必须保留中间产物。
+1. **处理产品上下文时必须优先使用 prd-helper skill。**
+2. **不允许跳过检查步骤。**
+3. **每次结束必须输出 Context Delta。**
+4. **不允许把 AI 推断当成确定事实。**
+5. **不允许跳过来源、冲突、待确认问题。**
+6. **不能直接从原始材料生成最终 PRD，必须保留中间产物。**
 
 ## 工作流程
 
@@ -41,10 +41,14 @@
 
 详细规则请参考：
 
-- `skills/prd-helper/SKILL.md`
-- `skills/prd-helper/references/workflow.md`
-- `skills/prd-helper/references/check-rules.md`
+- `SKILL.md`
+- `modules/collect/guide.md`
+- `modules/refine/guide.md`
+- `modules/relate/guide.md`
+- `modules/generate/guide.md`
+- `checks/guide.md`
+- `checks/templates/05-context-delta-template.md`
 
 ## 模板
 
-使用 `skills/prd-helper/assets/templates/` 下的模板文件。
+使用 `modules/*/templates/` 和 `checks/templates/` 下的模板文件。

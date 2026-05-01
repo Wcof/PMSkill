@@ -2,16 +2,16 @@
 
 ## 安装步骤
 
-1. 将 `skills/prd-helper/` 目录复制到目标项目的 `.claude/skills/prd-helper/`：
+1. 将本仓库复制到目标项目的 `.claude/repository root/`：
 
 ```bash
-cp -r skills/prd-helper/ /path/to/your-project/.claude/skills/prd-helper/
+cp -r /path/to/PRDContextEngine /path/to/your-project/.claude/repository root
 ```
 
-2. 将 `adapters/claude-code/CLAUDE.md` 复制到目标项目根目录：
+2. 将 `support/adapters/claude-code/CLAUDE.md` 复制到目标项目根目录：
 
 ```bash
-cp adapters/claude-code/CLAUDE.md /path/to/your-project/CLAUDE.md
+cp /path/to/PRDContextEngine/support/adapters/claude-code/CLAUDE.md /path/to/your-project/CLAUDE.md
 ```
 
 3. 如果目标项目已有 `CLAUDE.md`，将内容追加到现有文件中。
@@ -27,9 +27,8 @@ your-project/
 │   └── skills/
 │       └── prd-helper/
 │           ├── SKILL.md
-│           ├── references/
-│           ├── assets/
-│           │   └── templates/
+│           ├── modules/
+│           ├── checks/
 │           └── scripts/
 └── docs/
     └── prd-helper/                    # 生成的 PRD 文档

@@ -2,13 +2,13 @@
 
 ## 安装步骤
 
-1. 将 `skills/prd-helper/` 目录复制到目标项目中：
+1. 将本仓库复制到目标项目中（路径按 Trae 当前版本调整）：
 
 ```bash
-cp -r skills/prd-helper/ /path/to/your-project/skills/prd-helper/
+cp -r /path/to/PRDContextEngine /path/to/your-project/repository root
 ```
 
-2. 将 `adapters/trae/project_rules.md` 的内容添加到 Trae 的项目规则中。
+2. 将 `support/adapters/trae/project_rules.md` 的内容添加到 Trae 的项目规则中。
 
 ## 验证安装
 
@@ -19,9 +19,8 @@ your-project/
 ├── skills/
 │   └── prd-helper/
 │       ├── SKILL.md
-│       ├── references/
-│       ├── assets/
-│       │   └── templates/
+│       ├── modules/
+│       ├── checks/
 │       └── scripts/
 └── docs/
     └── prd-helper/                    # 生成的 PRD 文档

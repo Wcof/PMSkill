@@ -19,4 +19,4 @@
 - `04-generate/`：生成项目说明、页面说明、功能规则、数据说明、验收标准和 Agent 上下文。
 - `05-check/`：输出最终检查、来源检查、关系检查、生成检查和 Context Delta。
 
-完整 demo 位于 `demo/robot-inspection-demo/docs/prd-helper/`。
+完整 demo 位于 `examples/robot-inspection/docs/prd-helper/`。

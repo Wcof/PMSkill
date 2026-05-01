@@ -10,11 +10,11 @@
 
 | # | 验收项 | 状态 | 说明 |
 |---|--------|------|------|
-| 1 | 符合通用 Skill 结构 | ✅ | skills/prd-helper/ 目录结构完整 |
+| 1 | 符合通用 Skill 结构 | ✅ | repository root/ 目录结构完整 |
 | 2 | SKILL.md 有 name 和 description | ✅ | 有 frontmatter 定义 |
 | 3 | SKILL.md 保持轻量 | ✅ | 详细规则拆到 references/ |
 | 4 | 详细规则拆到 references/ | ✅ | 7 个参考文件 |
-| 5 | 模板拆到 assets/templates/ | ✅ | 26 个模板文件 |
+| 5 | 模板拆到 modules/*/templates/ | ✅ | 26 个模板文件 |
 
 ### 功能验收
 
@@ -41,7 +41,7 @@
 
 | # | 验收项 | 状态 | 说明 |
 |---|--------|------|------|
-| 17 | 有真实示例 | ✅ | demo/robot-inspection-demo/ |
+| 17 | 有真实示例 | ✅ | examples/robot-inspection/ |
 | 18 | 示例使用机器人巡检场景 | ✅ | 真实业务场景 |
 | 19 | 示例跑通完整闭环 | ✅ | 采集→精炼→关联→生成，检查贯穿全流程 |
 

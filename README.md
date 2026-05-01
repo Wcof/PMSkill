@@ -1,29 +1,27 @@
-# PRD Helper Skill Kit
+# PRD Helper
 
-![PRD Helper Skill Kit workflow](docs/prd-helper-skill-kit-flow.svg)
+![PRD Helper flow](support/assets/prd-helper-skill-kit-flow.svg)
 
-## 介绍
+## 这是干嘛的
 
-PRD Helper Skill Kit 是 PRD helper 的通用 Agent Skill 套件，用 Markdown 工作流把产品沟通、会议纪要、原型说明、客户反馈和 Agent 对话沉淀为可追溯、可复用、可检查的产品上下文。
+PRD Helper 用来把产品原始材料（会议纪要、聊天记录、原型说明、客户反馈、Agent 对话）整理成可追溯的 PRD 上下文。
 
-它的核心流程是：采集原始材料，精炼事实、背景、目标、决策、约束、冲突、问题和 AI 推断，建立需求与页面、功能、规则、数据、验收之间的关系，生成角色化 PRD 和 Agent 上下文，最后输出检查结果与 Context Delta。
+入口是根目录 `SKILL.md`，四个业务模块在 `modules/`：
 
-```text
-01-collect → 02-refine → 03-relate → 04-generate → 05-check → Context Delta
-```
-
-项目只做 Skill、模板、检查规则、工具适配和 demo，不做 UI、后台、数据库或 SaaS 平台。
+- `modules/collect/`
+- `modules/refine/`
+- `modules/relate/`
+- `modules/generate/`
 
 ## 怎么用
 
-1. 把 `skills/prd-helper/` 复制到目标项目的 `.agents/skills/prd-helper/`、`.claude/skills/prd-helper/` 或对应 Agent 工具的 Skill 目录。
-2. 按使用工具复制 `adapters/` 里的适配说明，例如 Codex 使用 `adapters/codex/AGENTS.md`，Claude Code 使用 `adapters/claude-code/CLAUDE.md`，Trae 使用 `adapters/trae/project_rules.md`。
-3. 准备会议纪要、聊天记录、原型说明、客户反馈或 Agent 对话摘要，让 Agent 使用 `prd-helper` Skill 处理。
-4. 在目标项目的 `docs/prd-helper/` 查看输出：`01-collect`、`02-refine`、`03-relate`、`04-generate` 和 `05-check`。
-5. 可运行检查脚本验证 demo：
+1. 把本仓库作为 Skill 放到目标 Agent 的 Skill 目录。
+2. 给 Agent 产品材料（会议纪要、原型说明、反馈、对话摘要等）。
+3. 产物会输出到目标项目 `docs/prd-helper/`。
+4. 用根目录 `scripts/` 做检查：
 
 ```bash
-python3 skills/prd-helper/scripts/check-structure.py demo/robot-inspection-demo/docs/prd-helper
-python3 skills/prd-helper/scripts/check-relations.py demo/robot-inspection-demo/docs/prd-helper
-python3 skills/prd-helper/scripts/check-generated.py demo/robot-inspection-demo/docs/prd-helper
+python3 scripts/check-structure.py examples/robot-inspection/docs/prd-helper
+python3 scripts/check-relations.py examples/robot-inspection/docs/prd-helper
+python3 scripts/check-generated.py examples/robot-inspection/docs/prd-helper
 ```

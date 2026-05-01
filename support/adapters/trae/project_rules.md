@@ -1,4 +1,4 @@
-# PRD Helper Skill - Claude Code Instructions
+# PRD Helper Skill - Trae Project Rules
 
 ## 项目说明
 
@@ -6,11 +6,12 @@
 
 ## 核心规则
 
-1. **本项目产品上下文处理必须走 prd-helper skill。**
-2. **不允许直接从原始材料生成最终 PRD。**
-3. **必须区分事实、推断、冲突、待确认。**
-4. **必须运行检查。**
-5. **必须输出 Context Delta。**
+1. 遇到产品需求整理任务时，使用 PRD Helper Skill 流程。
+2. 必须按 collect、refine、relate、generate 执行，检查贯穿四环节。
+3. 必须保存原始材料。
+4. 必须输出 Context Delta。
+5. 不允许把 AI 推断当成确定事实。
+6. 不能直接从原始材料生成最终 PRD，必须保留中间产物。
 
 ## 工作流程
 
@@ -21,8 +22,6 @@
 3. **Relate（关联）**：建立关系到 `docs/prd-helper/03-relate/`
 4. **Generate（生成）**：输出文档到 `docs/prd-helper/04-generate/`
 5. **Final Check（最终检查，不是第五个业务环节）**：每步都输出 `check.md`，最终输出到 `docs/prd-helper/05-check/`
-
-**重要：不能直接从原始材料生成最终 PRD，必须保留 collect/refine/relate/generate 中间产物。**
 
 ## 检查要求
 
@@ -42,15 +41,13 @@
 
 详细规则请参考：
 
-- `skills/prd-helper/SKILL.md`
-- `skills/prd-helper/references/workflow.md`
-- `skills/prd-helper/references/collect.md`
-- `skills/prd-helper/references/refine.md`
-- `skills/prd-helper/references/relate.md`
-- `skills/prd-helper/references/generate.md`
-- `skills/prd-helper/references/check-rules.md`
-- `skills/prd-helper/references/context-delta.md`
+- `SKILL.md`
+- `modules/collect/guide.md`
+- `modules/refine/guide.md`
+- `modules/relate/guide.md`
+- `modules/generate/guide.md`
+- `checks/guide.md`
 
 ## 模板
 
-使用 `skills/prd-helper/assets/templates/` 下的模板文件。
+使用 `modules/*/templates/` 和 `checks/templates/` 下的模板文件。
