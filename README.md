@@ -1,132 +1,130 @@
 # PRD Helper
 
-![一张图教会你 PRD Helper 项目](support/assets/prd-helper-project-overview.svg)
+![PRD Helper Skill Kit overview](support/assets/prd-helper-project-overview.svg)
+
+一句话：PRD Helper 是一个可安装的 Agent Skill，把产品讨论、会议纪要、客户反馈和旧文档，按“采集、精炼、关联、生成”四个模块转成可追溯的 PRD 上下文。
+
+## 项目介绍
+
+PRD Helper 不是一个普通脚本包，也不是四个分散的小工具。它是一个完整的 Skill：根目录的 `SKILL.md` 是唯一入口，`modules/` 显式承载四个业务模块，`checks/` 提供贯穿全流程的质量门禁，`scripts/` 提供安装、采集、检查和卸载自动化。
+
+四个模块的职责是：
+
+| 模块 | 目标 | 产物 |
+|------|------|------|
+| Collect 采集 | 保存原始材料，支持主动会话采集和被动文件投放 | `01-collect/`、`source-index.md`、`collect-state.md` |
+| Refine 精炼 | 从原始材料中拆出事实、目标、决策、约束、问题和 AI 推断 | `02-refine/` |
+| Relate 关联 | 建立事实到页面、功能、规则、数据、验收的关系链 | `03-relate/`、`context-map.md` |
+| Generate 生成 | 输出前端、后端、测试、产品可使用的 PRD 和 Agent 上下文 | `04-generate/`、`05-check/` |
+
+检查不是第五个业务模块；它是每一步都必须执行的质量门禁。
 
 ## 怎么用
 
-### Step 0：安装
+### Step 0：安装 Skill
 
-运行 skills.sh 安装器（installer）：
+运行 skills.sh 安装器：
 
 ```bash
 npx skills@latest add Wcof/PRDContextEngine
 ```
 
-选择你要安装的 Skill 和编码 Agent（coding agents）。这个仓库默认只提供一个完整 Skill：`prd-helper`，它内部包含采集、精炼、关联、生成四个业务模块，不需要分模块安装。
+安装器会让你选择 Skill 和编码 Agent。这个仓库只提供一个完整 Skill：`prd-helper`，它内部已经包含四个模块，不需要分别安装 collect、refine、relate、generate。
 
-交互选择时：
+交互方式：
 
-- 使用 `↑` / `↓` 移动
-- 使用 `Space` 勾选或取消
-- 使用 `Enter` 确认
-- 不需要输入数字
+| 操作 | 说明 |
+|------|------|
+| `↑` / `↓` | 上下移动 |
+| `Space` | 勾选或取消 |
+| `Enter` | 确认 |
 
-安装完成后，在你的 Agent 中运行：
+建议默认全选：
+
+- Skill：`prd-helper`
+- Agent：你当前项目会用到的全部编码 Agent，例如 Codex、Claude Code、Trae
+- Setup command：`/prd-setup`
+
+安装完成后，在 Agent 对话中运行：
 
 ```text
 /prd-setup
 ```
 
-它会询问并确认：
+`/prd-setup` 会询问：
 
-- 你要把 PRD Helper 文档保存在哪里，默认 `docs/prd-helper/`
-- 你当前项目启用哪些 Agent，例如 Codex、Claude Code、Trae
-- 采集策略是否只通过显式命令开启，默认只在 `/prd-start` 后主动采集
+- PRD Helper 文档保存目录，默认 `docs/prd-helper/`
+- 当前项目启用哪些 Agent
+- 是否只允许显式命令开启主动采集，默认只在 `/prd-start` 后采集
 
-完成后就可以使用 `/prd-start` 开始采集。
+完成后，项目会准备好 `docs/prd-helper/` 结构。
 
-### 卸载
+### Step 1：开始采集
 
-安装完成后，在 Claude Code、Codex 或 Trae 对话中发送：
-
-```text
-/prd-remove
-```
-
-如果平台支持参数式斜杠命令，也可以发送：
-
-```text
-/remove prd-helper
-```
-
-Agent 会按顺序完成两件事：
-
-- 清理 `AGENTS.md`、`CLAUDE.md`、Trae `project_rules.md` 中的 PRD Helper 配置块
-- 执行 `skills remove` 卸载 `prd-helper` Skill
-
-如果 Agent 无法执行斜杠命令，可以手动执行同等命令：
-
-```bash
-python3 .agents/skills/prd-helper/scripts/remove-prd-helper.py --project .
-```
-
-Claude Code 项目通常使用：
-
-```bash
-python3 .claude/skills/prd-helper/scripts/remove-prd-helper.py --project .
-```
-
-底层卸载命令是：
-
-```bash
-npx skills@latest remove prd-helper --agent '*' -y
-```
-
-如果当初是全局安装，使用：
-
-```bash
-npx skills@latest remove prd-helper --agent '*' --global -y
-```
-
-如果你想手动选择要卸载的 Skill，可以运行：
-
-```bash
-npx skills@latest remove
-```
-
-交互卸载同样使用 `↑` / `↓` 移动，`Space` 勾选，`Enter` 确认，不需要输入数字。
-
-`/prd-remove` 会先调用清理脚本，再调用 `skills remove`。只执行 `skills remove` 不会清理 Agent 配置文件里的引用。
-
-卸载 Skill 不会自动删除已经生成的项目文档；如需清理产物，可以手动删除目标项目里的 `docs/prd-helper/`。
-
-### Step 1：开始采集（Collect）
-
-在你的项目中，向 Agent 发送：
+在 Agent 对话中运行：
 
 ```text
 /prd-start
 ```
 
-Agent 会创建采集目录，开始主动记录你的产品讨论。
+开启后，Agent 会把会话按 `User Query + Agent Answer` 写入主动采集目录。
 
-投放已有材料（会议纪要、旧 PRD、客户反馈等），直接放到：
+已有材料直接放入被动采集目录：
 
 ```text
 docs/prd-helper/01-collect/passive/
 ```
 
-采集完成后，Agent 会按流程执行：
+适合投放的材料包括会议纪要、评审记录、客户反馈、旧 PRD、原型说明、历史 Agent 会话摘要等。
+
+### Step 2-4：完成四模块闭环
+
+采集完成后，按顺序推进：
 
 ```text
-Step 1 采集（Collect）→ Step 2 精炼（Refine）→ Step 3 关联（Relate）→ Step 4 生成（Generate）
+Collect 采集 → Refine 精炼 → Relate 关联 → Generate 生成
 ```
 
-每一步都有自动检查，确保质量。
+每一步都要留下可追溯来源、状态、待确认项和检查结果。最终产物默认保存在：
 
-### 采集命令
+```text
+docs/prd-helper/
+```
 
-| 命令 | 含义 |
+## 常用命令
+
+| 命令 | 用途 |
 |------|------|
-| `/prd-start` | 开启采集 |
-| `/prd-pause` | 暂停采集 |
-| `/prd-resume` | 恢复采集 |
-| `/prd-stop` | 停止采集，生成摘要和检查 |
-| `/prd-status` | 查看当前采集状态 |
-| `/prd-setup` | 初始化项目配置和 `docs/prd-helper/` 结构 |
-| `/prd-remove` | 卸载 PRD Helper 并清理 Agent 配置 |
+| `/prd-setup` | 初始化当前项目配置和 `docs/prd-helper/` 结构 |
+| `/prd-start` | 开启主动采集 |
+| `/prd-pause` | 暂停主动采集 |
+| `/prd-resume` | 恢复主动采集 |
+| `/prd-stop` | 停止采集，并生成采集摘要和检查 |
+| `/prd-status` | 查看采集状态 |
+| `/prd-remove` | 卸载 PRD Helper，并清理 Agent 配置引用 |
+| `/remove prd-helper` | `/prd-remove` 的兼容别名 |
 
-### 运行检查
+## 卸载
+
+在 Agent 对话中运行：
+
+```text
+/prd-remove
+```
+
+卸载会先清理当前项目中的 Agent 配置块，例如 `AGENTS.md`、`CLAUDE.md`、Trae `project_rules.md`，再调用 `skills remove` 删除 Skill。只执行 `skills remove` 不会清理这些配置引用。
+
+如果平台支持参数式斜杠命令，也可以运行：
+
+```text
+/remove prd-helper
+```
+
+卸载默认保留已经生成的 `docs/prd-helper/` 项目文档，避免误删业务资产。
+
+## 运行检查
+
+在仓库根目录运行：
 
 ```bash
 python3 scripts/check-collect.py --root examples/robot-inspection/docs/prd-helper/01-collect
@@ -135,38 +133,38 @@ python3 scripts/check-relate.py examples/robot-inspection/docs/prd-helper
 python3 scripts/check-structure.py examples/robot-inspection/docs/prd-helper
 python3 scripts/check-relations.py examples/robot-inspection/docs/prd-helper
 python3 scripts/check-generated.py examples/robot-inspection/docs/prd-helper
+python3 "$HOME/.codex/skills/.system/skill-creator/scripts/quick_validate.py" .
 ```
 
----
+开发时建议同时运行：
 
-## 项目介绍
+```bash
+python3 -m py_compile scripts/*.py scripts/lib/*.py
+python3 -m pytest tests
+```
 
-PRD Helper 是一个面向 Agent 的 PRD 上下文工程能力包。
-
-它把零散的产品讨论、会议纪要、旧文档和 Agent 会话，沉淀成可追溯、可精炼、可关联、可生成、可检查的 PRD 上下文资产。
-
-### 结构
+## 项目结构
 
 ```text
 PRDContextEngine/
-├── SKILL.md              # Skill 入口
+├── SKILL.md              # Skill 根入口，Agent 首先读取这里
 ├── modules/              # 四个业务模块
-│   ├── collect/          # 采集：主动采集 + 被动采集
-│   ├── refine/           # 精炼：提取事实、决策、约束
-│   ├── relate/           # 关联：建立关系链路
-│   └── generate/         # 生成：输出 PRD 和 Agent 上下文
-├── checks/               # 质量门禁（不是第五业务模块）
-├── scripts/              # 自动化脚本
-└── examples/             # 示例项目
+│   ├── collect/          # 采集：主动会话 + 被动材料
+│   ├── refine/           # 精炼：事实、决策、约束、问题、推断
+│   ├── relate/           # 关联：页面、功能、规则、数据、验收链路
+│   └── generate/         # 生成：PRD、Agent 上下文、验收材料
+├── checks/               # 横向质量门禁，不是第五业务模块
+├── scripts/              # 安装、采集、检查、卸载脚本
+├── examples/             # 可运行示例
+├── support/              # Agent 适配器、安装说明、图片资源
+├── CONTEXT.md            # 领域词汇表
+└── docs/adr/             # 架构决策记录
 ```
 
-### 各部分职责
+## 设计约束
 
-- `SKILL.md`：Skill 唯一入口，定义流程和执行约束。
-- `modules/collect/`：采集模块，支持主动采集（`/prd-start`）和被动采集（投放文件）。
-- `modules/refine/`：精炼模块，提取事实、目标、约束、冲突、问题与推断。
-- `modules/relate/`：关联模块，建立需求到页面/功能/规则/数据/验收的链路。
-- `modules/generate/`：生成模块，输出页面、规则、数据、验收、Agent 上下文文档。
-- `checks/`：横向质量门禁，负责阶段检查与最终检查模板。
-- `scripts/`：自动检查脚本和采集控制脚本。
-- `examples/`：可直接参考的示例项目。
+- 单仓库、单 Skill、四模块，不把四个模块拆成四个 Skill。
+- 原始材料先保存原貌，噪音只做轻量标记，清洗留给精炼模块。
+- 主动采集必须由 `/prd-start` 显式开启，不默认采集所有会话。
+- 每个决策、约束、推断和生成文档都要能追溯到来源。
+- 安装和卸载都优先通过 Agent 斜杠命令完成，降低新手使用门槛。
