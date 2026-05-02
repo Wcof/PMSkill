@@ -4,6 +4,8 @@
 
 一句话：PRD Helper 是一个可安装的 Agent Skill，把产品讨论、会议纪要、客户反馈和旧文档，按“采集、精炼、关联、生成”四个模块转成可追溯的 PRD 上下文。
 
+安装器界面由 `skills@latest` 控制，当前可能显示英文；安装完成后，`prd-helper` 会跟随用户语言输出，中文用户默认中文，英文用户默认英文，无法判断时会先询问语言。
+
 ## 项目介绍
 
 PRD Helper 不是一个普通脚本包，也不是四个分散的小工具。它是一个完整的 Skill：根目录的 `SKILL.md` 是唯一入口，`modules/` 显式承载四个业务模块，`checks/` 提供贯穿全流程的质量门禁，`scripts/` 提供安装、采集、检查和卸载自动化。
@@ -23,7 +25,13 @@ PRD Helper 不是一个普通脚本包，也不是四个分散的小工具。它
 
 ### Step 0：安装 Skill
 
-运行 skills.sh 安装器：
+推荐使用免交互安装，避免安装器英文提示干扰：
+
+```bash
+npx skills@latest add Wcof/PRDContextEngine --all
+```
+
+如果你想手动选择 Agent，也可以运行交互式安装器：
 
 ```bash
 npx skills@latest add Wcof/PRDContextEngine
@@ -51,7 +59,7 @@ npx skills@latest add Wcof/PRDContextEngine
 /prd-setup
 ```
 
-`/prd-setup` 会询问：
+`/prd-setup` 会跟随你的语言询问：
 
 - PRD Helper 文档保存目录，默认 `docs/prd-helper/`
 - 当前项目启用哪些 Agent

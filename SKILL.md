@@ -1,6 +1,6 @@
 ---
 name: prd-helper
-description: Use this skill when transforming product discussions, meeting notes, prototype notes, customer feedback, review notes, or agent session summaries into structured PRD documents through collect, refine, relate, and generate steps.
+description: 用于把产品讨论、会议纪要、原型说明、客户反馈、评审记录或 Agent 会话摘要，通过采集、精炼、关联、生成四步转成结构化 PRD 文档。Use this skill to transform product context into structured PRD docs.
 ---
 
 # PRD Helper Skill
@@ -8,6 +8,16 @@ description: Use this skill when transforming product discussions, meeting notes
 你正在帮助用户处理产品需求上下文（product requirement context）。
 
 不要直接从原始材料生成最终 PRD，必须走完整流程。
+
+## Language Rule
+
+安装器（installer）本身可能显示英文，但 Skill 安装完成后，Agent 必须根据用户语言选择输出语言：
+
+- 如果用户主要使用中文，默认使用中文，并在关键术语后保留英文括注，例如“采集（Collect）”。
+- 如果用户主要使用英文，默认使用英文，并在第一次出现关键模块时保留中文括注。
+- 如果用户中英混合，使用中英双语关键字段，正文跟随用户主要语言。
+- 如果无法判断用户偏好，在第一次响应时询问：`请选择语言 / Choose language: 中文 or English`。
+- `/prd-setup`、`/prd-start`、`/prd-status`、`/prd-remove` 的提示必须跟随上述语言策略。
 
 在项目中使用前，先安装完整的 `prd-helper` Skill。
 
