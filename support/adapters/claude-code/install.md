@@ -1,44 +1,81 @@
-# Claude Code 安装说明
+# PRD Helper Skill - Claude Code 安装说明
 
-## 安装步骤
+## Step 0：默认完整安装
 
-1. 将本仓库复制到目标项目的 `.claude/repository root/`：
-
-```bash
-cp -r /path/to/PRDContextEngine /path/to/your-project/.claude/repository root
-```
-
-2. 将 `support/adapters/claude-code/CLAUDE.md` 复制到目标项目根目录：
+运行 skills.sh 安装器（installer）：
 
 ```bash
-cp /path/to/PRDContextEngine/support/adapters/claude-code/CLAUDE.md /path/to/your-project/CLAUDE.md
+npx skills@latest add Wcof/PRDContextEngine
 ```
 
-3. 如果目标项目已有 `CLAUDE.md`，将内容追加到现有文件中。
+选择 `prd-helper`，并选择 Claude Code 作为安装目标。这个 Skill 内部包含采集、精炼、关联、生成四个模块，不拆分安装。
+
+交互选择时：
+
+- 使用 `↑` / `↓` 移动
+- 使用 `Space` 勾选或取消
+- 使用 `Enter` 确认
+- 不需要输入数字
+
+安装完成后，在 Claude Code 中运行：
+
+```text
+/prd-setup
+```
+
+它会确认文档保存目录（docs root）、当前启用 Agent 和采集策略。
+
+## 卸载
+
+在 Claude Code 对话中发送：
+
+```text
+/prd-remove
+```
+
+Agent 会清理 `CLAUDE.md` 中的 PRD Helper 配置块，然后从当前项目卸载 Claude Code 中的 PRD Helper Skill。
+
+如果需要手动执行同等命令：
+
+```bash
+python3 .claude/skills/prd-helper/scripts/remove-prd-helper.py --agent claude-code --project .
+```
+
+如果当初是全局安装：
+
+```bash
+npx skills@latest remove prd-helper --agent claude-code --global -y
+```
+
+交互式卸载：
+
+```bash
+npx skills@latest remove
+```
+
+卸载 Skill 不会自动删除 `docs/prd-helper/` 中已经生成的 PRD 文档。
 
 ## 验证安装
 
-安装完成后，目标项目结构应如下：
+在你的项目中发送 `/prd-start`，如果 Claude Code 创建了 `docs/prd-helper/01-collect/` 目录，说明安装成功。
 
-```
-your-project/
-├── CLAUDE.md                          # Claude Code 指令
-├── .claude/
-│   └── skills/
-│       └── prd-helper/
-│           ├── SKILL.md
-│           ├── modules/
-│           ├── checks/
-│           └── scripts/
-└── docs/
-    └── prd-helper/                    # 生成的 PRD 文档
-        ├── 01-collect/
-        ├── 02-refine/
-        ├── 03-relate/
-        ├── 04-generate/
-        └── 05-check/
+## 使用
+
+1. 发送 `/prd-start` 开启采集
+2. 提供产品材料（会议纪要、原型说明、客户反馈等）
+3. 发送 `/prd-stop` 停止采集
+4. Agent 自动执行 Refine → Relate → Generate 流程
+
+## 手动安装（备选）
+
+如果无法使用 `npx`，可以手动复制：
+
+```bash
+# 将仓库克隆到你的 Agent skills 目录
+git clone https://github.com/Wcof/PRDContextEngine.git ~/.claude/skills/prd-helper
 ```
 
-## 使用方式
-
-安装后，当向 Claude Code 提供产品讨论、会议纪要、原型说明等材料时，Claude Code 会自动使用 prd-helper skill 进行处理。
+然后在项目的 `CLAUDE.md` 中引用：
+```markdown
+详细规则请参考 `~/.claude/skills/prd-helper/SKILL.md`
+```

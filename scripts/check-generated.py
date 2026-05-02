@@ -13,26 +13,14 @@ Output:
     Prints check results to stdout.
 """
 
-import os
 import re
 import sys
 from pathlib import Path
 
-
-# Required generated subdirectories and files
-REQUIRED_STRUCTURE = {
-    "overview": ["project-overview.md"],
-    "pages": [],  # At least one file
-    "rules": [],  # At least one file
-    "data": [],   # At least one file
-    "acceptance": [],  # At least one file
-    "agent-context": [
-        "frontend-context.md",
-        "backend-context.md",
-        "test-context.md",
-        "product-review-context.md",
-    ],
-}
+sys.path.insert(0, str(Path(__file__).parent))
+from lib.id_registry import ALL_ENTITIES
+from lib.markdown_util import extract_template_sections
+from lib.paths import DEFAULT_PRD_ROOT
 
 # Patterns that indicate unresolved content
 UNRESOLVED_PATTERNS = [
@@ -46,59 +34,6 @@ UNRESOLVED_PATTERNS = [
     (r"<!--\s*待确认\s*-->", "<!-- 待确认 -->"),
     (r"<!--\s*无来源\s*-->", "<!-- 无来源 -->"),
 ]
-
-
-def check_directory_structure(root_path: Path) -> list[dict]:
-    """Check if generated directory structure is complete."""
-    results = []
-    gen_dir = root_path / "04-generate"
-
-    if not gen_dir.exists():
-        return [{"check": "04-generate exists", "status": "FAIL", "detail": "Directory not found"}]
-
-    for subdir, required_files in REQUIRED_STRUCTURE.items():
-        dir_path = gen_dir / subdir
-
-        if not dir_path.exists():
-            results.append({
-                "check": f"04-generate/{subdir} exists",
-                "status": "FAIL",
-                "detail": "Directory not found",
-            })
-            continue
-
-        results.append({
-            "check": f"04-generate/{subdir} exists",
-            "status": "PASS",
-            "detail": "",
-        })
-
-        # Check for files
-        md_files = list(dir_path.glob("*.md"))
-        if required_files:
-            for f in required_files:
-                file_path = dir_path / f
-                exists = file_path.exists()
-                results.append({
-                    "check": f"04-generate/{subdir}/{f} exists",
-                    "status": "PASS" if exists else "FAIL",
-                    "detail": "" if exists else "File not found",
-                })
-        else:
-            if len(md_files) == 0:
-                results.append({
-                    "check": f"04-generate/{subdir} has content",
-                    "status": "FAIL",
-                    "detail": "No .md files found",
-                })
-            else:
-                results.append({
-                    "check": f"04-generate/{subdir} has content",
-                    "status": "PASS",
-                    "detail": f"{len(md_files)} file(s)",
-                })
-
-    return results
 
 
 def check_unresolved_content(root_path: Path) -> list[dict]:
@@ -177,17 +112,15 @@ def check_traceability(root_path: Path) -> list[dict]:
     if not gen_dir.exists():
         return results
 
-    trace_patterns = [
-        r"fact_\d+",
-        r"rule_\d+",
-        r"data_\d+",
-        r"acceptance_\d+",
+    # 从注册表动态构建可追溯性模式
+    trace_patterns = [entity.id_pattern for entity in ALL_ENTITIES]
+    trace_patterns.extend([
         r"来源说明",
         r"来源事实",
         r"关联规则",
         r"关联数据",
         r"关联验收",
-    ]
+    ])
 
     for md_file in gen_dir.rglob("*.md"):
         if md_file == gen_dir / "check.md":
@@ -204,24 +137,16 @@ def check_traceability(root_path: Path) -> list[dict]:
 
 
 def check_page_completeness(root_path: Path) -> list[dict]:
-    """Check if page documents have required sections."""
+    """Check if page documents have required sections from template."""
     results = []
     pages_dir = root_path / "04-generate" / "pages"
 
     if not pages_dir.exists():
         return results
 
-    required_sections = [
-        "## 1. 页面基本信息",
-        "## 2. 页面区域",
-        "## 3. 字段说明",
-        "## 4. 用户操作",
-        "## 5. 页面状态",
-        "## 6. 异常状态",
-        "## 8. 前端验收标准",
-        "## 9. 待确认问题",
-        "## 10. 来源说明",
-    ]
+    # 从模板动态获取必填章节
+    template_path = Path(__file__).parent.parent / "modules" / "generate" / "templates" / "04-generate-page-prd-template.md"
+    required_sections = extract_template_sections(template_path)
 
     for md_file in pages_dir.glob("*.md"):
         content = md_file.read_text()
@@ -249,27 +174,16 @@ def check_page_completeness(root_path: Path) -> list[dict]:
 
 
 def check_rule_completeness(root_path: Path) -> list[dict]:
-    """Check if rule documents have required sections."""
+    """Check if rule documents have required sections from template."""
     results = []
     rules_dir = root_path / "04-generate" / "rules"
 
     if not rules_dir.exists():
         return results
 
-    required_sections = [
-        "## 1. 规则目标",
-        "## 2. 触发页面",
-        "## 3. 触发操作",
-        "## 4. 前置条件",
-        "## 5. 执行步骤",
-        "## 6. 状态变化",
-        "## 7. 异常分支",
-        "## 8. 权限规则",
-        "## 11. 关联数据对象",
-        "## 13. 验收标准",
-        "## 14. 待确认问题",
-        "## 15. 来源说明",
-    ]
+    # 从模板动态获取必填章节
+    template_path = Path(__file__).parent.parent / "modules" / "generate" / "templates" / "04-generate-rule-prd-template.md"
+    required_sections = extract_template_sections(template_path)
 
     for md_file in rules_dir.glob("*.md"):
         content = md_file.read_text()
@@ -297,7 +211,6 @@ def check_rule_completeness(root_path: Path) -> list[dict]:
 
 
 def print_results(
-    structure: list[dict],
     unresolved: list[dict],
     consolidation: dict,
     traceability: list[dict],
@@ -309,15 +222,6 @@ def print_results(
     print("=" * 60)
     print()
 
-    # Structure check
-    print("--- Structure ---")
-    for r in structure:
-        icon = "✅" if r["status"] == "PASS" else "❌" if r["status"] == "FAIL" else "⚠️"
-        detail = f" ({r['detail']})" if r['detail'] else ""
-        print(f"  {icon} {r['check']}{detail}")
-    print()
-
-    # Unresolved content
     print("--- Unresolved Content ---")
     if unresolved:
         for r in unresolved:
@@ -326,7 +230,6 @@ def print_results(
         print("  ✅ No unresolved content found")
     print()
 
-    # Pending questions consolidation
     print("--- Pending Questions Consolidation ---")
     if consolidation["checked"]:
         if consolidation["pending_count"] == 0:
@@ -339,7 +242,6 @@ def print_results(
         print("  ⚠️  Could not check consolidation")
     print()
 
-    # Traceability
     print("--- Traceability ---")
     if traceability:
         for r in traceability:
@@ -349,7 +251,6 @@ def print_results(
         print("  ℹ️  No generated files to check")
     print()
 
-    # Page completeness
     print("--- Page Completeness ---")
     if pages:
         for r in pages:
@@ -360,7 +261,6 @@ def print_results(
         print("  ℹ️  No pages to check")
     print()
 
-    # Rule completeness
     print("--- Rule Completeness ---")
     if rules:
         for r in rules:
@@ -374,27 +274,104 @@ def print_results(
     print("=" * 60)
 
 
+def write_check_md(
+    root_path: Path,
+    unresolved: list[dict],
+    consolidation: dict,
+    traceability: list[dict],
+    pages: list[dict],
+    rules: list[dict],
+) -> Path:
+    """Write 04-generate/check.md using the generate check template structure."""
+    gen_dir = root_path / "04-generate"
+    gen_dir.mkdir(parents=True, exist_ok=True)
+    check_file = gen_dir / "check.md"
+
+    source_ok = (
+        not unresolved
+        and not any(r["status"] == "FAIL" for r in traceability)
+        and not (consolidation["checked"] and not consolidation["all_consolidated"])
+    )
+    page_ok = bool(pages) and not any(r["status"] == "FAIL" for r in pages)
+    rule_ok = bool(rules) and not any(r["status"] == "FAIL" for r in rules)
+    can_final = source_ok and page_ok and rule_ok
+
+    pending = []
+    pending.extend(f"{r['file']} 缺少来源追溯" for r in traceability if r["status"] == "FAIL")
+    pending.extend(f"{r['file']} 存在未解决标记" for r in unresolved)
+    pending.extend(f"{r['file']} 缺少章节" for r in pages if r["status"] == "FAIL")
+    pending.extend(f"{r['file']} 缺少章节" for r in rules if r["status"] == "FAIL")
+    if consolidation["checked"] and not consolidation["all_consolidated"]:
+        pending.append("待确认问题未汇总到 05-check")
+
+    lines = [
+        "# 生成检查",
+        "",
+        "## 0. 检查信息",
+        "",
+        "- 检查来源：check-generated.py 自动生成",
+        f"- 检查状态：{'通过' if can_final else '不通过'}",
+        f"- 待确认项：{'; '.join(pending[:8]) if pending else '无'}",
+        "",
+        "## 1. 来源检查",
+        "",
+        f"- [{'x' if traceability else ' '}] 生成内容来自 02-refine",
+        f"- [{'x' if traceability else ' '}] 生成内容来自 03-relate",
+        f"- [{'x' if not unresolved else ' '}] 没有凭空新增规则",
+        f"- [{'x' if not any(r['status'] == 'FAIL' for r in traceability) else ' '}] AI 推断已标记",
+        f"- [{'x' if not (consolidation['checked'] and not consolidation['all_consolidated']) else ' '}] 待确认问题已保留",
+        "",
+        "## 2. 结构检查",
+        "",
+        "- [x] 结构完整性由 check-structure.py 独立负责",
+        f"- [{'x' if page_ok else ' '}] 页面说明完整",
+        f"- [{'x' if rule_ok else ' '}] 功能规则完整",
+        "- [x] 数据说明结构由 check-structure.py 独立负责",
+        "- [x] 验收标准结构由 check-structure.py 独立负责",
+        "- [x] Agent 上下文结构由 check-structure.py 独立负责",
+        "",
+        "## 3. 角色覆盖检查",
+        "",
+        f"- [{'x' if source_ok else ' '}] 产品经理可读",
+        f"- [{'x' if source_ok else ' '}] 前端可执行",
+        f"- [{'x' if source_ok else ' '}] 后端可理解",
+        f"- [{'x' if source_ok else ' '}] 测试可验收",
+        f"- [{'x' if source_ok else ' '}] Agent 可使用",
+        "",
+        "## 4. 生成结论",
+        "",
+        "本轮生成是否可以进入最终检查：",
+        "",
+        f"- [{'x' if can_final else ' '}] 可以",
+        f"- [{'x' if not can_final else ' '}] 不可以",
+        f"- 原因：{'自动检查通过' if can_final else '; '.join(pending[:8]) if pending else '存在未通过项'}",
+        "",
+    ]
+    check_file.write_text("\n".join(lines))
+    return check_file
+
+
 def main():
     if len(sys.argv) > 1:
         root = sys.argv[1]
     else:
-        root = "docs/prd-helper"
+        root = DEFAULT_PRD_ROOT
 
     root_path = Path(root)
     if not root_path.exists():
         print(f"Error: Directory '{root}' does not exist.")
         sys.exit(1)
 
-    structure = check_directory_structure(root_path)
     unresolved = check_unresolved_content(root_path)
     consolidation = check_pending_questions_consolidation(root_path)
     traceability = check_traceability(root_path)
     pages = check_page_completeness(root_path)
     rules = check_rule_completeness(root_path)
 
-    print_results(structure, unresolved, consolidation, traceability, pages, rules)
+    print_results(unresolved, consolidation, traceability, pages, rules)
+    check_file = write_check_md(root_path, unresolved, consolidation, traceability, pages, rules)
+    print(f"\nCheck written to: {check_file}")
 
-    has_structure_fail = any(r["status"] == "FAIL" for r in structure)
     has_unresolved = len(unresolved) > 0
     has_consolidation_fail = consolidation["checked"] and not consolidation["all_consolidated"]
     has_traceability_fail = any(r["status"] == "FAIL" for r in traceability)
@@ -402,8 +379,7 @@ def main():
     has_rule_fail = any(r["status"] == "FAIL" for r in rules)
 
     if (
-        has_structure_fail
-        or has_unresolved
+        has_unresolved
         or has_consolidation_fail
         or has_traceability_fail
         or has_page_fail

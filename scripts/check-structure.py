@@ -13,9 +13,13 @@ Output:
     Optionally writes to 05-check/structure-check-result.md
 """
 
-import os
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from lib.generated_structure import REQUIRED_GENERATED_SUBDIRS, REQUIRED_GENERATED_FILES
+from lib.id_registry import REFINE_ENTITIES, RELATE_ENTITIES
+from lib.paths import DEFAULT_PRD_ROOT
 
 # Required directories
 REQUIRED_DIRS = [
@@ -30,22 +34,12 @@ REQUIRED_DIRS = [
 REQUIRED_FILES = {
     "01-collect": ["check.md"],
     "02-refine": [
-        "facts.md",
         "background.md",
-        "goals.md",
-        "decisions.md",
-        "constraints.md",
-        "conflicts.md",
-        "questions.md",
-        "assumptions.md",
+        *(entity.filename for entity in REFINE_ENTITIES),
         "check.md",
     ],
     "03-relate": [
-        "page-map.md",
-        "feature-map.md",
-        "rule-map.md",
-        "data-map.md",
-        "acceptance-map.md",
+        *(entity.filename for entity in RELATE_ENTITIES),
         "context-map.md",
         "check.md",
     ],
@@ -59,28 +53,6 @@ REQUIRED_FILES = {
         "context-delta.md",
     ],
 }
-
-# Required generated subdirectories
-GENERATED_SUBDIRS = [
-    "overview",
-    "pages",
-    "rules",
-    "data",
-    "acceptance",
-    "agent-context",
-]
-
-# Required generated files
-GENERATED_FILES = {
-    "overview": ["project-overview.md"],
-    "agent-context": [
-        "frontend-context.md",
-        "backend-context.md",
-        "test-context.md",
-        "product-review-context.md",
-    ],
-}
-
 
 def check_structure(root: str) -> list[dict]:
     results = []
@@ -110,7 +82,7 @@ def check_structure(root: str) -> list[dict]:
             })
 
     # Check generated subdirectories
-    for subdir in GENERATED_SUBDIRS:
+    for subdir in REQUIRED_GENERATED_SUBDIRS:
         dir_path = root_path / "04-generate" / subdir
         exists = dir_path.exists()
         results.append({
@@ -121,7 +93,7 @@ def check_structure(root: str) -> list[dict]:
         })
 
     # Check generated files
-    for subdir, files in GENERATED_FILES.items():
+    for subdir, files in REQUIRED_GENERATED_FILES.items():
         for f in files:
             file_path = root_path / "04-generate" / subdir / f
             exists = file_path.exists()
@@ -204,7 +176,7 @@ def main():
     if len(sys.argv) > 1:
         root = sys.argv[1]
     else:
-        root = "docs/prd-helper"
+        root = DEFAULT_PRD_ROOT
 
     if not Path(root).exists():
         print(f"Error: Directory '{root}' does not exist.")

@@ -2,13 +2,39 @@
 
 `checks/` 是横向质量门禁，不是第五业务模块。
 
+## 检查架构
+
+检查系统由三层组成，共享同一套规则：
+
+```
+模块指南（行为约束）
+    ↓
+检查模板（人类可读检查清单）    ←  modules/*/templates/*-check-template.md
+    ↓
+自动化脚本（机器可执行校验）    ←  scripts/check-*.py
+```
+
+### 单一来源原则
+
+- **行为约束**定义在各模块指南（`modules/*/guide.md`）的"核心约束"和"检查"章节
+- **检查模板**在 `modules/*/templates/*-check-template.md`，由 agent 填写
+- **自动化脚本**在 `scripts/`，从模板和 ID 注册表动态读取校验规则
+
+### ID 注册表
+
+所有实体类型（fact、rule、page 等）的前缀、必填字段、文件名统一定义在 `scripts/lib/id_registry.py`。
+
+新增实体类型时只需修改注册表，脚本自动适配。
+
 ## 覆盖范围
 
-- collect 后检查
-- refine 后检查
-- relate 后检查
-- generate 后检查
-- 最终总检查
+| 阶段 | 检查模板 | 自动化脚本 | 检查产物 |
+|------|----------|-----------|---------|
+| 采集后 | `01-collect-check-template.md` | `check-collect.py`（状态+结构） | `01-collect/check.md` |
+| 精炼后 | `02-refine-check-template.md` | `check-refine.py`（分类+来源+风险） | `02-refine/check.md` |
+| 关联后 | `03-relate-check-template.md` | `check-relate.py`（断链+孤立项+待确认影响） | `03-relate/check.md` |
+| 生成后 | `04-generate-check-template.md` | `check-generated.py`（结构+内容+来源+待确认汇总） | `04-generate/check.md` |
+| 最终 | `05-final-check-template.md` | `check-structure.py`（目录完整性） | `05-check/*.md` |
 
 ## 检查产物位置
 
@@ -24,8 +50,33 @@
 - `05-check/source-check.md`
 - `05-check/generated-check.md`
 - `05-check/context-delta.md`
+- `05-check/structure-check-result.md`
 
 ## 模板
 
-- `checks/templates/05-final-check-template.md`
-- `checks/templates/05-context-delta-template.md`
+- `checks/templates/05-final-check-template.md` — 最终总检查清单
+- `checks/templates/05-context-delta-template.md` — 本轮上下文增量
+
+## 自动化脚本
+
+```bash
+# 检查采集模块状态和结构
+python3 scripts/check-collect.py --root docs/prd-helper/01-collect
+
+# 检查精炼分类、来源与风险
+python3 scripts/check-refine.py docs/prd-helper
+
+# 检查关联断链、孤立项与待确认影响范围
+python3 scripts/check-relate.py docs/prd-helper
+
+# 检查目录结构完整性
+python3 scripts/check-structure.py docs/prd-helper
+
+# 兼容旧入口：依次运行 check-refine.py 和 check-relate.py
+python3 scripts/check-relations.py docs/prd-helper
+
+# 检查生成文档完整性和质量
+python3 scripts/check-generated.py docs/prd-helper
+```
+
+脚本使用 `scripts/lib/id_registry.py` 中的实体定义，与模板保持同步。

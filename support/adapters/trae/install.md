@@ -1,6 +1,67 @@
 # Trae 安装说明
 
-## 安装步骤
+## Step 0：默认完整安装
+
+运行 skills.sh 安装器（installer）：
+
+```bash
+npx skills@latest add Wcof/PRDContextEngine
+```
+
+选择 `prd-helper`，并选择 Trae 或 Trae CN 作为安装目标。这个 Skill 内部包含采集、精炼、关联、生成四个模块，不拆分安装。
+
+交互选择时：
+
+- 使用 `↑` / `↓` 移动
+- 使用 `Space` 勾选或取消
+- 使用 `Enter` 确认
+- 不需要输入数字
+
+安装完成后，在 Trae 中运行：
+
+```text
+/prd-setup
+```
+
+它会确认文档保存目录（docs root）、当前启用 Agent 和采集策略。
+
+## 卸载
+
+在 Trae 对话中发送：
+
+```text
+/prd-remove
+```
+
+Agent 会清理 Trae `project_rules.md` 中的 PRD Helper 配置块，然后从当前项目卸载 Trae 中的 PRD Helper Skill。
+
+如果需要手动执行同等命令：
+
+```bash
+python3 .trae/skills/prd-helper/scripts/remove-prd-helper.py --agent trae --project .
+```
+
+如果使用 Trae CN：
+
+```bash
+python3 .trae/skills/prd-helper/scripts/remove-prd-helper.py --agent trae-cn --project .
+```
+
+如果当初是全局安装：
+
+```bash
+npx skills@latest remove prd-helper --agent trae --global -y
+```
+
+交互式卸载：
+
+```bash
+npx skills@latest remove
+```
+
+卸载 Skill 不会自动删除 `docs/prd-helper/` 中已经生成的 PRD 文档。
+
+## 手动安装步骤（备选）
 
 1. 将本仓库复制到目标项目中（路径按 Trae 当前版本调整）：
 

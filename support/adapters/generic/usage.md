@@ -4,54 +4,60 @@
 
 ## 使用方式
 
-将以下指令复制到你的 Agent 对话中，然后提供原始材料即可。
+如果 Agent 支持标准 Skills，默认先完整安装：
+
+```bash
+npx skills@latest add Wcof/PRDContextEngine
+```
+
+在安装器（installer）中选择 `prd-helper`，再选择要安装到哪些编码 Agent（coding agents）。安装后运行：
+
+```text
+/prd-setup
+```
+
+`/prd-setup` 会确认文档保存目录（docs root）、启用 Agent 和采集策略。交互选择时使用 `↑` / `↓` 移动，使用 `Space` 勾选或取消，使用 `Enter` 确认，不需要输入数字。
+
+卸载当前项目中的 PRD Helper：
+
+```text
+/prd-remove
+```
+
+Agent 收到该指令后，执行安装目录中的卸载脚本：
+
+```bash
+python3 .agents/skills/prd-helper/scripts/remove-prd-helper.py --project .
+```
+
+如果当初是全局安装：
+
+```bash
+npx skills@latest remove prd-helper --agent '*' --global -y
+```
+
+交互式卸载可以运行 `npx skills@latest remove`。
+
+完整卸载分两层：卸载脚本先清理 Agent 配置文件中的 PRD Helper 引用，再调用 `skills remove` 删除 Skill 安装目录。
+
+如果 Agent 不支持标准 Skills，将以下指令复制到你的 Agent 对话中，然后提供原始材料即可。
 
 ---
 
 ## 指令开始
 
-你是一个产品上下文处理助手。请按照以下流程处理我提供的产品材料：
+你是一个产品上下文处理助手。请按照 `support/adapters/canonical-rules.md` 中的规则处理我提供的产品材料。
 
-### 流程
+核心流程：Collect → Refine → Relate → Generate → Final Check
 
-1. **采集（Collect）**
-   - 保存原始材料到 `docs/prd-helper/01-collect/`
-   - 每份材料包含：标题、类型、来源、记录时间、记录人、责任人、优先级、原始内容、涉及模块、关键词
-   - 不要改写原始内容
-   - 输出 `01-collect/check.md`
-
-2. **精炼（Refine）**
-   - 从原始材料提取：需求事实、业务背景、业务目标、设计决策、业务约束、冲突点、待确认问题、AI 推断
-   - 输出到 `docs/prd-helper/02-refine/`
-   - **禁止把 AI 推断写成确定事实**
-   - 每条内容必须有来源
-   - 输出 `02-refine/check.md`
-
-3. **关联（Relate）**
-   - 建立关系：需求→页面、功能→规则、规则→数据、页面→验收
-   - 输出到 `docs/prd-helper/03-relate/`
-   - 不允许孤立需求、孤立页面、孤立规则
-   - 输出 `03-relate/check.md`
-
-4. **生成（Generate）**
-   - 生成：项目说明、页面说明、功能规则、数据说明、验收标准、Agent 上下文
-   - 输出到 `docs/prd-helper/04-generate/`
-   - 必须基于精炼和关联结果生成
-   - 输出 `04-generate/check.md`
-
-5. **最终检查（Final Check，不是第五个业务环节）**
-   - 最终检查：完整性、关系、生成质量
-   - 输出到 `docs/prd-helper/05-check/`
-   - 输出 Context Delta
-
-### 关键规则
-
-- 不允许跳过任何步骤
-- 不允许把 AI 推断当成事实
-- 不能直接从原始材料生成最终 PRD，必须保留中间产物
-- 每步必须输出 check.md
-- 最终必须输出 Context Delta
+关键规则、采集命令和检查要求统一见 `support/adapters/canonical-rules.md`。
 
 ---
 
 ## 指令结束
+
+## 参考文件
+
+- `support/adapters/canonical-rules.md` — 完整规则
+- `SKILL.md` — 流程编排
+- `modules/*/guide.md` — 各模块行为约束

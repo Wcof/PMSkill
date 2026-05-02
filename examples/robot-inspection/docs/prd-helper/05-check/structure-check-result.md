@@ -18,11 +18,11 @@
 | directory | 04-generate | PASS |
 | directory | 05-check | PASS |
 | file | 01-collect/check.md | PASS |
-| file | 02-refine/facts.md | PASS |
 | file | 02-refine/background.md | PASS |
-| file | 02-refine/goals.md | PASS |
+| file | 02-refine/facts.md | PASS |
 | file | 02-refine/decisions.md | PASS |
 | file | 02-refine/constraints.md | PASS |
+| file | 02-refine/goals.md | PASS |
 | file | 02-refine/conflicts.md | PASS |
 | file | 02-refine/questions.md | PASS |
 | file | 02-refine/assumptions.md | PASS |

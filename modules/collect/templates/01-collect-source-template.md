@@ -2,15 +2,15 @@
 
 ## 1. 基本信息
 
-- 材料类型：
-- 来源：
-- 记录时间：
-- 记录人：
-- 责任人：
-- 优先级：高 / 中 / 低
-- 涉及模块：
-- 相关页面：
-- 当前状态：
+- 材料类型 / source_type：
+- 来源 / source：
+- 记录时间 / source_time：
+- 记录人 / recorder：
+- 责任人 / owner：
+- 优先级 / priority：高 / 中 / 低；high / medium / low
+- 涉及模块 / related_modules：
+- 相关页面 / related_pages：
+- 当前状态 / status：
 
 ## 2. 原始内容
 
@@ -29,6 +29,6 @@
 
 ## 5. 后续处理建议
 
-- 是否需要精炼：
-- 是否需要确认：
-- 是否需要关联到页面：
+- 是否需要精炼 / needs_refine：
+- 是否需要确认 / needs_confirmation：
+- 是否需要关联到页面 / needs_page_mapping：

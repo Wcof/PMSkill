@@ -1,0 +1,21 @@
+# PRD Helper Context
+
+## Domain Vocabulary
+
+- **PRD Helper Skill**: 一个单独的 Agent Skill，负责把原始产品上下文转成可追溯的 PRD 上下文资产。
+- **Collect**: 采集模块，保存原始材料、元信息、索引、状态和轻量摘要。
+- **Refine**: 精炼模块，从采集材料中提取事实、背景、目标、决策、约束、冲突、问题和 AI 推断。
+- **Relate**: 关联模块，建立事实、页面、功能、规则、数据、验收之间的关系。
+- **Generate**: 生成模块，输出项目说明、页面说明、规则说明、数据说明、验收标准和 Agent 上下文。
+- **Check**: 横向质量门禁，不是第五个业务模块。
+- **Active Capture**: Agent 在 `/prd-start` 后主动记录完整 User Query + Agent Answer。
+- **Passive Source**: 用户放入 `docs/prd-helper/01-collect/passive/` 的原始材料。
+- **Source Index**: `source-index.md`，记录材料来源、路径、hash、通道和状态。
+- **Collect State**: `collect-state.md`，记录采集 session 状态和增量写入检查点。
+
+## Architecture Language
+
+- 根目录 `SKILL.md` 是唯一 Skill 入口。
+- `modules/*` 是同一个 Skill 内部的业务模块。
+- `scripts/lib/*` 是脚本共享库，状态、索引、时间、哈希、模板解析等公共逻辑必须放在这里。
+- `support/adapters/canonical-rules.md` 是适配器共性规则的来源。
