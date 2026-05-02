@@ -110,3 +110,17 @@ def test_check_relate_writes_template_shaped_check(tmp_path: Path):
     assert "## 1. 断链检查" in content
     assert "每个核心规则有关联数据对象" in content
     assert "本轮关联是否可以进入生成阶段" in content
+
+
+def test_setup_installs_agent_configs_and_claude_commands(tmp_path: Path):
+    module = load_script("setup-prd-helper.py")
+
+    config_files = module.install_agent_configs(tmp_path, ["codex", "claude-code"])
+    command_files = module.install_claude_commands(tmp_path, "docs/prd-helper")
+
+    assert tmp_path / "AGENTS.md" in config_files
+    assert tmp_path / "CLAUDE.md" in config_files
+    assert "<!-- PRD-HELPER:START -->" in (tmp_path / "AGENTS.md").read_text()
+    assert "<!-- PRD-HELPER:START -->" in (tmp_path / "CLAUDE.md").read_text()
+    assert tmp_path / ".claude" / "commands" / "prd-start.md" in command_files
+    assert "collect-control.py\" start" in (tmp_path / ".claude" / "commands" / "prd-start.md").read_text()

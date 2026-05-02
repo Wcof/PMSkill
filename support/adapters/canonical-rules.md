@@ -24,6 +24,8 @@
 
 ## 工作流程
 
+安装后第一次触发 `/prd-helper` 时，如果项目尚未初始化，Agent 必须自动执行初始化脚本，创建 `docs/prd-helper/`、写入 Agent 配置文件，并在 Claude Code 项目中生成 `.claude/commands/prd-*.md` 命令文件。不要只提示用户手动运行 `/prd-setup`。
+
 处理产品上下文时，必须按以下顺序执行：
 
 1. **Collect（采集）**：保存原始上下文到 `docs/prd-helper/01-collect/`
@@ -50,7 +52,7 @@
 
 | 命令 | 含义 |
 |------|------|
-| `/prd-setup` | 安装后初始化 PRD Helper：确认 docs 目录、启用 Agent、采集策略，并创建项目结构 |
+| `/prd-setup` | 手动重新初始化 PRD Helper：确认 docs 目录、启用 Agent、采集策略，并创建项目结构 |
 | `/prd-start` | 开启 PRD Capture Session |
 | `/prd-pause` | 暂停采集 |
 | `/prd-resume` | 恢复采集 |
@@ -58,6 +60,8 @@
 | `/prd-status` | 查看采集状态 |
 | `/prd-remove` | 卸载 PRD Helper：先清理 Agent 配置引用，再卸载 Skill |
 | `/remove prd-helper` | `/prd-remove` 的别名，用于支持参数式斜杠命令的平台 |
+| `/prd-helper start` | 兼容入口：平台只显示 `/prd-helper` 时，用它开启采集 |
+| `/prd-helper status` | 兼容入口：平台只显示 `/prd-helper` 时，用它查看采集状态 |
 
 收到 `/prd-remove` 或 `/remove prd-helper` 后，Agent 必须执行卸载脚本，不要求用户手动运行 shell 命令：
 
@@ -71,7 +75,7 @@ python3 .agents/skills/prd-helper/scripts/remove-prd-helper.py --project .
 python3 .claude/skills/prd-helper/scripts/remove-prd-helper.py --project .
 ```
 
-收到 `/prd-setup` 后，Agent 必须先询问配置，再执行安装目录中的 setup 脚本。默认配置如下：
+收到 `/prd-helper` 且项目尚未初始化时，Agent 必须直接执行安装目录中的 setup 脚本。收到 `/prd-setup` 时，执行同一初始化脚本；只有用户明确要求自定义 docs 目录或 Agent 范围时，才先询问配置。默认配置如下：
 
 - docs 目录：`docs/prd-helper/`
 - Agent：当前正在使用的 Agent

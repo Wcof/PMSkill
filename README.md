@@ -51,19 +51,20 @@ npx skills@latest add Wcof/PRDContextEngine
 
 - Skill：`prd-helper`
 - Agent：你当前项目会用到的全部编码 Agent，例如 Codex、Claude Code、Trae
-- Setup command：`/prd-setup`
+- 首次入口：`/prd-helper`
 
 安装完成后，在 Agent 对话中运行：
 
 ```text
-/prd-setup
+/prd-helper
 ```
 
-`/prd-setup` 会跟随你的语言询问：
+首次运行 `/prd-helper` 会自动初始化项目。初始化会完成：
 
-- PRD Helper 文档保存目录，默认 `docs/prd-helper/`
-- 当前项目启用哪些 Agent
-- 是否只允许显式命令开启主动采集，默认只在 `/prd-start` 后采集
+- 创建 PRD Helper 文档目录，默认 `docs/prd-helper/`
+- 写入 `CLAUDE.md`、`AGENTS.md` 或 Trae `project_rules.md` 中的 PRD Helper 配置块
+- 在 Claude Code 项目中生成 `.claude/commands/prd-start.md` 等真实斜杠命令文件
+- 设置主动采集策略：默认只在 `/prd-start` 后采集
 
 完成后，项目会准备好 `docs/prd-helper/` 结构。
 
@@ -73,6 +74,12 @@ npx skills@latest add Wcof/PRDContextEngine
 
 ```text
 /prd-start
+```
+
+如果当前平台只显示 `/prd-helper`，看不到 `/prd-start`，使用兼容入口：
+
+```text
+/prd-helper start
 ```
 
 开启后，Agent 会把会话按 `User Query + Agent Answer` 写入主动采集目录。
@@ -111,6 +118,8 @@ docs/prd-helper/
 | `/prd-status` | 查看采集状态 |
 | `/prd-remove` | 卸载 PRD Helper，并清理 Agent 配置引用 |
 | `/remove prd-helper` | `/prd-remove` 的兼容别名 |
+| `/prd-helper start` | 兼容入口：平台只显示 `/prd-helper` 时开启采集 |
+| `/prd-helper status` | 兼容入口：平台只显示 `/prd-helper` 时查看状态 |
 
 ## 卸载
 

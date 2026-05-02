@@ -7,16 +7,22 @@
 如果 Agent 支持标准 Skills，默认先完整安装：
 
 ```bash
-npx skills@latest add Wcof/PRDContextEngine
+npx skills@latest add Wcof/PRDContextEngine --all
 ```
 
-在安装器（installer）中选择 `prd-helper`，再选择要安装到哪些编码 Agent（coding agents）。安装后运行：
+如果需要手动选择 Agent，也可以运行 `npx skills@latest add Wcof/PRDContextEngine`。安装后运行：
 
 ```text
-/prd-setup
+/prd-helper
 ```
 
-`/prd-setup` 会确认文档保存目录（docs root）、启用 Agent 和采集策略。交互选择时使用 `↑` / `↓` 移动，使用 `Space` 勾选或取消，使用 `Enter` 确认，不需要输入数字。
+首次运行 `/prd-helper` 会自动初始化项目，创建 `docs/prd-helper/` 并写入 Agent 配置文件。Claude Code 项目还会生成 `.claude/commands/prd-start.md` 等真实斜杠命令文件。
+
+如果平台只显示 `/prd-helper`，没有独立 `/prd-start`，使用兼容入口：
+
+```text
+/prd-helper start
+```
 
 卸载当前项目中的 PRD Helper：
 

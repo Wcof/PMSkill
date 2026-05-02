@@ -10,6 +10,15 @@ from pathlib import Path
 
 
 AGENTS = ("codex", "claude-code", "trae", "trae-cn")
+CLAUDE_COMMANDS = (
+    "prd-setup.md",
+    "prd-start.md",
+    "prd-pause.md",
+    "prd-resume.md",
+    "prd-stop.md",
+    "prd-status.md",
+    "prd-remove.md",
+)
 
 
 def script_dir() -> Path:
@@ -20,6 +29,17 @@ def run(cmd: list[str], cwd: Path) -> int:
     print("+ " + " ".join(cmd))
     completed = subprocess.run(cmd, cwd=str(cwd), check=False)
     return completed.returncode
+
+
+def remove_generated_commands(project: Path, agents: list[str]) -> None:
+    if "claude-code" not in agents:
+        return
+    commands_dir = project / ".claude" / "commands"
+    for name in CLAUDE_COMMANDS:
+        path = commands_dir / name
+        if path.exists():
+            path.unlink()
+            print(f"已删除 Claude Code 命令：{path}")
 
 
 def parse_args() -> argparse.Namespace:
@@ -56,6 +76,7 @@ def main() -> int:
     clean_code = run(clean_cmd, project)
     if clean_code != 0:
         return clean_code
+    remove_generated_commands(project, agents)
 
     remove_cmd = [
         "npx",

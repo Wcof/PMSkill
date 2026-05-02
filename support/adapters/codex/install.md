@@ -2,7 +2,13 @@
 
 ## Step 0：默认完整安装
 
-运行 skills.sh 安装器（installer）：
+推荐使用免交互安装，避免安装器英文提示干扰：
+
+```bash
+npx skills@latest add Wcof/PRDContextEngine --all
+```
+
+也可以运行 skills.sh 交互安装器（installer）：
 
 ```bash
 npx skills@latest add Wcof/PRDContextEngine
@@ -20,10 +26,10 @@ npx skills@latest add Wcof/PRDContextEngine
 安装完成后，在 Codex 中运行：
 
 ```text
-/prd-setup
+/prd-helper
 ```
 
-它会确认文档保存目录（docs root）、当前启用 Agent 和采集策略。
+首次运行 `/prd-helper` 会自动初始化项目：创建 `docs/prd-helper/`，并写入 `AGENTS.md` 配置块。Codex 如果没有显示独立 `/prd-start`，使用兼容入口 `/prd-helper start`。
 
 ## 卸载
 
@@ -96,4 +102,10 @@ your-project/
 
 ## 使用方式
 
-安装后，当向 Codex 提供产品讨论、会议纪要、原型说明等材料时，Codex 会自动使用 prd-helper skill 进行处理。
+安装后，先发送 `/prd-helper` 自动初始化。开始主动采集时发送：
+
+```text
+/prd-helper start
+```
+
+之后向 Codex 提供产品讨论、会议纪要、原型说明等材料，Codex 会按照 prd-helper skill 进行处理。
