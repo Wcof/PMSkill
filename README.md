@@ -68,6 +68,22 @@ npx skills@latest add Wcof/PRDContextEngine
 
 完成后，项目会准备好 `docs/prd-helper/` 结构。
 
+### 安装后快速自检
+
+初始化完成后，建议立刻做一次最小自检：
+
+```text
+/prd-status
+```
+
+如果当前平台只显示 `/prd-helper`，使用：
+
+```text
+/prd-helper status
+```
+
+看到采集状态（capture_mode/session_id/turn_count）即可说明命令入口和项目初始化已生效。
+
 ### Step 1：开始采集
 
 在 Agent 对话中运行：
