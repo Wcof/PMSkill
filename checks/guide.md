@@ -11,14 +11,14 @@
     ↓
 检查模板（人类可读检查清单）    ←  modules/*/templates/*-check-template.md
     ↓
-自动化脚本（机器可执行校验）    ←  scripts/check-*.py
+自动化脚本（机器可执行校验）    ←  modules/*/scripts/check-*.py
 ```
 
 ### 单一来源原则
 
 - **行为约束**定义在各模块指南（`modules/*/guide.md`）的"核心约束"和"检查"章节
 - **检查模板**在 `modules/*/templates/*-check-template.md`，由 agent 填写
-- **自动化脚本**在 `scripts/`，从模板和 ID 注册表动态读取校验规则
+- **自动化脚本**在 `modules/*/scripts/`，从模板和 ID 注册表动态读取校验规则
 
 ### ID 注册表
 
@@ -61,22 +61,19 @@
 
 ```bash
 # 检查采集模块状态和结构
-python3 scripts/check-collect.py --root docs/prd-helper/01-collect
+python3 modules/collect/scripts/check-collect.py --root docs/prd-helper/01-collect
 
 # 检查精炼分类、来源与风险
-python3 scripts/check-refine.py docs/prd-helper
+python3 modules/refine/scripts/check-refine.py docs/prd-helper
 
 # 检查关联断链、孤立项与待确认影响范围
-python3 scripts/check-relate.py docs/prd-helper
+python3 modules/relate/scripts/check-relate.py docs/prd-helper
 
 # 检查目录结构完整性
 python3 scripts/check-structure.py docs/prd-helper
 
-# 兼容旧入口：依次运行 check-refine.py 和 check-relate.py
-python3 scripts/check-relations.py docs/prd-helper
-
 # 检查生成文档完整性和质量
-python3 scripts/check-generated.py docs/prd-helper
+python3 modules/generate/scripts/check-generated.py docs/prd-helper
 ```
 
 脚本使用 `scripts/lib/id_registry.py` 中的实体定义，与模板保持同步。

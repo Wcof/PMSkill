@@ -8,17 +8,12 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from lib.paths import COMMAND_NAMES
+
 
 AGENTS = ("codex", "claude-code", "trae", "trae-cn")
-CLAUDE_COMMANDS = (
-    "prd-setup.md",
-    "prd-start.md",
-    "prd-pause.md",
-    "prd-resume.md",
-    "prd-stop.md",
-    "prd-status.md",
-    "prd-remove.md",
-)
+CLAUDE_COMMANDS = tuple(f"{name}.md" for name in COMMAND_NAMES)
 
 
 def script_dir() -> Path:

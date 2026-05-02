@@ -51,15 +51,15 @@ npx skills@latest add Wcof/PRDContextEngine
 
 - Skill：`prd-helper`
 - Agent：你当前项目会用到的全部编码 Agent，例如 Codex、Claude Code、Trae
-- 首次入口：`/prd-helper`
+- 首次入口：`/prd-init`
 
 安装完成后，在 Agent 对话中运行：
 
 ```text
-/prd-helper
+/prd-init
 ```
 
-首次运行 `/prd-helper` 会自动初始化项目。初始化会完成：
+首次运行 `/prd-init` 会自动初始化项目。初始化会完成：
 
 - 创建 PRD Helper 文档目录，默认 `docs/prd-helper/`
 - 写入 `CLAUDE.md`、`AGENTS.md` 或 Trae `project_rules.md` 中的 PRD Helper 配置块
@@ -76,12 +76,6 @@ npx skills@latest add Wcof/PRDContextEngine
 /prd-status
 ```
 
-如果当前平台只显示 `/prd-helper`，使用：
-
-```text
-/prd-helper status
-```
-
 看到采集状态（capture_mode/session_id/turn_count）即可说明命令入口和项目初始化已生效。
 
 ### Step 1：开始采集
@@ -90,12 +84,6 @@ npx skills@latest add Wcof/PRDContextEngine
 
 ```text
 /prd-start
-```
-
-如果当前平台只显示 `/prd-helper`，看不到 `/prd-start`，使用兼容入口：
-
-```text
-/prd-helper start
 ```
 
 开启后，Agent 会把会话按 `User Query + Agent Answer` 写入主动采集目录。
@@ -126,16 +114,13 @@ docs/prd-helper/
 
 | 命令 | 用途 |
 |------|------|
-| `/prd-setup` | 初始化当前项目配置和 `docs/prd-helper/` 结构 |
+| `/prd-init` | 初始化当前项目配置和 `docs/prd-helper/` 结构 |
 | `/prd-start` | 开启主动采集 |
 | `/prd-pause` | 暂停主动采集 |
 | `/prd-resume` | 恢复主动采集 |
 | `/prd-stop` | 停止采集，并生成采集摘要和检查 |
 | `/prd-status` | 查看采集状态 |
 | `/prd-remove` | 卸载 PRD Helper，并清理 Agent 配置引用 |
-| `/remove prd-helper` | `/prd-remove` 的兼容别名 |
-| `/prd-helper start` | 兼容入口：平台只显示 `/prd-helper` 时开启采集 |
-| `/prd-helper status` | 兼容入口：平台只显示 `/prd-helper` 时查看状态 |
 
 ## 卸载
 
@@ -147,12 +132,6 @@ docs/prd-helper/
 
 卸载会先清理当前项目中的 Agent 配置块，例如 `AGENTS.md`、`CLAUDE.md`、Trae `project_rules.md`，再调用 `skills remove` 删除 Skill。只执行 `skills remove` 不会清理这些配置引用。
 
-如果平台支持参数式斜杠命令，也可以运行：
-
-```text
-/remove prd-helper
-```
-
 卸载默认保留已经生成的 `docs/prd-helper/` 项目文档，避免误删业务资产。
 
 ## 运行检查
@@ -160,19 +139,18 @@ docs/prd-helper/
 在仓库根目录运行：
 
 ```bash
-python3 scripts/check-collect.py --root examples/robot-inspection/docs/prd-helper/01-collect
-python3 scripts/check-refine.py examples/robot-inspection/docs/prd-helper
-python3 scripts/check-relate.py examples/robot-inspection/docs/prd-helper
+python3 modules/collect/scripts/check-collect.py --root examples/robot-inspection/docs/prd-helper/01-collect
+python3 modules/refine/scripts/check-refine.py examples/robot-inspection/docs/prd-helper
+python3 modules/relate/scripts/check-relate.py examples/robot-inspection/docs/prd-helper
 python3 scripts/check-structure.py examples/robot-inspection/docs/prd-helper
-python3 scripts/check-relations.py examples/robot-inspection/docs/prd-helper
-python3 scripts/check-generated.py examples/robot-inspection/docs/prd-helper
+python3 modules/generate/scripts/check-generated.py examples/robot-inspection/docs/prd-helper
 python3 "$HOME/.codex/skills/.system/skill-creator/scripts/quick_validate.py" .
 ```
 
 开发时建议同时运行：
 
 ```bash
-python3 -m py_compile scripts/*.py scripts/lib/*.py
+python3 -m py_compile scripts/*.py scripts/lib/*.py modules/*/scripts/*.py
 python3 -m pytest tests
 ```
 
@@ -183,11 +161,16 @@ PRDContextEngine/
 ├── SKILL.md              # Skill 根入口，Agent 首先读取这里
 ├── modules/              # 四个业务模块
 │   ├── collect/          # 采集：主动会话 + 被动材料
+│   │   └── scripts/      # 采集脚本：控制、采集、扫描、检查
 │   ├── refine/           # 精炼：事实、决策、约束、问题、推断
+│   │   └── scripts/      # 精炼检查脚本
 │   ├── relate/           # 关联：页面、功能、规则、数据、验收链路
+│   │   └── scripts/      # 关联检查脚本
 │   └── generate/         # 生成：PRD、Agent 上下文、验收材料
+│       └── scripts/      # 生成检查脚本
 ├── checks/               # 横向质量门禁，不是第五业务模块
-├── scripts/              # 安装、采集、检查、卸载脚本
+├── scripts/              # 全局脚本：安装、卸载、配置清理、结构检查
+│   └── lib/              # 共享库：状态、索引、ID、路径、哈希等
 ├── examples/             # 可运行示例
 ├── support/              # Agent 适配器、安装说明、图片资源
 ├── CONTEXT.md            # 领域词汇表

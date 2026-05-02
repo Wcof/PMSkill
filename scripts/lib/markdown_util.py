@@ -34,5 +34,5 @@ def extract_template_sections(template_path: Path, level: int = 2) -> list[str]:
 
 
 def has_field(block: str, field: str) -> bool:
-    """Return whether a Chinese markdown bullet field has a non-empty value."""
-    return bool(re.search(rf"^\s*-\s*{re.escape(field)}\s*：\s*\S+", block, re.MULTILINE))
+    """Return whether a markdown bullet field has a non-empty value. Supports both : and ：."""
+    return bool(re.search(rf"^\s*-\s*{re.escape(field)}\s*[:：]\s*\S+", block, re.MULTILINE))

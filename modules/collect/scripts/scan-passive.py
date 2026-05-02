@@ -14,8 +14,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-# Add scripts/ to path for lib imports
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+# Import shared lib from project-level scripts/
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
 
 from lib.state import read_collect_state, write_collect_state
 from lib.time_util import TZ, now_iso

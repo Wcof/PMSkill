@@ -12,6 +12,11 @@
 - **Passive Source**: 用户放入 `docs/prd-helper/01-collect/passive/` 的原始材料。
 - **Source Index**: `source-index.md`，记录材料来源、路径、hash、通道和状态。
 - **Collect State**: `collect-state.md`，记录采集 session 状态和增量写入检查点。
+- **原子指令**: 每个斜杠命令对应 Skill 生命周期的一个离散状态操作（初始化、开始、暂停、恢复、停止、查状态、卸载），不包装、不分发。
+_Avoid_: 包装命令、兼容入口、总入口
+- **Skill 名称**: `prd-helper`，是安装标识（npm/skills 安装时使用），与命令命名解耦。
+- **命令集合**: `/prd-init`、`/prd-start`、`/prd-pause`、`/prd-resume`、`/prd-stop`、`/prd-status`、`/prd-remove`。
+_Avoid_: `/prd-helper start`、`/prd-setup`
 
 ## Architecture Language
 

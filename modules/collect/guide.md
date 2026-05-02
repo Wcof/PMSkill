@@ -47,7 +47,7 @@ Agent 不能只回复"已开启采集"，必须真实写入状态文件和 sessi
 当 `capture_mode == on` 时，Agent 在每轮对话结束后自动写入：
 
 ```bash
-python3 scripts/capture-source.py \
+python3 modules/collect/scripts/capture-source.py \
   --agent codex \
   --user-query-file /tmp/user-query.txt \
   --agent-answer-file /tmp/agent-answer.txt

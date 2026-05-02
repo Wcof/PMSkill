@@ -8,8 +8,9 @@ from scripts.lib.state import write_collect_state
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def load_script(name: str):
-    path = ROOT / "scripts" / name
+def load_script(relative_path: str):
+    path = ROOT / relative_path
+    name = Path(relative_path).name
     spec = importlib.util.spec_from_file_location(name.replace("-", "_").removesuffix(".py"), path)
     module = importlib.util.module_from_spec(spec)
     assert spec.loader is not None
@@ -52,7 +53,7 @@ def test_check_collect_writes_template_shaped_check(tmp_path: Path):
         },
     )
 
-    module = load_script("check-collect.py")
+    module = load_script("modules/collect/scripts/check-collect.py")
     result = module.check(root)
     check_file = module.write_check_md(root, result)
     content = check_file.read_text()
@@ -74,7 +75,7 @@ def test_check_refine_writes_template_shaped_check(tmp_path: Path):
     write(refine / "questions.md", "## question_001\n- 来源材料：访谈\n- 状态：open\n")
     write(refine / "assumptions.md", "## assumption_001\n- 来源材料：访谈\n")
 
-    module = load_script("check-refine.py")
+    module = load_script("modules/refine/scripts/check-refine.py")
     result = module.check_refine(root)
     check_file = module.write_check(root, result)
     content = check_file.read_text()
@@ -102,7 +103,7 @@ def test_check_relate_writes_template_shaped_check(tmp_path: Path):
         "fact_001 page_001 feature_001 rule_001 data_001 acceptance_001 question_001 conflict_001 assumption_001",
     )
 
-    module = load_script("check-relate.py")
+    module = load_script("modules/relate/scripts/check-relate.py")
     result = module.check_relate(root)
     check_file = module.write_check(root, result)
     content = check_file.read_text()
@@ -113,7 +114,7 @@ def test_check_relate_writes_template_shaped_check(tmp_path: Path):
 
 
 def test_setup_installs_agent_configs_and_claude_commands(tmp_path: Path):
-    module = load_script("setup-prd-helper.py")
+    module = load_script("scripts/setup-prd-helper.py")
 
     config_files = module.install_agent_configs(tmp_path, ["codex", "claude-code"])
     command_files = module.install_claude_commands(tmp_path, "docs/prd-helper")
@@ -122,5 +123,7 @@ def test_setup_installs_agent_configs_and_claude_commands(tmp_path: Path):
     assert tmp_path / "CLAUDE.md" in config_files
     assert "<!-- PRD-HELPER:START -->" in (tmp_path / "AGENTS.md").read_text()
     assert "<!-- PRD-HELPER:START -->" in (tmp_path / "CLAUDE.md").read_text()
+    assert tmp_path / ".claude" / "commands" / "prd-init.md" in command_files
     assert tmp_path / ".claude" / "commands" / "prd-start.md" in command_files
+    assert not (tmp_path / ".claude" / "commands" / "prd-setup.md").exists()
     assert "collect-control.py\" start" in (tmp_path / ".claude" / "commands" / "prd-start.md").read_text()

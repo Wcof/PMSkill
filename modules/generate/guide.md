@@ -80,7 +80,7 @@
 可运行脚本验证生成质量：
 
 ```bash
-python3 scripts/check-generated.py docs/prd-helper
+python3 modules/generate/scripts/check-generated.py docs/prd-helper
 ```
 
 脚本从模板自动读取必填章节，确保模板和校验同步。

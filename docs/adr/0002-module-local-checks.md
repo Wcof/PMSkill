@@ -10,17 +10,17 @@ Accepted
 
 ## Decision
 
-每个业务模块拥有自己的检查入口：
+每个业务模块拥有自己的检查脚本，放在对应模块目录下：
 
-- `check-collect.py` 检查 `01-collect/`
-- `check-refine.py` 检查 `02-refine/`
-- `check-relate.py` 检查 `03-relate/`
-- `check-generated.py` 检查 `04-generate/`
+- `modules/collect/scripts/check-collect.py` 检查 `01-collect/`
+- `modules/refine/scripts/check-refine.py` 检查 `02-refine/`
+- `modules/relate/scripts/check-relate.py` 检查 `03-relate/`
+- `modules/generate/scripts/check-generated.py` 检查 `04-generate/`
 
-`check-relations.py` 仅保留为兼容旧流程的薄包装。
+全局脚本（安装、卸载、结构检查）保留在 `scripts/` 顶层。`check-relations.py` 已删除。
 
 ## Consequences
 
-- 检查问题定位更清楚。
+- 检查脚本归属清晰：模块脚本在模块目录下，全局脚本在 `scripts/` 顶层。
 - 每个脚本输出对应模块的 `check.md`。
 - 后续新增检查规则时优先放入对应模块脚本，不再扩展上帝脚本。

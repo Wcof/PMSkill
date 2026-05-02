@@ -13,18 +13,19 @@ import argparse
 import sys
 from pathlib import Path
 
-# Add scripts/ to path for lib imports
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+# Import shared lib from project-level scripts/
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
 
-from lib.state import read_collect_state
+from lib.state import read_collect_state, STATE_FILE
+from lib.source_index import INDEX_FILE, read_indexed_paths
 from lib.paths import DEFAULT_COLLECT_ROOT
 
 
 def check(root: Path) -> dict:
     """Run all automated checks. Returns dict with section results."""
     state = read_collect_state(root)
-    state_file = root / "collect-state.md"
-    index_file = root / "source-index.md"
+    state_file = root / STATE_FILE
+    index_file = root / INDEX_FILE
     summary_file = root / "collect-summary.md"
     active_dir = root / "active"
     passive_dir = root / "passive"
@@ -51,14 +52,9 @@ def check(root: Path) -> dict:
 
     # Check source-index references
     if index_file.exists():
-        index_content = index_file.read_text()
-        for line in index_content.split("\n"):
-            if line.startswith("|") and "|" in line[1:]:
-                cells = [c.strip() for c in line.split("|")[1:-1]]
-                if len(cells) >= 5 and cells[4] and cells[4] not in ("path", "---"):
-                    ref_path = root / cells[4]
-                    if not ref_path.exists():
-                        result["missing_index_refs"].append(cells[4])
+        for ref in read_indexed_paths(root):
+            if not (root / ref).exists():
+                result["missing_index_refs"].append(ref)
 
     return result
 

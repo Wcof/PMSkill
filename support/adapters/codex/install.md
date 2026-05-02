@@ -26,10 +26,10 @@ npx skills@latest add Wcof/PRDContextEngine
 安装完成后，在 Codex 中运行：
 
 ```text
-/prd-helper
+/prd-init
 ```
 
-首次运行 `/prd-helper` 会自动初始化项目：创建 `docs/prd-helper/`，并写入 `AGENTS.md` 配置块。Codex 如果没有显示独立 `/prd-start`，使用兼容入口 `/prd-helper start`。
+首次运行 `/prd-init` 会自动初始化项目：创建 `docs/prd-helper/`，并写入 `AGENTS.md` 配置块。
 
 ## 卸载
 
@@ -102,10 +102,10 @@ your-project/
 
 ## 使用方式
 
-安装后，先发送 `/prd-helper` 自动初始化。开始主动采集时发送：
+安装后，先发送 `/prd-init` 自动初始化。开始主动采集时发送：
 
 ```text
-/prd-helper start
+/prd-start
 ```
 
 之后向 Codex 提供产品讨论、会议纪要、原型说明等材料，Codex 会按照 prd-helper skill 进行处理。

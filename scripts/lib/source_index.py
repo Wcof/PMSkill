@@ -38,12 +38,8 @@ def ensure_index(root: Path):
         index_file.write_text(INDEX_HEADER)
 
 
-def read_indexed_paths(root: Path) -> set[str]:
-    """读取 source-index.md 中已索引的文件路径集合。"""
-    index_file = root / INDEX_FILE
-    if not index_file.exists():
-        return set()
-    content = index_file.read_text()
+def _parse_paths_from_content(content: str) -> set[str]:
+    """从 source-index.md 内容中提取已索引的文件路径集合。"""
     paths = set()
     for line in content.split("\n"):
         if not line.startswith("|"):
@@ -54,6 +50,14 @@ def read_indexed_paths(root: Path) -> set[str]:
     return paths
 
 
+def read_indexed_paths(root: Path) -> set[str]:
+    """读取 source-index.md 中已索引的文件路径集合。"""
+    index_file = root / INDEX_FILE
+    if not index_file.exists():
+        return set()
+    return _parse_paths_from_content(index_file.read_text())
+
+
 def append_index(root: Path, entry: dict):
     """向 source-index.md 追加一行索引记录。
 
@@ -62,9 +66,9 @@ def append_index(root: Path, entry: dict):
     index_file = root / INDEX_FILE
     if not index_file.exists():
         index_file.write_text(INDEX_HEADER)
-    if entry.get("path") in read_indexed_paths(root):
-        return
     content = index_file.read_text()
+    if entry.get("path", "") in _parse_paths_from_content(content):
+        return
     cells = [entry.get(col, "") for col in INDEX_COLUMNS]
     row = "| " + " | ".join(cells) + " |\n"
     if not content.endswith("\n"):

@@ -26,10 +26,10 @@ npx skills@latest add Wcof/PRDContextEngine
 安装完成后，在 Claude Code 中运行：
 
 ```text
-/prd-helper
+/prd-init
 ```
 
-首次运行 `/prd-helper` 会自动初始化项目：创建 `docs/prd-helper/`、写入 `CLAUDE.md` 配置块，并生成 `.claude/commands/prd-start.md`、`.claude/commands/prd-status.md` 等真实斜杠命令文件。
+首次运行 `/prd-init` 会自动初始化项目：创建 `docs/prd-helper/`、写入 `CLAUDE.md` 配置块，并生成 `.claude/commands/prd-start.md`、`.claude/commands/prd-status.md` 等真实斜杠命令文件。
 
 ## 卸载
 
@@ -63,7 +63,7 @@ npx skills@latest remove
 
 ## 验证安装
 
-先发送 `/prd-helper` 完成自动初始化，再发送 `/prd-start`。如果 Claude Code 创建了 `docs/prd-helper/01-collect/` 目录并生成 `.claude/commands/prd-start.md`，说明安装成功。
+先发送 `/prd-init` 完成自动初始化，再发送 `/prd-start`。如果 Claude Code 创建了 `docs/prd-helper/01-collect/` 目录并生成 `.claude/commands/prd-start.md`，说明安装成功。
 
 ## 使用
 
@@ -71,12 +71,6 @@ npx skills@latest remove
 2. 提供产品材料（会议纪要、原型说明、客户反馈等）
 3. 发送 `/prd-stop` 停止采集
 4. Agent 自动执行 Refine → Relate → Generate 流程
-
-如果当前会话暂时没有刷新出 `/prd-start`，可以使用兼容入口：
-
-```text
-/prd-helper start
-```
 
 ## 手动安装（备选）
 

@@ -9,7 +9,7 @@ Checks whether 02-refine/ satisfies the refine quality gate and writes
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
 
 from lib.id_registry import REFINE_ENTITIES, FACT, DECISION, CONSTRAINT, CONFLICT, ASSUMPTION
 from lib.markdown_util import has_field

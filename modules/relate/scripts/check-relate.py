@@ -9,7 +9,7 @@ Checks whether 03-relate/ satisfies the relation quality gate and writes
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
 
 from lib.id_registry import (
     FACT,
