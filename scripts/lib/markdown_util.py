@@ -24,6 +24,26 @@ def extract_table_rows(content: str) -> list[dict]:
     return rows
 
 
+def extract_table_rows_with_headers(content: str, expected_headers: tuple[str, ...]) -> list[dict]:
+    """Extract rows from the first markdown table matching expected headers."""
+    rows = []
+    headers = []
+    for raw_line in content.splitlines():
+        line = raw_line.strip()
+        if not line.startswith("|"):
+            continue
+        cells = [c.strip() for c in line.split("|")[1:-1]]
+        if not cells or all(set(c) <= {"-", ":", " "} for c in cells):
+            continue
+        if not headers:
+            if tuple(cells) == expected_headers:
+                headers = cells
+            continue
+        if len(cells) == len(headers):
+            rows.append(dict(zip(headers, cells)))
+    return rows
+
+
 def extract_template_sections(template_path: Path, level: int = 2) -> list[str]:
     """Extract required heading lines from a template."""
     if not template_path.exists():

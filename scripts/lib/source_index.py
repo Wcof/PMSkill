@@ -7,6 +7,8 @@ source-index.md 的统一管理。
 
 from pathlib import Path
 
+from .markdown_util import extract_table_rows_with_headers
+
 
 INDEX_FILE = "source-index.md"
 
@@ -38,16 +40,13 @@ def ensure_index(root: Path):
         index_file.write_text(INDEX_HEADER)
 
 
-def _parse_paths_from_content(content: str) -> set[str]:
+def indexed_paths_from_content(content: str) -> set[str]:
     """从 source-index.md 内容中提取已索引的文件路径集合。"""
-    paths = set()
-    for line in content.split("\n"):
-        if not line.startswith("|"):
-            continue
-        cells = [c.strip() for c in line.split("|")[1:-1]]
-        if len(cells) >= 5 and cells[4] and cells[4] not in ("path", "---"):
-            paths.add(cells[4])
-    return paths
+    return {
+        row["path"]
+        for row in extract_table_rows_with_headers(content, INDEX_COLUMNS)
+        if row.get("path")
+    }
 
 
 def read_indexed_paths(root: Path) -> set[str]:
@@ -55,7 +54,7 @@ def read_indexed_paths(root: Path) -> set[str]:
     index_file = root / INDEX_FILE
     if not index_file.exists():
         return set()
-    return _parse_paths_from_content(index_file.read_text())
+    return indexed_paths_from_content(index_file.read_text())
 
 
 def append_index(root: Path, entry: dict):
@@ -67,7 +66,7 @@ def append_index(root: Path, entry: dict):
     if not index_file.exists():
         index_file.write_text(INDEX_HEADER)
     content = index_file.read_text()
-    if entry.get("path", "") in _parse_paths_from_content(content):
+    if entry.get("path", "") in indexed_paths_from_content(content):
         return
     cells = [entry.get(col, "") for col in INDEX_COLUMNS]
     row = "| " + " | ".join(cells) + " |\n"

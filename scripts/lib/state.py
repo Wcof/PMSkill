@@ -7,6 +7,8 @@
 
 from pathlib import Path
 
+from .markdown_util import extract_table_rows_with_headers
+
 
 STATE_FILE = "collect-state.md"
 
@@ -45,14 +47,8 @@ def read_collect_state(root: Path) -> dict:
     if not state_file.exists():
         return {}
     content = state_file.read_text()
-    state = {}
-    for line in content.split("\n"):
-        line = line.strip()
-        if line.startswith("|") and "|" in line[1:]:
-            cells = [c.strip() for c in line.split("|")[1:-1]]
-            if len(cells) == 2 and cells[0] and cells[0] not in ("key", "---", ""):
-                state[cells[0]] = cells[1]
-    return state
+    rows = extract_table_rows_with_headers(content, ("key", "value"))
+    return {row["key"]: row["value"] for row in rows if row.get("key")}
 
 
 def write_collect_state(root: Path, state: dict):

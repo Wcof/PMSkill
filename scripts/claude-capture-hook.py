@@ -15,7 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from lib.paths import DEFAULT_COLLECT_ROOT
+from lib.constants import DEFAULT_COLLECT_ROOT
 from lib.state import read_collect_state
 
 

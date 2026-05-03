@@ -13,12 +13,18 @@ import argparse
 import sys
 from pathlib import Path
 
-# Import shared lib from project-level scripts/
-sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
+# Locate project-level scripts/lib without depending on a fixed module depth.
+for _parent in Path(__file__).resolve().parents:
+    _scripts = _parent / "scripts"
+    if (_scripts / "lib").exists():
+        sys.path.insert(0, str(_scripts))
+        break
+else:
+    raise RuntimeError("Unable to locate PRD Helper scripts/lib")
 
 from lib.state import read_collect_state, STATE_FILE
 from lib.source_index import INDEX_FILE, read_indexed_paths
-from lib.paths import DEFAULT_COLLECT_ROOT
+from lib.constants import DEFAULT_COLLECT_ROOT
 
 
 def check(root: Path) -> dict:

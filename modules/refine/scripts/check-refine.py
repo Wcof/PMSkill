@@ -9,11 +9,18 @@ Checks whether 02-refine/ satisfies the refine quality gate and writes
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
+# Locate project-level scripts/lib without depending on a fixed module depth.
+for _parent in Path(__file__).resolve().parents:
+    _scripts = _parent / "scripts"
+    if (_scripts / "lib").exists():
+        sys.path.insert(0, str(_scripts))
+        break
+else:
+    raise RuntimeError("Unable to locate PRD Helper scripts/lib")
 
 from lib.id_registry import REFINE_ENTITIES, FACT, DECISION, CONSTRAINT, CONFLICT, ASSUMPTION
 from lib.markdown_util import has_field
-from lib.paths import DEFAULT_PRD_ROOT
+from lib.constants import DEFAULT_PRD_ROOT
 
 
 def _entity_blocks(content: str, entity) -> list[tuple[str, str]]:

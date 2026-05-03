@@ -20,6 +20,7 @@ class EntityType:
     required_fields: tuple[str, ...] = ()
     id_pattern: str = ""
     filename: str = ""  # 对应的 Markdown 文件名（如 "facts.md"）
+    lifecycle: tuple[tuple[str, str], ...] = ()
 
     def __post_init__(self):
         if not self.id_pattern:
@@ -30,6 +31,19 @@ class EntityType:
         return set(re.findall(self.id_pattern, content))
 
 
+REFINE_LIFECYCLE = (
+    ("collect", "从 source-index 和原始材料中追溯来源"),
+    ("refine", "创建结构化实体并标注来源、状态、待确认信息"),
+    ("relate", "进入 context-map 或对应 map，参与关系覆盖检查"),
+    ("generate", "作为生成文档的事实、约束、问题或推断依据"),
+)
+
+RELATE_LIFECYCLE = (
+    ("refine", "引用事实、问题、冲突或推断作为来源"),
+    ("relate", "创建关系实体并连接 fact/page/feature/rule/data/acceptance 链路"),
+    ("generate", "驱动页面、规则、数据、验收和 Agent 上下文生成"),
+)
+
 # ── 精炼模块（refine）实体 ──────────────────────────────
 
 FACT = EntityType(
@@ -38,6 +52,7 @@ FACT = EntityType(
     source_module="refine",
     required_fields=("来源材料", "来源位置", "状态"),
     filename="facts.md",
+    lifecycle=REFINE_LIFECYCLE,
 )
 
 DECISION = EntityType(
@@ -46,6 +61,7 @@ DECISION = EntityType(
     source_module="refine",
     required_fields=("来源材料", "来源位置", "状态"),
     filename="decisions.md",
+    lifecycle=REFINE_LIFECYCLE,
 )
 
 CONSTRAINT = EntityType(
@@ -54,6 +70,7 @@ CONSTRAINT = EntityType(
     source_module="refine",
     required_fields=("来源材料", "来源位置", "状态"),
     filename="constraints.md",
+    lifecycle=REFINE_LIFECYCLE,
 )
 
 GOAL = EntityType(
@@ -62,6 +79,7 @@ GOAL = EntityType(
     source_module="refine",
     required_fields=("来源材料", "状态"),
     filename="goals.md",
+    lifecycle=REFINE_LIFECYCLE,
 )
 
 CONFLICT = EntityType(
@@ -70,6 +88,7 @@ CONFLICT = EntityType(
     source_module="refine",
     required_fields=("涉及来源", "当前状态"),
     filename="conflicts.md",
+    lifecycle=REFINE_LIFECYCLE,
 )
 
 QUESTION = EntityType(
@@ -78,6 +97,7 @@ QUESTION = EntityType(
     source_module="refine",
     required_fields=("来源材料", "状态"),
     filename="questions.md",
+    lifecycle=REFINE_LIFECYCLE,
 )
 
 ASSUMPTION = EntityType(
@@ -86,6 +106,7 @@ ASSUMPTION = EntityType(
     source_module="refine",
     required_fields=("来源材料",),
     filename="assumptions.md",
+    lifecycle=REFINE_LIFECYCLE,
 )
 
 # ── 关联模块（relate）实体 ──────────────────────────────
@@ -96,6 +117,7 @@ PAGE = EntityType(
     source_module="relate",
     required_fields=("页面路径", "所属模块", "来源范围"),
     filename="page-map.md",
+    lifecycle=RELATE_LIFECYCLE,
 )
 
 FEATURE = EntityType(
@@ -104,6 +126,7 @@ FEATURE = EntityType(
     source_module="relate",
     required_fields=("功能说明", "来源事实"),
     filename="feature-map.md",
+    lifecycle=RELATE_LIFECYCLE,
 )
 
 RULE = EntityType(
@@ -112,6 +135,7 @@ RULE = EntityType(
     source_module="relate",
     required_fields=("规则说明", "来源事实"),
     filename="rule-map.md",
+    lifecycle=RELATE_LIFECYCLE,
 )
 
 DATA = EntityType(
@@ -120,6 +144,7 @@ DATA = EntityType(
     source_module="relate",
     required_fields=("对象含义", "来源事实"),
     filename="data-map.md",
+    lifecycle=RELATE_LIFECYCLE,
 )
 
 ACCEPTANCE = EntityType(
@@ -128,6 +153,7 @@ ACCEPTANCE = EntityType(
     source_module="relate",
     required_fields=("验收目标", "来源事实"),
     filename="acceptance-map.md",
+    lifecycle=RELATE_LIFECYCLE,
 )
 
 # ── 注册表 ──────────────────────────────────────────────

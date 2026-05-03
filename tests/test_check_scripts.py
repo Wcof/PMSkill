@@ -248,3 +248,63 @@ def test_claude_capture_hook_records_turn_after_start(tmp_path: Path):
     assert "机器人巡检点位管理功能" in content
     assert "已记录这个需求" in content
     assert "active/sessions/" in (root / "source-index.md").read_text()
+
+
+def test_scan_passive_indexes_new_files_and_updates_state(tmp_path: Path, monkeypatch):
+    module = load_script("modules/collect/scripts/scan-passive.py")
+    root = tmp_path / "docs" / "prd-helper" / "01-collect"
+    passive = root / "passive"
+    passive.mkdir(parents=True)
+    write(
+        passive / "meeting.md",
+        """
+- 来源：会议纪要
+- 记录时间：2026-05-03
+- 记录人：产品经理
+- 责任人：业务负责人
+- 优先级：高
+""",
+    )
+    write_collect_state(root, {"capture_mode": "off", "passive_source_count": "0", "total_sources": "0"})
+
+    monkeypatch.setattr(sys, "argv", ["scan-passive.py", "--root", str(root)])
+    module.main()
+
+    index = (root / "source-index.md").read_text()
+    state = (root / "collect-state.md").read_text()
+    assert "passive/meeting.md" in index
+    assert "| passive_source_count | 1 |" in state
+    assert "| total_sources | 1 |" in state
+
+
+def test_remove_prd_helper_cleans_commands_and_hooks(tmp_path: Path):
+    module = load_script("scripts/remove-prd-helper.py")
+    commands = tmp_path / ".claude" / "commands"
+    write(commands / "prd-start.md", "start")
+    write(commands / "prd-stop.md", "stop")
+    write(commands / "unrelated.md", "keep")
+    write(
+        tmp_path / ".claude" / "settings.json",
+        """
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {"hooks": [{"type": "command", "command": "python3 \\"/old/claude-capture-hook.py\\""}]}
+    ],
+    "Stop": [
+      {"hooks": [{"type": "command", "command": "python3 \\"/old/claude-capture-hook.py\\""}]}
+    ]
+  }
+}
+""".strip()
+        + "\n",
+    )
+
+    module.remove_generated_commands(tmp_path, ["claude-code"])
+    hook_file = module.remove_claude_hooks(tmp_path)
+
+    assert not (commands / "prd-start.md").exists()
+    assert not (commands / "prd-stop.md").exists()
+    assert (commands / "unrelated.md").exists()
+    assert hook_file == tmp_path / ".claude" / "settings.json"
+    assert "claude-capture-hook.py" not in (tmp_path / ".claude" / "settings.json").read_text()

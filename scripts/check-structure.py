@@ -17,9 +17,9 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from lib.generated_structure import REQUIRED_GENERATED_SUBDIRS, REQUIRED_GENERATED_FILES
+from lib.constants import REQUIRED_GENERATED_SUBDIRS, REQUIRED_GENERATED_FILES
 from lib.id_registry import REFINE_ENTITIES, RELATE_ENTITIES
-from lib.paths import DEFAULT_PRD_ROOT
+from lib.constants import DEFAULT_PRD_ROOT
 
 # Required directories
 REQUIRED_DIRS = [

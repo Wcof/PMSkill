@@ -9,7 +9,14 @@ Checks whether 03-relate/ satisfies the relation quality gate and writes
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
+# Locate project-level scripts/lib without depending on a fixed module depth.
+for _parent in Path(__file__).resolve().parents:
+    _scripts = _parent / "scripts"
+    if (_scripts / "lib").exists():
+        sys.path.insert(0, str(_scripts))
+        break
+else:
+    raise RuntimeError("Unable to locate PRD Helper scripts/lib")
 
 from lib.id_registry import (
     FACT,
@@ -24,7 +31,7 @@ from lib.id_registry import (
     RELATE_ENTITIES,
     RELATION_CHAIN_RULES,
 )
-from lib.paths import DEFAULT_PRD_ROOT
+from lib.constants import DEFAULT_PRD_ROOT
 
 
 def _read(path: Path) -> str:

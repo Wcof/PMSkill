@@ -10,7 +10,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.claude_hooks import remove_claude_hooks
-from lib.paths import COMMAND_NAMES
+from lib.constants import COMMAND_NAMES
 
 
 AGENTS = ("codex", "claude-code", "trae", "trae-cn")

@@ -14,14 +14,20 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-# Import shared lib from project-level scripts/
-sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
+# Locate project-level scripts/lib without depending on a fixed module depth.
+for _parent in Path(__file__).resolve().parents:
+    _scripts = _parent / "scripts"
+    if (_scripts / "lib").exists():
+        sys.path.insert(0, str(_scripts))
+        break
+else:
+    raise RuntimeError("Unable to locate PRD Helper scripts/lib")
 
 from lib.state import read_collect_state, write_collect_state
 from lib.time_util import TZ, now_iso
 from lib.hash_util import file_hash
 from lib.source_index import ensure_index, read_indexed_paths, append_index
-from lib.paths import DEFAULT_COLLECT_ROOT
+from lib.constants import DEFAULT_COLLECT_ROOT
 from lib.metadata import metadata_status_for_text
 
 

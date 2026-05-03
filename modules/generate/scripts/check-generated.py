@@ -17,10 +17,17 @@ import re
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
+# Locate project-level scripts/lib without depending on a fixed module depth.
+for _parent in Path(__file__).resolve().parents:
+    _scripts = _parent / "scripts"
+    if (_scripts / "lib").exists():
+        sys.path.insert(0, str(_scripts))
+        break
+else:
+    raise RuntimeError("Unable to locate PRD Helper scripts/lib")
 from lib.id_registry import ALL_ENTITIES
 from lib.markdown_util import extract_template_sections
-from lib.paths import DEFAULT_PRD_ROOT
+from lib.constants import DEFAULT_PRD_ROOT
 
 # Patterns that indicate unresolved content
 UNRESOLVED_PATTERNS = [

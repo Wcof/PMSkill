@@ -9,7 +9,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from lib.paths import COMMAND_NAMES
+from lib.constants import COMMAND_NAMES
 from lib.source_index import INDEX_HEADER
 from lib.state import write_collect_state
 

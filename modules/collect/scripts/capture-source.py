@@ -14,14 +14,20 @@ import re
 import sys
 from pathlib import Path
 
-# Import shared lib from project-level scripts/
-sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
+# Locate project-level scripts/lib without depending on a fixed module depth.
+for _parent in Path(__file__).resolve().parents:
+    _scripts = _parent / "scripts"
+    if (_scripts / "lib").exists():
+        sys.path.insert(0, str(_scripts))
+        break
+else:
+    raise RuntimeError("Unable to locate PRD Helper scripts/lib")
 
 from lib.state import read_collect_state, write_collect_state
 from lib.time_util import now_iso, now_id
 from lib.hash_util import content_hash
 from lib.source_index import append_index
-from lib.paths import DEFAULT_COLLECT_ROOT
+from lib.constants import DEFAULT_COLLECT_ROOT
 
 
 def detect_noise(user_query: str, agent_answer: str) -> tuple[str, str]:
