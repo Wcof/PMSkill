@@ -16,6 +16,7 @@ Commands:
 """
 
 import argparse
+import subprocess
 import sys
 from pathlib import Path
 
@@ -135,12 +136,40 @@ def cmd_resume(root: Path, agent: str, project: Path, docs_root: str):
     print(f"Session resumed: {state.get('session_id')}")
 
 
+def scan_codex_sessions(root: Path, project: Path, agent: str, state: dict) -> None:
+    """Scan Codex session JSONL files to backfill uncaptured turns."""
+    if agent != "codex":
+        return
+    scan_script = Path(__file__).resolve().parent / "scan-codex-sessions.py"
+    if not scan_script.exists():
+        print(f"Codex session scanner not found: {scan_script}")
+        return
+    since = state.get("started_at", "")
+    cmd = [
+        sys.executable,
+        str(scan_script),
+        "--collect-root",
+        str(root),
+        "--project",
+        str(project),
+        "--agent",
+        agent,
+    ]
+    if since:
+        cmd.extend(["--since", since])
+    print("Scanning Codex sessions for uncaptured turns...")
+    subprocess.run(cmd, cwd=str(project), check=False)
+
+
 def cmd_stop(root: Path, agent: str, project: Path):
     """Stop the current PRD Capture Session."""
     state = read_collect_state(root)
     if state.get("capture_mode") not in ("on", "paused"):
         print(f"Cannot stop: current mode is '{state.get('capture_mode', 'off')}'")
         return
+
+    # Scan Codex sessions before stopping
+    scan_codex_sessions(root, project, agent, state)
 
     state["capture_mode"] = "off"
     state["ended_at"] = now_iso()

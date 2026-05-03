@@ -64,6 +64,7 @@ npx skills@latest add Wcof/PRDContextEngine
 - 创建 PRD Helper 文档目录，默认 `docs/prd-helper/`
 - 写入 `CLAUDE.md`、`AGENTS.md` 或 Trae `project_rules.md` 中的 PRD Helper 配置块
 - 在 Claude Code 项目中生成 `.claude/commands/prd-start.md` 等真实斜杠命令文件
+- 在 Codex 项目中安装 `~/.codex/plugins/prd-helper/` 插件，注册原生斜杠命令
 - 设置主动采集策略：默认只在 `/prd-start` 后采集，Hook 在 `/prd-start`/`/prd-resume` 时启用，在 `/prd-pause`/`/prd-stop` 时清理
 
 完成后，项目会准备好 `docs/prd-helper/` 结构。Claude Code 可能需要开启新会话或刷新命令列表后，才会显示刚生成的 `/prd-start` 等命令。
@@ -95,6 +96,15 @@ ls .claude/commands/prd-*.md
 ```
 
 开启后，`/prd-start` 会写入 `.claude/settings.json` hooks，Claude Code 会把后续会话按 `User Query + Agent Answer` 自动写入主动采集目录。`/prd-start` 本身只开启状态，不会采集开启命令这一轮。发送 `/prd-pause` 或 `/prd-stop` 后，Hook 会被清理，不再常驻生效。
+
+### Codex 采集机制
+
+Codex 没有进程级 Hook，采用混合采集方案：
+
+1. **AGENTS.md 指令注入**：采集模式开启时，每轮回答后 Agent 调用 `capture-source.py` 记录对话
+2. **JSONL 会话扫描兜底**：`/prd-stop` 时自动扫描 `~/.codex/sessions/` 下的 JSONL 会话文件，补录未采集的轮次
+
+Codex 会话数据存储在 `~/.codex/sessions/YYYY/MM/DD/rollout-{时间}-{uuid}.jsonl`，格式为 JSONL，每行一个 JSON 对象。扫描脚本通过 `session_meta.cwd` 过滤当前项目的会话，提取 `role=user` 和 `role=assistant` 的消息对。
 
 已有材料直接放入被动采集目录：
 
@@ -181,6 +191,8 @@ PRDContextEngine/
 │   └── lib/              # 共享库：状态、索引、ID、常量、哈希等
 ├── examples/             # 可运行示例
 ├── support/              # Agent 适配器、安装说明、图片资源
+│   └── adapters/         # Claude Code、Codex、Trae 适配器
+│       └── codex/plugin/ # Codex 插件结构（commands、agents）
 ├── CONTEXT.md            # 领域词汇表
 └── docs/adr/             # 架构决策记录
 ```
@@ -195,6 +207,7 @@ PRDContextEngine/
 - `scripts/lib/markdown_util.py` 统一解析 Markdown 表格，`state.py` 和 `source_index.py` 只处理各自领域语义。
 - `scripts/lib/id_registry.py` 是实体类型、ID 前缀、必填字段和实体生命周期的唯一注册表。
 - Claude Code 采集 Hook 由 `scripts/lib/claude_hooks.py` 管理，`/prd-start`、`/prd-resume` 启用，`/prd-pause`、`/prd-stop`、`/prd-remove` 清理。
+- Codex 会话发现由 `scripts/lib/codex_discovery.py` 管理，`/prd-stop` 时扫描 JSONL 补录未采集轮次。
 
 ## 设计约束
 

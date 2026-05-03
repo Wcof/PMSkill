@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import shutil
 import sys
 from pathlib import Path
 
@@ -118,6 +119,37 @@ def adapter_block(agent: str) -> str:
             "",
         ]
     )
+
+
+def install_codex_plugin(skill_root: Path, docs_root: str) -> Path:
+    """Install PRD Helper as a Codex plugin to ~/.codex/plugins/prd-helper/."""
+    from lib.constants import CODEX_DEFAULT_HOME, CODEX_HOME_ENV, CODEX_PLUGIN_DIR
+    import os
+
+    codex_home = os.environ.get(CODEX_HOME_ENV, CODEX_DEFAULT_HOME)
+    plugin_dest = Path(codex_home).expanduser() / CODEX_PLUGIN_DIR
+
+    plugin_src = skill_root / "support" / "adapters" / "codex" / "plugin"
+    if not plugin_src.exists():
+        print(f"Codex plugin source not found: {plugin_src}")
+        return plugin_dest
+
+    # Remove existing plugin if present
+    if plugin_dest.exists():
+        shutil.rmtree(plugin_dest)
+
+    # Copy plugin structure
+    shutil.copytree(plugin_src, plugin_dest)
+
+    # Replace template variables in command files
+    for md_file in (plugin_dest / "commands").glob("*.md"):
+        content = md_file.read_text(encoding="utf-8")
+        content = content.replace("{skill_root}", str(skill_root))
+        content = content.replace("{docs_root}", docs_root)
+        md_file.write_text(content, encoding="utf-8")
+
+    print(f"Codex plugin installed: {plugin_dest}")
+    return plugin_dest
 
 
 def install_agent_configs(project: Path, agents: list[str]) -> list[Path]:
@@ -302,6 +334,10 @@ def main() -> int:
     if "claude-code" in agents:
         command_files = install_claude_commands(project, args.docs_root)
 
+    codex_plugin_dir: Path | None = None
+    if "codex" in agents:
+        codex_plugin_dir = install_codex_plugin(_SKILL_ROOT, args.docs_root)
+
     print(f"PRD Helper 初始化完成（setup complete）：{docs_root}")
     if config_files:
         print("已写入 Agent 配置：")
@@ -311,6 +347,8 @@ def main() -> int:
         print("已写入 Claude Code 斜杠命令：")
         for path in command_files:
             print(f"- {path}")
+    if codex_plugin_dir:
+        print(f"已安装 Codex 插件：{codex_plugin_dir}")
     print("下一步：准备采集产品上下文时，在 Agent 中发送 /prd-start；Hook 会在 start/resume 时启用，在 pause/stop 时清理。")
     return 0
 

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -16,6 +17,21 @@ from lib.constants import COMMAND_NAMES
 AGENTS = ("codex", "claude-code", "trae", "trae-cn")
 LEGACY_CLAUDE_COMMANDS = ("prd-init.md", "prd-setup.md")
 CLAUDE_COMMANDS = tuple(f"{name}.md" for name in COMMAND_NAMES) + LEGACY_CLAUDE_COMMANDS
+
+
+def remove_codex_plugin() -> None:
+    """Remove PRD Helper Codex plugin from ~/.codex/plugins/prd-helper/."""
+    from lib.constants import CODEX_DEFAULT_HOME, CODEX_HOME_ENV, CODEX_PLUGIN_DIR
+    import os
+
+    codex_home = os.environ.get(CODEX_HOME_ENV, CODEX_DEFAULT_HOME)
+    plugin_dir = Path(codex_home).expanduser() / CODEX_PLUGIN_DIR
+
+    if plugin_dir.exists():
+        shutil.rmtree(plugin_dir)
+        print(f"已删除 Codex 插件：{plugin_dir}")
+    else:
+        print("Codex 插件目录不存在，跳过清理。")
 
 
 def script_dir() -> Path:
@@ -78,6 +94,9 @@ def main() -> int:
         hook_file = remove_claude_hooks(project)
         if hook_file:
             print(f"已清理 Claude Code Hook 配置：{hook_file}")
+
+    if "codex" in agents:
+        remove_codex_plugin()
 
     remove_cmd = [
         "npx",

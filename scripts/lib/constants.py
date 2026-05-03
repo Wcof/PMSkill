@@ -14,6 +14,13 @@ COMMAND_NAMES = (
     "prd-remove",
 )
 
+# Codex 相关常量
+CODEX_HOME_ENV = "CODEX_HOME"
+CODEX_DEFAULT_HOME = "~/.codex"
+CODEX_SESSIONS_REL = "sessions"
+CODEX_INDEX_REL = "session_index.jsonl"
+CODEX_PLUGIN_DIR = "plugins/prd-helper"
+
 REQUIRED_GENERATED_SUBDIRS = (
     "overview",
     "pages",
