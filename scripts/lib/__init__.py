@@ -12,4 +12,5 @@ from .markdown_util import extract_table_rows, extract_template_sections, has_fi
 from .generated_structure import REQUIRED_GENERATED_SUBDIRS, REQUIRED_GENERATED_FILES
 from .paths import DEFAULT_COLLECT_ROOT, DEFAULT_PRD_ROOT
 from .metadata import FIELD_ALIASES, metadata_status_for_text
+from .claude_hooks import install_claude_hooks, remove_claude_hooks
 from . import id_registry

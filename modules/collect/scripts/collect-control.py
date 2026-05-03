@@ -25,7 +25,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
 from lib.state import read_collect_state, write_collect_state
 from lib.time_util import now_iso, now_id
 from lib.source_index import ensure_index
-from lib.paths import DEFAULT_COLLECT_ROOT
+from lib.paths import DEFAULT_COLLECT_ROOT, DEFAULT_PRD_ROOT
+from lib.claude_hooks import install_claude_hooks, remove_claude_hooks
 
 
 def ensure_dirs(root: Path):
@@ -36,7 +37,22 @@ def ensure_dirs(root: Path):
     (root / "passive").mkdir(parents=True, exist_ok=True)
 
 
-def cmd_start(root: Path, agent: str):
+def sync_claude_hooks(project: Path, docs_root: str, agent: str, enabled: bool) -> None:
+    """Install or remove Claude Code hooks to match capture mode."""
+    if agent != "claude-code":
+        return
+    if enabled:
+        hook_file = install_claude_hooks(project, docs_root)
+        print(f"Claude Code hooks enabled: {hook_file}")
+    else:
+        hook_file = remove_claude_hooks(project)
+        if hook_file:
+            print(f"Claude Code hooks removed: {hook_file}")
+        else:
+            print("Claude Code hooks already clean.")
+
+
+def cmd_start(root: Path, agent: str, project: Path, docs_root: str):
     """Start a new PRD Capture Session."""
     ensure_dirs(root)
 
@@ -73,6 +89,7 @@ def cmd_start(root: Path, agent: str):
 
     write_collect_state(root, new_state)
     ensure_index(root)
+    sync_claude_hooks(project, docs_root, agent, True)
 
     print(f"PRD Capture Session started: {session_id}")
     print(f"Agent: {agent}")
@@ -81,7 +98,7 @@ def cmd_start(root: Path, agent: str):
     print(f"Capture mode: on")
 
 
-def cmd_pause(root: Path):
+def cmd_pause(root: Path, agent: str, project: Path):
     """Pause the current PRD Capture Session."""
     state = read_collect_state(root)
     if state.get("capture_mode") != "on":
@@ -91,10 +108,11 @@ def cmd_pause(root: Path):
     state["capture_mode"] = "paused"
     state["paused_at"] = now_iso()
     write_collect_state(root, state)
+    sync_claude_hooks(project, "", agent, False)
     print(f"Session paused: {state.get('session_id')}")
 
 
-def cmd_resume(root: Path):
+def cmd_resume(root: Path, agent: str, project: Path, docs_root: str):
     """Resume the current PRD Capture Session."""
     state = read_collect_state(root)
     if state.get("capture_mode") != "paused":
@@ -104,10 +122,11 @@ def cmd_resume(root: Path):
     state["capture_mode"] = "on"
     state["resumed_at"] = now_iso()
     write_collect_state(root, state)
+    sync_claude_hooks(project, docs_root, agent, True)
     print(f"Session resumed: {state.get('session_id')}")
 
 
-def cmd_stop(root: Path):
+def cmd_stop(root: Path, agent: str, project: Path):
     """Stop the current PRD Capture Session."""
     state = read_collect_state(root)
     if state.get("capture_mode") not in ("on", "paused"):
@@ -117,6 +136,7 @@ def cmd_stop(root: Path):
     state["capture_mode"] = "off"
     state["ended_at"] = now_iso()
     write_collect_state(root, state)
+    sync_claude_hooks(project, "", agent, False)
 
     # Generate collect-summary.md
     summary_file = root / "collect-summary.md"
@@ -160,16 +180,19 @@ def main():
     parser = argparse.ArgumentParser(description="PRD Collect Control")
     parser.add_argument("command", choices=["start", "pause", "resume", "stop", "status"])
     parser.add_argument("--root", default=DEFAULT_COLLECT_ROOT, help="Collect root directory")
+    parser.add_argument("--project", default=".", help="Project root directory")
+    parser.add_argument("--docs-root", default=DEFAULT_PRD_ROOT, help="PRD Helper docs root directory")
     parser.add_argument("--agent", default="unknown", help="Agent name")
 
     args = parser.parse_args()
     root = Path(args.root)
+    project = Path(args.project).resolve()
 
     commands = {
-        "start": lambda: cmd_start(root, args.agent),
-        "pause": lambda: cmd_pause(root),
-        "resume": lambda: cmd_resume(root),
-        "stop": lambda: cmd_stop(root),
+        "start": lambda: cmd_start(root, args.agent, project, args.docs_root),
+        "pause": lambda: cmd_pause(root, args.agent, project),
+        "resume": lambda: cmd_resume(root, args.agent, project, args.docs_root),
+        "stop": lambda: cmd_stop(root, args.agent, project),
         "status": lambda: cmd_status(root),
     }
 

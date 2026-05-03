@@ -120,7 +120,6 @@ def test_setup_installs_agent_configs_and_claude_commands(tmp_path: Path):
 
     config_files = module.install_agent_configs(tmp_path, ["codex", "claude-code"])
     command_files = module.install_claude_commands(tmp_path, "docs/prd-helper")
-    settings_file = module.install_claude_hooks(tmp_path, "docs/prd-helper")
 
     assert tmp_path / "AGENTS.md" in config_files
     assert tmp_path / "CLAUDE.md" in config_files
@@ -130,9 +129,10 @@ def test_setup_installs_agent_configs_and_claude_commands(tmp_path: Path):
     assert not (tmp_path / ".claude" / "commands" / "prd-init.md").exists()
     assert not (tmp_path / ".claude" / "commands" / "prd-setup.md").exists()
     assert "collect-control.py\" start" in (tmp_path / ".claude" / "commands" / "prd-start.md").read_text()
-    settings = json.loads(settings_file.read_text())
-    assert "claude-capture-hook.py" in settings["hooks"]["UserPromptSubmit"][0]["hooks"][0]["command"]
-    assert "claude-capture-hook.py" in settings["hooks"]["Stop"][0]["hooks"][0]["command"]
+    assert "--project . --docs-root docs/prd-helper --agent claude-code" in (
+        tmp_path / ".claude" / "commands" / "prd-start.md"
+    ).read_text()
+    assert not (tmp_path / ".claude" / "settings.json").exists()
 
 
 def test_setup_main_repairs_partial_claude_initialization(tmp_path: Path, monkeypatch):
@@ -158,8 +158,28 @@ def test_setup_main_repairs_partial_claude_initialization(tmp_path: Path, monkey
     assert (docs_root / "prd-helper-config.md").read_text() == "# existing config\n"
     assert (tmp_path / ".claude" / "commands" / "prd-start.md").exists()
     assert (tmp_path / ".claude" / "commands" / "prd-status.md").exists()
-    assert (tmp_path / ".claude" / "settings.json").exists()
+    assert not (tmp_path / ".claude" / "settings.json").exists()
     assert not (tmp_path / ".claude" / "commands" / "prd-init.md").exists()
+
+
+def test_collect_control_toggles_claude_hooks(tmp_path: Path):
+    module = load_script("modules/collect/scripts/collect-control.py")
+    root = tmp_path / "docs" / "prd-helper" / "01-collect"
+
+    module.cmd_start(root, "claude-code", tmp_path, "docs/prd-helper")
+    settings_file = tmp_path / ".claude" / "settings.json"
+    settings = json.loads(settings_file.read_text())
+    assert "claude-capture-hook.py" in settings["hooks"]["UserPromptSubmit"][0]["hooks"][0]["command"]
+    assert "claude-capture-hook.py" in settings["hooks"]["Stop"][0]["hooks"][0]["command"]
+
+    module.cmd_pause(root, "claude-code", tmp_path)
+    assert "claude-capture-hook.py" not in settings_file.read_text()
+
+    module.cmd_resume(root, "claude-code", tmp_path, "docs/prd-helper")
+    assert "claude-capture-hook.py" in settings_file.read_text()
+
+    module.cmd_stop(root, "claude-code", tmp_path)
+    assert "claude-capture-hook.py" not in settings_file.read_text()
 
 
 def test_claude_capture_hook_records_turn_after_start(tmp_path: Path):

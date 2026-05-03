@@ -29,7 +29,7 @@ npx skills@latest add Wcof/PRDContextEngine
 /prd-helper
 ```
 
-运行 `/prd-helper` 会自动初始化或修复当前项目：创建 `docs/prd-helper/`、写入 `CLAUDE.md` 配置块，生成 `.claude/commands/prd-start.md`、`.claude/commands/prd-status.md` 等真实斜杠命令文件，并写入 `.claude/settings.json` 采集 hooks。即使 `docs/prd-helper/` 已存在，也要允许 `/prd-helper` 再次执行，用来补齐缺失的命令文件和 hooks。
+运行 `/prd-helper` 会自动初始化或修复当前项目：创建 `docs/prd-helper/`、写入 `CLAUDE.md` 配置块，生成 `.claude/commands/prd-start.md`、`.claude/commands/prd-status.md` 等真实斜杠命令文件。即使 `docs/prd-helper/` 已存在，也要允许 `/prd-helper` 再次执行，用来补齐缺失的命令文件。采集 hooks 不在初始化时常驻；它们由 `/prd-start` 和 `/prd-resume` 启用，由 `/prd-pause` 和 `/prd-stop` 清理。
 
 ## 卸载
 
@@ -63,7 +63,7 @@ npx skills@latest remove
 
 ## 验证安装
 
-先发送 `/prd-helper` 完成自动初始化，再确认 `.claude/commands/prd-start.md` 和 `.claude/settings.json` 已生成，然后重开 Claude Code 会话或刷新命令列表后发送 `/prd-start`。如果只生成了 `docs/prd-helper/`，没有生成命令文件或 hooks，请再次发送 `/prd-helper` 修复半初始化状态。可用 `/hooks` 查看 `UserPromptSubmit` 和 `Stop` 是否已有 PRD Helper hook。
+先发送 `/prd-helper` 完成自动初始化，再确认 `.claude/commands/prd-start.md` 已生成，然后重开 Claude Code 会话或刷新命令列表后发送 `/prd-start`。`/prd-start` 后可用 `/hooks` 查看 `UserPromptSubmit` 和 `Stop` 是否已有 PRD Helper hook；发送 `/prd-pause` 或 `/prd-stop` 后，这些 hook 应被清理。
 
 ## 使用
 
