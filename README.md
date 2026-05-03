@@ -64,6 +64,7 @@ npx skills@latest add Wcof/PRDContextEngine
 - 创建 PRD Helper 文档目录，默认 `docs/prd-helper/`
 - 写入 `CLAUDE.md`、`AGENTS.md` 或 Trae `project_rules.md` 中的 PRD Helper 配置块
 - 在 Claude Code 项目中生成 `.claude/commands/prd-start.md` 等真实斜杠命令文件
+- 在 Claude Code 项目中写入 `.claude/settings.json` hooks：`UserPromptSubmit` 暂存用户输入，`Stop` 采集最后一次 Agent 回复
 - 设置主动采集策略：默认只在 `/prd-start` 后采集
 
 完成后，项目会准备好 `docs/prd-helper/` 结构。Claude Code 可能需要开启新会话或刷新命令列表后，才会显示刚生成的 `/prd-start` 等命令。
@@ -94,7 +95,7 @@ ls .claude/commands/prd-*.md
 /prd-start
 ```
 
-开启后，Agent 会把会话按 `User Query + Agent Answer` 写入主动采集目录。
+开启后，Claude Code hook 会把后续会话按 `User Query + Agent Answer` 自动写入主动采集目录。`/prd-start` 本身只开启状态，不会采集开启命令这一轮。
 
 已有材料直接放入被动采集目录：
 
@@ -122,7 +123,7 @@ docs/prd-helper/
 
 | 命令 | 用途 |
 |------|------|
-| `/prd-helper` | 初始化或修复当前项目配置、`docs/prd-helper/` 结构和 Claude Code 后续命令 |
+| `/prd-helper` | 初始化或修复当前项目配置、`docs/prd-helper/` 结构、Claude Code 后续命令和采集 hooks |
 | `/prd-start` | 开启主动采集 |
 | `/prd-pause` | 暂停主动采集 |
 | `/prd-resume` | 恢复主动采集 |

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -36,6 +37,58 @@ def remove_generated_commands(project: Path, agents: list[str]) -> None:
         if path.exists():
             path.unlink()
             print(f"已删除 Claude Code 命令：{path}")
+
+
+def remove_claude_hooks(project: Path, agents: list[str]) -> None:
+    if "claude-code" not in agents:
+        return
+    settings_file = project / ".claude" / "settings.json"
+    if not settings_file.exists():
+        return
+    try:
+        settings = json.loads(settings_file.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        print(f"Claude Code Hook 配置不是合法 JSON，跳过清理：{settings_file}")
+        return
+    hooks = settings.get("hooks")
+    if not isinstance(hooks, dict):
+        return
+
+    changed = False
+    for event in ("UserPromptSubmit", "Stop"):
+        event_hooks = hooks.get(event)
+        if not isinstance(event_hooks, list):
+            continue
+        kept = []
+        for item in event_hooks:
+            item_hooks = item.get("hooks", []) if isinstance(item, dict) else []
+            filtered_hooks = [
+                hook
+                for hook in item_hooks
+                if not isinstance(hook, dict) or "claude-capture-hook.py" not in str(hook.get("command", ""))
+            ]
+            if len(filtered_hooks) != len(item_hooks):
+                changed = True
+            if filtered_hooks:
+                new_item = dict(item)
+                new_item["hooks"] = filtered_hooks
+                kept.append(new_item)
+        if kept:
+            hooks[event] = kept
+        else:
+            hooks.pop(event, None)
+    if changed:
+        if not hooks:
+            settings.pop("hooks", None)
+        settings_file.write_text(json.dumps(settings, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print(f"已清理 Claude Code Hook 配置：{settings_file}")
+
+    hook_state = project / ".claude" / "prd-helper"
+    if hook_state.exists():
+        import shutil
+
+        shutil.rmtree(hook_state)
+        print(f"已删除 Claude Code Hook 状态目录：{hook_state}")
 
 
 def parse_args() -> argparse.Namespace:
@@ -73,6 +126,7 @@ def main() -> int:
     if clean_code != 0:
         return clean_code
     remove_generated_commands(project, agents)
+    remove_claude_hooks(project, agents)
 
     remove_cmd = [
         "npx",

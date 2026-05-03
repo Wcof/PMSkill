@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import sys
 from pathlib import Path
 
@@ -119,6 +120,7 @@ def test_setup_installs_agent_configs_and_claude_commands(tmp_path: Path):
 
     config_files = module.install_agent_configs(tmp_path, ["codex", "claude-code"])
     command_files = module.install_claude_commands(tmp_path, "docs/prd-helper")
+    settings_file = module.install_claude_hooks(tmp_path, "docs/prd-helper")
 
     assert tmp_path / "AGENTS.md" in config_files
     assert tmp_path / "CLAUDE.md" in config_files
@@ -128,6 +130,9 @@ def test_setup_installs_agent_configs_and_claude_commands(tmp_path: Path):
     assert not (tmp_path / ".claude" / "commands" / "prd-init.md").exists()
     assert not (tmp_path / ".claude" / "commands" / "prd-setup.md").exists()
     assert "collect-control.py\" start" in (tmp_path / ".claude" / "commands" / "prd-start.md").read_text()
+    settings = json.loads(settings_file.read_text())
+    assert "claude-capture-hook.py" in settings["hooks"]["UserPromptSubmit"][0]["hooks"][0]["command"]
+    assert "claude-capture-hook.py" in settings["hooks"]["Stop"][0]["hooks"][0]["command"]
 
 
 def test_setup_main_repairs_partial_claude_initialization(tmp_path: Path, monkeypatch):
@@ -153,4 +158,45 @@ def test_setup_main_repairs_partial_claude_initialization(tmp_path: Path, monkey
     assert (docs_root / "prd-helper-config.md").read_text() == "# existing config\n"
     assert (tmp_path / ".claude" / "commands" / "prd-start.md").exists()
     assert (tmp_path / ".claude" / "commands" / "prd-status.md").exists()
+    assert (tmp_path / ".claude" / "settings.json").exists()
     assert not (tmp_path / ".claude" / "commands" / "prd-init.md").exists()
+
+
+def test_claude_capture_hook_records_turn_after_start(tmp_path: Path):
+    module = load_script("scripts/claude-capture-hook.py")
+    root = tmp_path / "docs" / "prd-helper" / "01-collect"
+    root.mkdir(parents=True)
+    write_collect_state(
+        root,
+        {
+            "capture_mode": "on",
+            "session_id": "prd-session-test",
+            "turn_count": "0",
+            "active_source_count": "0",
+            "total_sources": "0",
+            "possible_noise_count": "0",
+        },
+    )
+
+    prompt_payload = {
+        "session_id": "session-001",
+        "cwd": str(tmp_path),
+        "hook_event_name": "UserPromptSubmit",
+        "prompt": "我们需要一个机器人巡检点位管理功能。",
+    }
+    stop_payload = {
+        "session_id": "session-001",
+        "cwd": str(tmp_path),
+        "hook_event_name": "Stop",
+        "last_assistant_message": "已记录这个需求，并会保留原始上下文。",
+    }
+
+    assert module.handle_user_prompt(prompt_payload, root, tmp_path) == 0
+    assert module.handle_stop(stop_payload, root, tmp_path, "claude-code") == 0
+
+    captured = list((root / "active" / "sessions").glob("turn-*.md"))
+    assert len(captured) == 1
+    content = captured[0].read_text()
+    assert "机器人巡检点位管理功能" in content
+    assert "已记录这个需求" in content
+    assert "active/sessions/" in (root / "source-index.md").read_text()

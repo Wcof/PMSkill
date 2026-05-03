@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -44,6 +45,7 @@ _SCRIPT_DIR = Path(__file__).resolve().parent
 _SKILL_ROOT = _SCRIPT_DIR.parent
 _COLLECT_CONTROL = _SKILL_ROOT / "modules" / "collect" / "scripts" / "collect-control.py"
 _REMOVE_SCRIPT = _SCRIPT_DIR / "remove-prd-helper.py"
+_CLAUDE_CAPTURE_HOOK = _SCRIPT_DIR / "claude-capture-hook.py"
 
 MODULE_DIRS = (
     "01-collect/active/sessions",
@@ -212,6 +214,44 @@ def install_claude_commands(project: Path, docs_root: str) -> list[Path]:
     return written
 
 
+def _load_json_object(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        backup = path.with_suffix(path.suffix + ".invalid")
+        path.replace(backup)
+        print(f"Claude settings JSON 无法解析，已备份到：{backup}")
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _append_unique_hook(settings: dict, event: str, command: str) -> None:
+    hooks = settings.setdefault("hooks", {})
+    event_hooks = hooks.setdefault(event, [])
+    for item in event_hooks:
+        if not isinstance(item, dict):
+            continue
+        for hook in item.get("hooks", []):
+            if isinstance(hook, dict) and hook.get("command") == command:
+                return
+    event_hooks.append({"hooks": [{"type": "command", "command": command}]})
+
+
+def install_claude_hooks(project: Path, docs_root: str) -> Path:
+    settings_file = project / ".claude" / "settings.json"
+    settings_file.parent.mkdir(parents=True, exist_ok=True)
+    settings = _load_json_object(settings_file)
+    command = f'python3 "{_CLAUDE_CAPTURE_HOOK}" --collect-root {docs_root}/01-collect --agent claude-code'
+
+    _append_unique_hook(settings, "UserPromptSubmit", command)
+    _append_unique_hook(settings, "Stop", command)
+
+    settings_file.write_text(json.dumps(settings, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return settings_file
+
+
 def main() -> int:
     args = parse_args()
     project = Path(args.project).resolve()
@@ -301,6 +341,9 @@ def main() -> int:
     command_files: list[Path] = []
     if "claude-code" in agents:
         command_files = install_claude_commands(project, args.docs_root)
+        hook_file = install_claude_hooks(project, args.docs_root)
+    else:
+        hook_file = None
 
     print(f"PRD Helper 初始化完成（setup complete）：{docs_root}")
     if config_files:
@@ -311,6 +354,8 @@ def main() -> int:
         print("已写入 Claude Code 斜杠命令：")
         for path in command_files:
             print(f"- {path}")
+    if hook_file:
+        print(f"已写入 Claude Code Hook 配置：{hook_file}")
     print("下一步：准备采集产品上下文时，在 Agent 中发送 /prd-start。")
     return 0
 
