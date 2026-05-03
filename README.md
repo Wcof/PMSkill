@@ -178,12 +178,23 @@ PRDContextEngine/
 │       └── scripts/      # 生成检查脚本
 ├── checks/               # 横向质量门禁，不是第五业务模块
 ├── scripts/              # 全局脚本：安装、卸载、配置清理、结构检查
-│   └── lib/              # 共享库：状态、索引、ID、路径、哈希等
+│   └── lib/              # 共享库：状态、索引、ID、常量、哈希等
 ├── examples/             # 可运行示例
 ├── support/              # Agent 适配器、安装说明、图片资源
 ├── CONTEXT.md            # 领域词汇表
 └── docs/adr/             # 架构决策记录
 ```
+
+## 开发说明
+
+仓库根目录是唯一源码。安装器在项目中生成的 `.agents/`、`.claude/` 和 `skills-lock.json` 都是本地安装产物，不参与提交，也不作为脚本真实来源。开发和修复时只改仓库根目录下的 `SKILL.md`、`modules/`、`scripts/`、`support/`、`checks/`、`tests/` 等源码文件。
+
+脚本共享边界：
+
+- `scripts/lib/constants.py` 统一保存默认路径、命令名和生成目录结构等静态配置。
+- `scripts/lib/markdown_util.py` 统一解析 Markdown 表格，`state.py` 和 `source_index.py` 只处理各自领域语义。
+- `scripts/lib/id_registry.py` 是实体类型、ID 前缀、必填字段和实体生命周期的唯一注册表。
+- Claude Code 采集 Hook 由 `scripts/lib/claude_hooks.py` 管理，`/prd-start`、`/prd-resume` 启用，`/prd-pause`、`/prd-stop`、`/prd-remove` 清理。
 
 ## 设计约束
 
