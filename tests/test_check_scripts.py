@@ -182,6 +182,34 @@ def test_collect_control_toggles_claude_hooks(tmp_path: Path):
     assert "claude-capture-hook.py" not in settings_file.read_text()
 
 
+def test_collect_start_repairs_hooks_when_already_capturing(tmp_path: Path):
+    module = load_script("modules/collect/scripts/collect-control.py")
+    root = tmp_path / "docs" / "prd-helper" / "01-collect"
+
+    module.cmd_start(root, "claude-code", tmp_path, "docs/prd-helper")
+    settings_file = tmp_path / ".claude" / "settings.json"
+    settings_file.write_text(
+        """
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {"hooks": [{"type": "command", "command": "python3 \\"/old/path/claude-capture-hook.py\\""}]}
+    ],
+    "Stop": [
+      {"hooks": [{"type": "command", "command": "python3 \\"/old/path/claude-capture-hook.py\\""}]}
+    ]
+  }
+}
+""".strip()
+        + "\n"
+    )
+
+    module.cmd_start(root, "claude-code", tmp_path, "docs/prd-helper")
+    settings = settings_file.read_text()
+    assert "/old/path/claude-capture-hook.py" not in settings
+    assert settings.count("claude-capture-hook.py") == 2
+
+
 def test_claude_capture_hook_records_turn_after_start(tmp_path: Path):
     module = load_script("scripts/claude-capture-hook.py")
     root = tmp_path / "docs" / "prd-helper" / "01-collect"

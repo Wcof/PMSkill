@@ -47,6 +47,7 @@ def install_claude_hooks(project: Path, docs_root: str, hook_script: Optional[Pa
     script = hook_script or _default_hook_script()
     command = f'python3 "{script}" --collect-root {docs_root}/01-collect --agent claude-code'
 
+    _remove_hooks_from_settings(settings)
     for event in HOOK_EVENTS:
         _append_unique_hook(settings, event, command)
 
@@ -69,6 +70,20 @@ def remove_claude_hooks(project: Path) -> Optional[Path]:
     if not isinstance(hooks, dict):
         _remove_hook_state(project)
         return settings_file
+
+    changed = _remove_hooks_from_settings(settings)
+    if changed:
+        if not hooks:
+            settings.pop("hooks", None)
+        settings_file.write_text(json.dumps(settings, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    _remove_hook_state(project)
+    return settings_file if changed else None
+
+
+def _remove_hooks_from_settings(settings: dict) -> bool:
+    hooks = settings.get("hooks")
+    if not isinstance(hooks, dict):
+        return False
 
     changed = False
     for event in HOOK_EVENTS:
@@ -93,13 +108,9 @@ def remove_claude_hooks(project: Path) -> Optional[Path]:
             hooks[event] = kept
         else:
             hooks.pop(event, None)
-
-    if changed:
-        if not hooks:
-            settings.pop("hooks", None)
-        settings_file.write_text(json.dumps(settings, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    _remove_hook_state(project)
-    return settings_file if changed else None
+    if not hooks:
+        settings.pop("hooks", None)
+    return changed
 
 
 def _remove_hook_state(project: Path) -> None:

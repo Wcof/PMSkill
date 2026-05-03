@@ -58,7 +58,10 @@ def cmd_start(root: Path, agent: str, project: Path, docs_root: str):
 
     state = read_collect_state(root)
     if state.get("capture_mode") == "on":
+        sync_claude_hooks(project, docs_root, agent, True)
         print(f"Already capturing (session: {state.get('session_id', 'unknown')})")
+        if agent == "claude-code":
+            print("Claude Code hooks verified.")
         print("Use '/prd-pause' to pause or '/prd-stop' to stop first.")
         return
 
