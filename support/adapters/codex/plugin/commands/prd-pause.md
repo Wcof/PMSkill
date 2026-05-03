@@ -11,5 +11,5 @@
 ## 执行
 
 ```bash
-python3 "{skill_root}/modules/collect/scripts/collect-control.py" pause --root "{docs_root}/01-collect" --project . --agent codex
+python3 "{skill_root}/modules/collect/scripts/collect-control.py" pause --root "{docs_root}/01-collect" --project . --docs-root "{docs_root}" --agent codex
 ```

@@ -9,7 +9,9 @@ from scripts.lib.codex_discovery import (
     find_codex_home,
     find_session_index,
     find_sessions_dir,
+    iter_session_files,
     list_project_sessions,
+    parse_session_header,
     parse_session_index,
     parse_session_jsonl,
 )
@@ -158,13 +160,6 @@ def test_filter_turns_since():
     assert turns[0][0] == "加上验证码功能"
 
 
-def test_filter_turns_project_cwd():
-    """Should filter by project cwd."""
-    entries = _make_session_entries(project_cwd="/test/project")
-    turns = filter_turns(entries, project_cwd="/other/project")
-    assert len(turns) == 0
-
-
 def test_filter_turns_no_assistant():
     """Should not return incomplete pairs (user without assistant)."""
     entries = [
@@ -223,3 +218,50 @@ def test_list_project_sessions_no_match(tmp_path: Path):
 
     result = list_project_sessions(codex_home, "/test/project")
     assert len(result) == 0
+
+
+def test_parse_session_header(tmp_path: Path):
+    """Should read only session_meta payload without loading full file."""
+    jsonl = tmp_path / "rollout-test.jsonl"
+    entries = _make_session_entries()
+    _write_jsonl(jsonl, entries)
+    header = parse_session_header(jsonl)
+    assert header["id"] == "test-session-001"
+    assert header["cwd"] == "/test/project"
+
+
+def test_parse_session_header_no_meta(tmp_path: Path):
+    """Should return empty dict if no session_meta entry exists."""
+    jsonl = tmp_path / "rollout-test.jsonl"
+    _write_jsonl(jsonl, [
+        {"timestamp": "2026-05-01T10:01:00Z", "type": "response_item", "payload": {"type": "message", "role": "user", "content": []}},
+    ])
+    header = parse_session_header(jsonl)
+    assert header == {}
+
+
+def test_iter_session_files(tmp_path: Path):
+    """Should discover session JSONL files and extract session IDs."""
+    sessions_dir = tmp_path / "sessions" / "2026" / "05" / "01"
+    sessions_dir.mkdir(parents=True)
+    uuid = "019de2d9-aee9-7c12-ade9-a66988645a37"
+    jsonl = sessions_dir / f"rollout-2026-05-01T10-00-00-{uuid}.jsonl"
+    _write_jsonl(jsonl, [{"type": "session_meta", "payload": {}}])
+
+    results = list(iter_session_files(tmp_path / "sessions"))
+    assert len(results) == 1
+    assert results[0][0] == jsonl
+    assert results[0][1] == uuid
+
+
+def test_iter_session_files_nested(tmp_path: Path):
+    """Should find files in nested date directories."""
+    sessions_dir = tmp_path / "sessions" / "2026" / "05" / "02"
+    sessions_dir.mkdir(parents=True)
+    uuid = "aabbccdd-1111-2222-3333-444455556666"
+    jsonl = sessions_dir / f"rollout-2026-05-02T12-00-00-{uuid}.jsonl"
+    _write_jsonl(jsonl, [{"type": "session_meta", "payload": {}}])
+
+    results = list(iter_session_files(tmp_path / "sessions"))
+    assert len(results) == 1
+    assert results[0][1] == uuid

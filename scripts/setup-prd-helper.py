@@ -123,11 +123,11 @@ def adapter_block(agent: str) -> str:
 
 def install_codex_plugin(skill_root: Path, docs_root: str) -> Path:
     """Install PRD Helper as a Codex plugin to ~/.codex/plugins/prd-helper/."""
-    from lib.constants import CODEX_DEFAULT_HOME, CODEX_HOME_ENV, CODEX_PLUGIN_DIR
-    import os
+    from lib.codex_discovery import find_codex_home
+    from lib.constants import CODEX_PLUGIN_DIR
 
-    codex_home = os.environ.get(CODEX_HOME_ENV, CODEX_DEFAULT_HOME)
-    plugin_dest = Path(codex_home).expanduser() / CODEX_PLUGIN_DIR
+    codex_home = find_codex_home()
+    plugin_dest = codex_home / CODEX_PLUGIN_DIR
 
     plugin_src = skill_root / "support" / "adapters" / "codex" / "plugin"
     if not plugin_src.exists():

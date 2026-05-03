@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Iterator, Optional
 
 from .constants import CODEX_DEFAULT_HOME, CODEX_HOME_ENV, CODEX_INDEX_REL, CODEX_SESSIONS_REL
 
@@ -37,46 +37,76 @@ def find_sessions_dir(home: Path) -> Optional[Path]:
     return sessions if sessions.is_dir() else None
 
 
+def _read_jsonl(path: Path) -> list[dict]:
+    """Parse a JSONL file and return all valid entries."""
+    entries = []
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                entries.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue
+    return entries
+
+
 def parse_session_index(home: Path) -> list[dict]:
     """Parse session_index.jsonl and return list of session metadata."""
     index_path = find_session_index(home)
     if not index_path:
         return []
-    entries = []
-    for line in index_path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            entries.append(json.loads(line))
-        except json.JSONDecodeError:
-            continue
-    return entries
+    return _read_jsonl(index_path)
 
 
 def parse_session_jsonl(path: Path) -> list[dict]:
     """Parse a Codex session JSONL file and return all entries."""
-    entries = []
-    for line in path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            entries.append(json.loads(line))
-        except json.JSONDecodeError:
-            continue
-    return entries
+    return _read_jsonl(path)
+
+
+def parse_session_header(path: Path) -> dict:
+    """Read only enough lines to find session_meta entry.
+
+    Returns the session_meta payload dict, or empty dict if not found.
+    Avoids loading the entire JSONL file into memory.
+    """
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                entry = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if entry.get("type") == "session_meta":
+                return entry.get("payload", {})
+    return {}
+
+
+def iter_session_files(sessions_dir: Path) -> Iterator[tuple[Path, str]]:
+    """Iterate session JSONL files and yield (path, session_id).
+
+    Extracts session ID from filename: rollout-{time}-{uuid}.jsonl
+    """
+    for jsonl_path in sessions_dir.rglob("rollout-*.jsonl"):
+        stem = jsonl_path.stem
+        parts = stem.split("-", 6)
+        if len(parts) >= 7:
+            yield jsonl_path, parts[6]
 
 
 def filter_turns(
     entries: list[dict],
     since: str = "",
-    project_cwd: str = "",
 ) -> list[tuple[str, str, str]]:
     """Extract (user_query, agent_answer, timestamp) triples from session entries.
 
     Only returns complete pairs where both user query and agent answer are present.
     Filters by timestamp if ``since`` is provided (ISO 8601 comparison).
+
+    Caller is responsible for cwd filtering before calling this function.
 
     Returns:
         List of (user_query, agent_answer, timestamp) tuples.
@@ -84,22 +114,12 @@ def filter_turns(
     turns: list[tuple[str, str, str]] = []
     current_user: Optional[str] = None
     current_ts: Optional[str] = None
-    session_cwd: Optional[str] = None
 
     for entry in entries:
         etype = entry.get("type", "")
-        payload = entry.get("payload", {})
-
-        # Extract session metadata for cwd filtering
-        if etype == "session_meta" and isinstance(payload, dict):
-            session_cwd = payload.get("cwd", "")
-
-        # Filter by project cwd if specified
-        if project_cwd and session_cwd and project_cwd != session_cwd:
-            continue
-
         if etype != "response_item":
             continue
+        payload = entry.get("payload", {})
         if not isinstance(payload, dict):
             continue
         if payload.get("type") != "message":
@@ -114,7 +134,6 @@ def filter_turns(
             current_user = text
             current_ts = ts
         elif role == "assistant" and text and current_user:
-            # Check since filter
             if since and current_ts and current_ts <= since:
                 current_user = None
                 current_ts = None
@@ -156,38 +175,21 @@ def list_project_sessions(
         return []
 
     index_entries = parse_session_index(home)
-    if not index_entries:
-        return []
-
-    # Collect all session IDs from index
     session_ids: dict[str, dict] = {}
     for entry in index_entries:
         sid = entry.get("id", "")
         if sid:
             session_ids[sid] = entry
 
-    # Find JSONL files and match with sessions
     results = []
-    for jsonl_path in sessions_dir.rglob("rollout-*.jsonl"):
-        # Extract session ID from filename: rollout-{time}-{uuid}.jsonl
-        stem = jsonl_path.stem
-        parts = stem.split("-", 6)
-        if len(parts) < 7:
-            continue
-        sid = parts[6]
-
-        # Parse and filter by project cwd
-        entries = parse_session_jsonl(jsonl_path)
-        meta_cwd = ""
-        for entry in entries:
-            if entry.get("type") == "session_meta":
-                meta_cwd = entry.get("payload", {}).get("cwd", "")
-                break
-
+    for jsonl_path, sid in iter_session_files(sessions_dir):
+        # Use header-only read to check cwd before full parse
+        header = parse_session_header(jsonl_path)
+        meta_cwd = header.get("cwd", "")
         if project_cwd and meta_cwd != project_cwd:
             continue
 
-        # Extract turns
+        entries = parse_session_jsonl(jsonl_path)
         turns = filter_turns(entries, since=since)
 
         index_info = session_ids.get(sid, {})

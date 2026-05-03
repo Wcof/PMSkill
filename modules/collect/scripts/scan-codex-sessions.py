@@ -8,6 +8,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -21,9 +22,15 @@ for _parent in Path(__file__).resolve().parents:
 else:
     raise RuntimeError("Unable to locate PRD Helper scripts/lib")
 
-from lib.codex_discovery import find_codex_home, list_project_sessions, parse_session_jsonl, filter_turns
+from lib.codex_discovery import (
+    find_codex_home,
+    iter_session_files,
+    list_project_sessions,
+    parse_session_jsonl,
+    parse_session_header,
+    filter_turns,
+)
 from lib.state import read_collect_state
-from lib.hash_util import content_hash
 from lib.constants import DEFAULT_COLLECT_ROOT
 
 
@@ -37,20 +44,19 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def capture_turn(user_query: str, agent_answer: str, collect_root: str, project: str, agent: str) -> bool:
+def capture_turn(
+    user_query: str,
+    agent_answer: str,
+    collect_root: str,
+    project: str,
+    agent: str,
+    capture_script: Path,
+    temp_dir: Path,
+    turn_index: int,
+) -> bool:
     """Call capture-source.py to record a single conversation turn."""
-    capture_script = Path(__file__).resolve().parent / "capture-source.py"
-    if not capture_script.exists():
-        print(f"Error: capture script not found: {capture_script}", file=sys.stderr)
-        return False
-
-    temp_dir = Path(collect_root).parent / ".codex-scan-temp"
-    temp_dir.mkdir(parents=True, exist_ok=True)
-
-    # Use content hash to generate unique filename for temp files
-    h = content_hash(user_query + agent_answer)[:12]
-    user_file = temp_dir / f"scan-{h}-user.md"
-    answer_file = temp_dir / f"scan-{h}-answer.md"
+    user_file = temp_dir / f"scan-{turn_index:04d}-user.md"
+    answer_file = temp_dir / f"scan-{turn_index:04d}-answer.md"
 
     user_file.write_text(user_query, encoding="utf-8")
     answer_file.write_text(agent_answer, encoding="utf-8")
@@ -68,19 +74,38 @@ def capture_turn(user_query: str, agent_answer: str, collect_root: str, project:
         str(answer_file),
     ]
 
-    try:
-        completed = subprocess.run(command, cwd=project, check=False, capture_output=True, text=True)
-        if completed.returncode == 0:
-            if completed.stdout:
-                print(f"  {completed.stdout.strip()}")
-            return True
-        else:
-            if completed.stderr:
-                print(f"  Error: {completed.stderr.strip()}", file=sys.stderr)
-            return False
-    finally:
-        user_file.unlink(missing_ok=True)
-        answer_file.unlink(missing_ok=True)
+    completed = subprocess.run(command, cwd=project, check=False, capture_output=True, text=True)
+    if completed.returncode == 0:
+        if completed.stdout:
+            print(f"  {completed.stdout.strip()}")
+        return True
+    if completed.stderr:
+        print(f"  Error: {completed.stderr.strip()}", file=sys.stderr)
+    return False
+
+
+def capture_session_turns(
+    session_id: str,
+    thread_name: str,
+    turns: list[tuple[str, str, str]],
+    collect_root: str,
+    project: str,
+    agent: str,
+    capture_script: Path,
+    temp_dir: Path,
+    turn_offset: int = 0,
+) -> tuple[int, int]:
+    """Capture all turns for a session. Returns (captured, total)."""
+    print(f"\nSession: {session_id}")
+    if thread_name:
+        print(f"  Thread: {thread_name}")
+    print(f"  Turns: {len(turns)}")
+    captured = 0
+    for i, (user_q, agent_a, ts) in enumerate(turns, 1):
+        print(f"  Capturing turn {i} ({ts})...")
+        if capture_turn(user_q, agent_a, collect_root, project, agent, capture_script, temp_dir, turn_offset + i):
+            captured += 1
+    return captured, len(turns)
 
 
 def main() -> int:
@@ -88,13 +113,11 @@ def main() -> int:
     collect_root = Path(args.collect_root)
     project = Path(args.project).resolve()
 
-    # Verify collect state exists and is active or was active
     state = read_collect_state(collect_root)
     if not state:
         print("Error: collect-state.md not found. Run '/prd-start' first.")
         return 1
 
-    # Discover Codex home
     try:
         codex_home = find_codex_home()
     except Exception as e:
@@ -108,62 +131,71 @@ def main() -> int:
     print(f"Codex home: {codex_home}")
     print(f"Project: {project}")
 
-    # Determine since timestamp
     since = args.since or state.get("started_at", "")
     if since:
         print(f"Scanning sessions since: {since}")
 
-    # Scan sessions
-    if args.session_id:
-        # Scan specific session
-        sessions_dir = codex_home / "sessions"
-        found = False
-        for jsonl_path in sessions_dir.rglob("rollout-*.jsonl"):
-            stem = jsonl_path.stem
-            if args.session_id in stem:
+    capture_script = Path(__file__).resolve().parent / "capture-source.py"
+    if not capture_script.exists():
+        print(f"Error: capture script not found: {capture_script}", file=sys.stderr)
+        return 1
+
+    temp_dir = collect_root.parent / ".codex-scan-temp"
+    temp_dir.mkdir(parents=True, exist_ok=True)
+
+    try:
+        if args.session_id:
+            sessions_dir = codex_home / "sessions"
+            found = False
+            for jsonl_path, sid in iter_session_files(sessions_dir):
+                if args.session_id not in sid:
+                    continue
+                header = parse_session_header(jsonl_path)
+                meta_cwd = header.get("cwd", "")
+                if str(project) and meta_cwd != str(project):
+                    continue
                 entries = parse_session_jsonl(jsonl_path)
-                turns = filter_turns(entries, since=since, project_cwd=str(project))
+                turns = filter_turns(entries, since=since)
                 if turns:
-                    print(f"\nSession: {args.session_id}")
-                    print(f"  Found {len(turns)} turn(s)")
-                    for i, (user_q, agent_a, ts) in enumerate(turns, 1):
-                        print(f"  Capturing turn {i} ({ts})...")
-                        capture_turn(user_q, agent_a, str(collect_root), str(project), args.agent)
+                    capture_session_turns(
+                        sid, "", turns, str(collect_root), str(project),
+                        args.agent, capture_script, temp_dir,
+                    )
                 found = True
                 break
-        if not found:
-            print(f"Session not found: {args.session_id}")
-            return 1
-    else:
-        # Scan all project sessions
-        sessions = list_project_sessions(codex_home, str(project), since=since)
-        if not sessions:
-            print("No Codex sessions found for this project.")
-            return 0
+            if not found:
+                print(f"Session not found: {args.session_id}")
+                return 1
+        else:
+            sessions = list_project_sessions(codex_home, str(project), since=since)
+            if not sessions:
+                print("No Codex sessions found for this project.")
+                return 0
 
-        total_turns = 0
-        captured_turns = 0
-        for session in sessions:
-            turns = session.get("turns", [])
-            if not turns:
-                continue
-            thread_name = session.get("thread_name", "")
-            print(f"\nSession: {session['id']}")
-            print(f"  Thread: {thread_name}")
-            print(f"  Turns: {len(turns)}")
-            total_turns += len(turns)
-            for i, (user_q, agent_a, ts) in enumerate(turns, 1):
-                print(f"  Capturing turn {i} ({ts})...")
-                if capture_turn(user_q, agent_a, str(collect_root), str(project), args.agent):
-                    captured_turns += 1
+            total_turns = 0
+            captured_turns = 0
+            for session in sessions:
+                turns = session.get("turns", [])
+                if not turns:
+                    continue
+                c, t = capture_session_turns(
+                    session["id"],
+                    session.get("thread_name", ""),
+                    turns,
+                    str(collect_root),
+                    str(project),
+                    args.agent,
+                    capture_script,
+                    temp_dir,
+                    total_turns,
+                )
+                captured_turns += c
+                total_turns += t
 
-        print(f"\nScan complete: {captured_turns}/{total_turns} turns captured.")
-
-    # Clean up temp directory
-    temp_dir = collect_root.parent / ".codex-scan-temp"
-    if temp_dir.exists():
-        import shutil
-        shutil.rmtree(temp_dir, ignore_errors=True)
+            print(f"\nScan complete: {captured_turns}/{total_turns} turns captured.")
+    finally:
+        if temp_dir.exists():
+            shutil.rmtree(temp_dir, ignore_errors=True)
 
     return 0
 
