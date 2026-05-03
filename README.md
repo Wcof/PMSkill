@@ -37,7 +37,7 @@ npx skills@latest add Wcof/PRDContextEngine --all
 npx skills@latest add Wcof/PRDContextEngine
 ```
 
-安装器会让你选择 Skill 和编码 Agent。这个仓库只提供一个完整 Skill：`prd-helper`，它内部已经包含四个模块，不需要分别安装 collect、refine、relate、generate。
+安装器会让你选择 Skill 和编码 Agent。这个仓库只提供一个完整 Skill：`prd-helper`，所以安装完成后先只看到 `/prd-helper` 是正常的。它内部包含采集、精炼、关联、生成四个模块，不需要分别安装 collect、refine、relate、generate。
 
 交互方式：
 
@@ -51,22 +51,22 @@ npx skills@latest add Wcof/PRDContextEngine
 
 - Skill：`prd-helper`
 - Agent：你当前项目会用到的全部编码 Agent，例如 Codex、Claude Code、Trae
-- 首次入口：`/prd-init`
+- 首次入口：`/prd-helper`
 
 安装完成后，在 Agent 对话中运行：
 
 ```text
-/prd-init
+/prd-helper
 ```
 
-首次运行 `/prd-init` 会自动初始化项目。初始化会完成：
+首次运行 `/prd-helper` 会自动初始化项目。初始化会完成：
 
 - 创建 PRD Helper 文档目录，默认 `docs/prd-helper/`
 - 写入 `CLAUDE.md`、`AGENTS.md` 或 Trae `project_rules.md` 中的 PRD Helper 配置块
 - 在 Claude Code 项目中生成 `.claude/commands/prd-start.md` 等真实斜杠命令文件
 - 设置主动采集策略：默认只在 `/prd-start` 后采集
 
-完成后，项目会准备好 `docs/prd-helper/` 结构。
+完成后，项目会准备好 `docs/prd-helper/` 结构。Claude Code 可能需要开启新会话或刷新命令列表后，才会显示刚生成的 `/prd-start` 等命令。
 
 ### 安装后快速自检
 
@@ -114,7 +114,7 @@ docs/prd-helper/
 
 | 命令 | 用途 |
 |------|------|
-| `/prd-init` | 初始化当前项目配置和 `docs/prd-helper/` 结构 |
+| `/prd-helper` | 初始化当前项目配置和 `docs/prd-helper/` 结构 |
 | `/prd-start` | 开启主动采集 |
 | `/prd-pause` | 暂停主动采集 |
 | `/prd-resume` | 恢复主动采集 |

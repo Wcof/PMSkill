@@ -20,11 +20,11 @@
 - 用户主要使用英文时，默认英文输出，关键模块首次出现时保留中文括注。
 - 用户中英混合时，关键字段使用中英双语，正文跟随用户主要语言。
 - 无法判断用户语言偏好时，第一次响应先询问：`请选择语言 / Choose language: 中文 or English`。
-- `/prd-init`、`/prd-start`、`/prd-status`、`/prd-remove` 的提示必须遵循同一语言策略。
+- `/prd-helper`、`/prd-start`、`/prd-status`、`/prd-remove` 的提示必须遵循同一语言策略。
 
 ## 工作流程
 
-安装后第一次触发 `/prd-init` 时，如果项目尚未初始化，Agent 必须自动执行初始化脚本，创建 `docs/prd-helper/`、写入 Agent 配置文件，并在 Claude Code 项目中生成 `.claude/commands/prd-*.md` 命令文件。
+安装后第一次触发 `/prd-helper` 时，如果项目尚未初始化，Agent 必须自动执行初始化脚本，创建 `docs/prd-helper/`、写入 Agent 配置文件，并在 Claude Code 项目中生成 `.claude/commands/prd-*.md` 命令文件。
 
 处理产品上下文时，必须按以下顺序执行：
 
@@ -52,7 +52,7 @@
 
 | 命令 | 含义 |
 |------|------|
-| `/prd-init` | 初始化 PRD Helper：创建 docs 目录、启用 Agent、采集策略，并生成命令文件 |
+| `/prd-helper` | 初始化 PRD Helper：创建 docs 目录、启用 Agent、采集策略，并生成命令文件 |
 | `/prd-start` | 开启 PRD Capture Session |
 | `/prd-pause` | 暂停采集 |
 | `/prd-resume` | 恢复采集 |
@@ -72,7 +72,7 @@ python3 .agents/skills/prd-helper/scripts/remove-prd-helper.py --project .
 python3 .claude/skills/prd-helper/scripts/remove-prd-helper.py --project .
 ```
 
-收到 `/prd-init` 且项目尚未初始化时，Agent 必须直接执行安装目录中的 setup 脚本。只有用户明确要求自定义 docs 目录或 Agent 范围时，才先询问配置。默认配置如下：
+收到 `/prd-helper` 且项目尚未初始化时，Agent 必须直接执行安装目录中的 setup 脚本。只有用户明确要求自定义 docs 目录或 Agent 范围时，才先询问配置。默认配置如下：
 
 - docs 目录：`docs/prd-helper/`
 - Agent：当前正在使用的 Agent

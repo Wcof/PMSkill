@@ -13,7 +13,8 @@ from lib.paths import COMMAND_NAMES
 
 
 AGENTS = ("codex", "claude-code", "trae", "trae-cn")
-CLAUDE_COMMANDS = tuple(f"{name}.md" for name in COMMAND_NAMES)
+LEGACY_CLAUDE_COMMANDS = ("prd-init.md", "prd-setup.md")
+CLAUDE_COMMANDS = tuple(f"{name}.md" for name in COMMAND_NAMES) + LEGACY_CLAUDE_COMMANDS
 
 
 def script_dir() -> Path:

@@ -1,4 +1,4 @@
-# ADR 0003: 原子指令模式替代包装命令
+# ADR 0003: `/prd-helper` 初始化后生成原子指令
 
 ## Status
 
@@ -6,31 +6,31 @@ Accepted
 
 ## Context
 
-早期命令体系采用 `/prd-helper` 作为总入口，通过 `/prd-helper start`、`/prd-helper status` 等子动作分发到具体脚本。部分平台（如 Codex、Trae）只显示一个 `/prd-helper` 命令，用户必须用兼容入口 `/prd-helper start` 来执行采集操作。
+早期命令体系采用 `/prd-helper` 作为总入口，通过 `/prd-helper start`、`/prd-helper status` 等子动作分发到具体脚本。后来尝试将初始化入口改为 `/prd-init`，但 `skills@latest` 只会把根 `SKILL.md` 注册成一个 Skill 命令，导致安装后仍只显示 `/prd-helper`。
 
 这种设计导致：
-- 用户看到的是一个命令，实际要靠参数分发，认知负担高
-- 安装器生成的命令文件包含"兼容入口"文案，文档和提示不一致
-- `/prd-helper` 既是 Skill 名又是命令入口，职责混淆
+- `/prd-init` 写在文档里，但安装后不会自动出现在 Claude Code 指令列表中
+- 用户看到 `/prd-helper` 后，不清楚它是否应该用于初始化
+- `/prd-helper <action>` 子动作仍然有包装感，和原子命令目标不一致
 
 ## Decision
 
-改为原子指令模式：每个斜杠命令对应 Skill 生命周期的一个离散状态操作。
+保留 `prd-helper` 作为唯一安装器可见入口，并明确它只负责初始化。初始化完成后，脚本生成后续原子命令文件。
 
 命令集合：
-- `/prd-init` — 初始化项目
-- `/prd-start` — 开启采集
-- `/prd-pause` — 暂停采集
-- `/prd-resume` — 恢复采集
-- `/prd-stop` — 停止采集
-- `/prd-status` — 查看状态
-- `/prd-remove` — 卸载
+- `/prd-helper` — 初始化项目，由安装器注册
+- `/prd-start` — 开启采集，由初始化脚本生成
+- `/prd-pause` — 暂停采集，由初始化脚本生成
+- `/prd-resume` — 恢复采集，由初始化脚本生成
+- `/prd-stop` — 停止采集，由初始化脚本生成
+- `/prd-status` — 查看状态，由初始化脚本生成
+- `/prd-remove` — 卸载，由初始化脚本生成
 
-移除所有 `/prd-helper <action>` 兼容入口。Skill 名称仍保留 `prd-helper`，与命令命名解耦。
+移除 `/prd-init` 和所有 `/prd-helper <action>` 兼容入口。
 
 ## Consequences
 
-- `/prd-start` 等采集命令保留自动初始化逻辑：未初始化时先执行 setup 脚本，再执行本命令操作
-- `/prd-init` 和 `/prd-remove` 不包含自动初始化检查，直接执行
-- 旧会话输入 `/prd-helper` 将不再有兼容提示，用户需改用原子指令
-- 用户需重新安装 Skill 获取新版本命令文件
+- 安装后只看到 `/prd-helper` 是预期行为
+- 首次运行 `/prd-helper` 后，Claude Code 项目生成 `/prd-start`、`/prd-status` 等命令文件
+- 旧的 `/prd-init.md` 和 `/prd-setup.md` 作为遗留命令由卸载脚本清理
+- 用户可能需要开启新会话或刷新 Claude Code 命令列表，才能看到刚生成的命令

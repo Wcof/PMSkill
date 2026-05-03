@@ -26,10 +26,10 @@ npx skills@latest add Wcof/PRDContextEngine
 安装完成后，在 Trae 中运行：
 
 ```text
-/prd-init
+/prd-helper
 ```
 
-首次运行 `/prd-init` 会自动初始化项目：创建 `docs/prd-helper/`，并写入 Trae `project_rules.md` 配置块。
+首次运行 `/prd-helper` 会自动初始化项目：创建 `docs/prd-helper/`，并写入 Trae `project_rules.md` 配置块。
 
 ## 卸载
 
@@ -100,7 +100,7 @@ your-project/
 
 ## 使用方式
 
-安装后，先发送 `/prd-init` 自动初始化。开始主动采集时发送：
+安装后，先发送 `/prd-helper` 自动初始化。开始主动采集时发送：
 
 ```text
 /prd-start

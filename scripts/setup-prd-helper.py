@@ -24,7 +24,8 @@ ADAPTER_FILES = {
     "trae-cn": ("project_rules.md", "support/adapters/trae/project_rules.md"),
 }
 
-# 从 COMMAND_NAMES 和命名规则推导命令元数据
+# 从 COMMAND_NAMES 和命名规则推导初始化后生成的命令元数据。
+# /prd-helper 是根 Skill 入口，不在这里生成，避免覆盖安装器注册的入口。
 _COLLECT_DESCRIPTIONS = {
     "start": "开启 PRD Helper 主动采集",
     "pause": "暂停 PRD Helper 主动采集",
@@ -35,9 +36,7 @@ _COLLECT_DESCRIPTIONS = {
 CLAUDE_COMMANDS = {}
 for _name in COMMAND_NAMES:
     _action = _name.removeprefix("prd-")
-    if _action == "init":
-        CLAUDE_COMMANDS[_name] = {"description": "初始化 PRD Helper 项目配置", "script": "setup", "command": ""}
-    elif _action == "remove":
+    if _action == "remove":
         CLAUDE_COMMANDS[_name] = {"description": "卸载 PRD Helper 并清理 Agent 配置", "script": "remove", "command": ""}
     else:
         CLAUDE_COMMANDS[_name] = {"description": _COLLECT_DESCRIPTIONS[_action], "script": "collect", "command": _action}

@@ -43,7 +43,7 @@
     <text x="696" y="62" class="body">Codex / Claude / Trae</text>
     <rect x="994" y="0" width="324" height="82" rx="18" fill="#fff7ed" stroke="#fdba74" stroke-width="2"/>
     <text x="1020" y="34" class="label">运行初始化</text>
-    <text x="1020" y="62" class="mono">/prd-setup</text>
+    <text x="1020" y="62" class="mono">/prd-helper</text>
     <path d="M412 41 L436 41" stroke="#64748b" stroke-width="4" marker-end="url(#arrow)"/>
     <path d="M646 41 L670 41" stroke="#64748b" stroke-width="4" marker-end="url(#arrow)"/>
     <path d="M970 41 L994 41" stroke="#64748b" stroke-width="4" marker-end="url(#arrow)"/>

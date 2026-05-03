@@ -13,10 +13,10 @@ npx skills@latest add Wcof/PRDContextEngine --all
 如果需要手动选择 Agent，也可以运行 `npx skills@latest add Wcof/PRDContextEngine`。安装后运行：
 
 ```text
-/prd-init
+/prd-helper
 ```
 
-首次运行 `/prd-init` 会自动初始化项目，创建 `docs/prd-helper/` 并写入 Agent 配置文件。Claude Code 项目还会生成 `.claude/commands/prd-start.md` 等真实斜杠命令文件。
+首次运行 `/prd-helper` 会自动初始化项目，创建 `docs/prd-helper/` 并写入 Agent 配置文件。Claude Code 项目还会生成 `.claude/commands/prd-start.md` 等真实斜杠命令文件。
 
 卸载当前项目中的 PRD Helper：
 

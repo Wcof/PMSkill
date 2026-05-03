@@ -123,7 +123,7 @@ def test_setup_installs_agent_configs_and_claude_commands(tmp_path: Path):
     assert tmp_path / "CLAUDE.md" in config_files
     assert "<!-- PRD-HELPER:START -->" in (tmp_path / "AGENTS.md").read_text()
     assert "<!-- PRD-HELPER:START -->" in (tmp_path / "CLAUDE.md").read_text()
-    assert tmp_path / ".claude" / "commands" / "prd-init.md" in command_files
     assert tmp_path / ".claude" / "commands" / "prd-start.md" in command_files
+    assert not (tmp_path / ".claude" / "commands" / "prd-init.md").exists()
     assert not (tmp_path / ".claude" / "commands" / "prd-setup.md").exists()
     assert "collect-control.py\" start" in (tmp_path / ".claude" / "commands" / "prd-start.md").read_text()
