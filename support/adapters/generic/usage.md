@@ -16,7 +16,7 @@ npx skills@latest add Wcof/PRDContextEngine --all
 /prd-helper
 ```
 
-首次运行 `/prd-helper` 会自动初始化项目，创建 `docs/prd-helper/` 并写入 Agent 配置文件。Claude Code 项目还会生成 `.claude/commands/prd-start.md` 等真实斜杠命令文件。
+运行 `/prd-helper` 会自动初始化或修复当前项目，创建 `docs/prd-helper/` 并写入 Agent 配置文件。Claude Code 项目还会生成或补齐 `.claude/commands/prd-start.md` 等真实斜杠命令文件。
 
 卸载当前项目中的 PRD Helper：
 

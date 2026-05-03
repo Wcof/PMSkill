@@ -1,4 +1,5 @@
 import importlib.util
+import sys
 from pathlib import Path
 
 from scripts.lib.source_index import append_index, ensure_index
@@ -127,3 +128,29 @@ def test_setup_installs_agent_configs_and_claude_commands(tmp_path: Path):
     assert not (tmp_path / ".claude" / "commands" / "prd-init.md").exists()
     assert not (tmp_path / ".claude" / "commands" / "prd-setup.md").exists()
     assert "collect-control.py\" start" in (tmp_path / ".claude" / "commands" / "prd-start.md").read_text()
+
+
+def test_setup_main_repairs_partial_claude_initialization(tmp_path: Path, monkeypatch):
+    module = load_script("scripts/setup-prd-helper.py")
+    docs_root = tmp_path / "docs" / "prd-helper"
+    write(docs_root / "prd-helper-config.md", "# existing config\n")
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "setup-prd-helper.py",
+            "--project",
+            str(tmp_path),
+            "--docs-root",
+            "docs/prd-helper",
+            "--agent",
+            "claude-code",
+        ],
+    )
+
+    assert module.main() == 0
+    assert (docs_root / "prd-helper-config.md").read_text() == "# existing config\n"
+    assert (tmp_path / ".claude" / "commands" / "prd-start.md").exists()
+    assert (tmp_path / ".claude" / "commands" / "prd-status.md").exists()
+    assert not (tmp_path / ".claude" / "commands" / "prd-init.md").exists()

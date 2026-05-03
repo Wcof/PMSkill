@@ -59,7 +59,7 @@ npx skills@latest add Wcof/PRDContextEngine
 /prd-helper
 ```
 
-首次运行 `/prd-helper` 会自动初始化项目。初始化会完成：
+运行 `/prd-helper` 会自动初始化或修复当前项目。初始化会完成：
 
 - 创建 PRD Helper 文档目录，默认 `docs/prd-helper/`
 - 写入 `CLAUDE.md`、`AGENTS.md` 或 Trae `project_rules.md` 中的 PRD Helper 配置块
@@ -67,6 +67,14 @@ npx skills@latest add Wcof/PRDContextEngine
 - 设置主动采集策略：默认只在 `/prd-start` 后采集
 
 完成后，项目会准备好 `docs/prd-helper/` 结构。Claude Code 可能需要开启新会话或刷新命令列表后，才会显示刚生成的 `/prd-start` 等命令。
+
+如果你运行 `/prd-helper` 后仍然只看到 `/prd-helper`，先检查当前项目是否生成了命令文件：
+
+```bash
+ls .claude/commands/prd-*.md
+```
+
+如果没有看到 `prd-start.md`，说明项目处于半初始化状态。再次发送 `/prd-helper`，它会幂等补齐 `.claude/commands/` 下的命令文件；补齐后重开 Claude Code 会话再输入 `/prd-start`。
 
 ### 安装后快速自检
 
@@ -114,7 +122,7 @@ docs/prd-helper/
 
 | 命令 | 用途 |
 |------|------|
-| `/prd-helper` | 初始化当前项目配置和 `docs/prd-helper/` 结构 |
+| `/prd-helper` | 初始化或修复当前项目配置、`docs/prd-helper/` 结构和 Claude Code 后续命令 |
 | `/prd-start` | 开启主动采集 |
 | `/prd-pause` | 暂停主动采集 |
 | `/prd-resume` | 恢复主动采集 |

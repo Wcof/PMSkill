@@ -29,7 +29,7 @@ npx skills@latest add Wcof/PRDContextEngine
 /prd-helper
 ```
 
-首次运行 `/prd-helper` 会自动初始化项目：创建 `docs/prd-helper/`、写入 `CLAUDE.md` 配置块，并生成 `.claude/commands/prd-start.md`、`.claude/commands/prd-status.md` 等真实斜杠命令文件。
+运行 `/prd-helper` 会自动初始化或修复当前项目：创建 `docs/prd-helper/`、写入 `CLAUDE.md` 配置块，并生成 `.claude/commands/prd-start.md`、`.claude/commands/prd-status.md` 等真实斜杠命令文件。即使 `docs/prd-helper/` 已存在，也要允许 `/prd-helper` 再次执行，用来补齐缺失的命令文件。
 
 ## 卸载
 
@@ -63,7 +63,7 @@ npx skills@latest remove
 
 ## 验证安装
 
-先发送 `/prd-helper` 完成自动初始化，再发送 `/prd-start`。如果 Claude Code 创建了 `docs/prd-helper/01-collect/` 目录并生成 `.claude/commands/prd-start.md`，说明安装成功。
+先发送 `/prd-helper` 完成自动初始化，再确认 `.claude/commands/prd-start.md` 已生成，然后重开 Claude Code 会话或刷新命令列表后发送 `/prd-start`。如果只生成了 `docs/prd-helper/`，没有生成 `.claude/commands/prd-start.md`，请再次发送 `/prd-helper` 修复半初始化状态。
 
 ## 使用
 

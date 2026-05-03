@@ -24,7 +24,7 @@
 
 ## 工作流程
 
-安装后第一次触发 `/prd-helper` 时，如果项目尚未初始化，Agent 必须自动执行初始化脚本，创建 `docs/prd-helper/`、写入 Agent 配置文件，并在 Claude Code 项目中生成 `.claude/commands/prd-*.md` 命令文件。
+安装后触发 `/prd-helper` 时，Agent 必须自动执行初始化脚本。初始化脚本是幂等的：它会创建 `docs/prd-helper/`、写入 Agent 配置文件，并在 Claude Code 项目中生成或补齐 `.claude/commands/prd-*.md` 命令文件。不要因为 `docs/prd-helper/prd-helper-config.md` 已存在就跳过 setup。
 
 处理产品上下文时，必须按以下顺序执行：
 
@@ -72,7 +72,7 @@ python3 .agents/skills/prd-helper/scripts/remove-prd-helper.py --project .
 python3 .claude/skills/prd-helper/scripts/remove-prd-helper.py --project .
 ```
 
-收到 `/prd-helper` 且项目尚未初始化时，Agent 必须直接执行安装目录中的 setup 脚本。只有用户明确要求自定义 docs 目录或 Agent 范围时，才先询问配置。默认配置如下：
+收到 `/prd-helper` 时，Agent 必须直接执行安装目录中的 setup 脚本，用它完成初始化或修复半初始化状态。只有用户明确要求自定义 docs 目录或 Agent 范围时，才先询问配置。默认配置如下：
 
 - docs 目录：`docs/prd-helper/`
 - Agent：当前正在使用的 Agent
@@ -81,7 +81,7 @@ python3 .claude/skills/prd-helper/scripts/remove-prd-helper.py --project .
 默认脚本路径：
 
 ```bash
-python3 .agents/skills/prd-helper/scripts/setup-prd-helper.py --project . --docs-root docs/prd-helper
+python3 .agents/skills/prd-helper/scripts/setup-prd-helper.py --project . --docs-root docs/prd-helper --agent claude-code
 ```
 
 ## Context Delta
