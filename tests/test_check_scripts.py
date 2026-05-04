@@ -27,7 +27,7 @@ def write(path: Path, content: str = "content") -> None:
 
 def test_check_collect_writes_template_shaped_check(tmp_path: Path):
     root = tmp_path / "01-collect"
-    write(root / "active" / "sessions" / "turn-001.md", "---\nsource_id: turn-001\n---\nUser Query\nAgent Answer\n")
+    write(root / "active" / "sessions" / "session-test.md", "---\nsource_id: turn-001\n---\n## Turn 1\n\n### User Query\n\nUser Query\n\n### Agent Answer\n\nAgent Answer\n")
     write(root / "passive" / "meeting.md", "- 来源：会议\n")
     write_collect_state(
         root,
@@ -47,7 +47,7 @@ def test_check_collect_writes_template_shaped_check(tmp_path: Path):
             "source_time": "2026-05-02T10:00:00+08:00",
             "source_type": "agent_conversation_turn",
             "source_channel": "active",
-            "path": "active/sessions/turn-001.md",
+            "path": "active/sessions/session-test.md",
             "content_hash": "sha256:abc",
             "metadata_status": "complete",
             "noise_hint": "none",
@@ -242,7 +242,7 @@ def test_claude_capture_hook_records_turn_after_start(tmp_path: Path):
     assert module.handle_user_prompt(prompt_payload, root, tmp_path) == 0
     assert module.handle_stop(stop_payload, root, tmp_path, "claude-code") == 0
 
-    captured = list((root / "active" / "sessions").glob("turn-*.md"))
+    captured = list((root / "active" / "sessions").glob("session-*.md"))
     assert len(captured) == 1
     content = captured[0].read_text()
     assert "机器人巡检点位管理功能" in content

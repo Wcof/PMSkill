@@ -89,12 +89,31 @@ def main():
     # Detect noise
     noise_hint, noise_reason = detect_noise(user_query, agent_answer)
 
-    # Write session file
+    # Write session file — one file per session, turns appended
     sessions_dir = root / "active" / "sessions"
     sessions_dir.mkdir(parents=True, exist_ok=True)
-    session_file = sessions_dir / f"{source_id}.md"
+    session_file = sessions_dir / f"session-{session_id}.md"
 
-    content = f"""---
+    if session_file.exists():
+        # Append turn to existing session file
+        turn_block = f"""
+---
+
+## Turn {turn_index}
+
+### User Query
+
+{user_query}
+
+### Agent Answer
+
+{agent_answer}
+"""
+        with open(session_file, "a", encoding="utf-8") as f:
+            f.write(turn_block)
+    else:
+        # Create new session file with frontmatter + first turn
+        content = f"""---
 source_id: {source_id}
 source_type: agent_conversation_turn
 source_channel: active
@@ -111,19 +130,17 @@ noise_reason: {noise_reason}
 status: collected
 ---
 
-## User Query
+## Turn {turn_index}
+
+### User Query
 
 {user_query}
 
-## Agent Answer
+### Agent Answer
 
 {agent_answer}
-
-## Capture Note
-
-本轮为完整会话采集，未做事实提取、需求判断或清洗。
 """
-    session_file.write_text(content)
+        session_file.write_text(content, encoding="utf-8")
 
     # Update state
     state["turn_count"] = turn_index

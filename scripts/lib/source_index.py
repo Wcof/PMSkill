@@ -49,6 +49,15 @@ def indexed_paths_from_content(content: str) -> set[str]:
     }
 
 
+def indexed_source_ids_from_content(content: str) -> set[str]:
+    """从 source-index.md 内容中提取已索引的 source_id 集合。"""
+    return {
+        row["source_id"]
+        for row in extract_table_rows_with_headers(content, INDEX_COLUMNS)
+        if row.get("source_id")
+    }
+
+
 def read_indexed_paths(root: Path) -> set[str]:
     """读取 source-index.md 中已索引的文件路径集合。"""
     index_file = root / INDEX_FILE
@@ -60,13 +69,14 @@ def read_indexed_paths(root: Path) -> set[str]:
 def append_index(root: Path, entry: dict):
     """向 source-index.md 追加一行索引记录。
 
-    如果相同 path 已经存在，则不重复追加。
+    如果相同 source_id 已经存在，则不重复追加。
+    同一 session 文件可有多条索引（不同轮次的 source_id）。
     """
     index_file = root / INDEX_FILE
     if not index_file.exists():
         index_file.write_text(INDEX_HEADER)
     content = index_file.read_text()
-    if entry.get("path", "") in indexed_paths_from_content(content):
+    if entry.get("source_id", "") in indexed_source_ids_from_content(content):
         return
     cells = [entry.get(col, "") for col in INDEX_COLUMNS]
     row = "| " + " | ".join(cells) + " |\n"

@@ -49,7 +49,7 @@ def check(root: Path) -> dict:
         "active_count": int(state.get("active_source_count", "0")),
         "passive_count": int(state.get("passive_source_count", "0")),
         "sessions_dir_exists": sessions_dir.exists(),
-        "session_file_count": len(list(sessions_dir.glob("turn-*.md"))) if sessions_dir.exists() else 0,
+        "session_file_count": len(list(sessions_dir.glob("session-*.md"))) if sessions_dir.exists() else 0,
         "turn_count": int(state.get("turn_count", "0")),
         "missing_index_refs": [],
         "noise_count": int(state.get("possible_noise_count", "0")),

@@ -16,7 +16,7 @@
 | last_collect_at | 2024-03-18T12:00:00+08:00 |
 | last_source_id | turn-20240318-120000-001 |
 | last_content_hash | sha256:a1b2c3d4e5f67890 |
-| last_write_file | active/sessions/turn-20240318-120000-001.md |
+| last_write_file | active/sessions/session-prd-session-20240318-120000.md |
 | total_sources | 5 |
 | active_source_count | 1 |
 | passive_source_count | 4 |

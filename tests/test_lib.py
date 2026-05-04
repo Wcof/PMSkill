@@ -31,7 +31,7 @@ def test_source_index_append_and_read_paths(tmp_path: Path):
             "source_time": "2026-05-02T10:00:00+08:00",
             "source_type": "agent_conversation_turn",
             "source_channel": "active",
-            "path": "active/sessions/turn-001.md",
+            "path": "active/sessions/session-test.md",
             "content_hash": "sha256:abc",
             "metadata_status": "complete",
             "noise_hint": "none",
@@ -41,11 +41,26 @@ def test_source_index_append_and_read_paths(tmp_path: Path):
     append_index(
         tmp_path,
         {
-            "source_id": "turn-001-duplicate",
-            "source_time": "2026-05-02T10:00:00+08:00",
+            "source_id": "turn-002",
+            "source_time": "2026-05-02T10:05:00+08:00",
             "source_type": "agent_conversation_turn",
             "source_channel": "active",
-            "path": "active/sessions/turn-001.md",
+            "path": "active/sessions/session-test.md",
+            "content_hash": "sha256:def",
+            "metadata_status": "complete",
+            "noise_hint": "none",
+            "status": "collected",
+        },
+    )
+    # Same source_id again — should be deduplicated
+    append_index(
+        tmp_path,
+        {
+            "source_id": "turn-002",
+            "source_time": "2026-05-02T10:05:00+08:00",
+            "source_type": "agent_conversation_turn",
+            "source_channel": "active",
+            "path": "active/sessions/session-test.md",
             "content_hash": "sha256:def",
             "metadata_status": "complete",
             "noise_hint": "none",
@@ -53,8 +68,11 @@ def test_source_index_append_and_read_paths(tmp_path: Path):
         },
     )
 
-    assert "active/sessions/turn-001.md" in read_indexed_paths(tmp_path)
-    assert (tmp_path / "source-index.md").read_text().count("active/sessions/turn-001.md") == 1
+    # Same session file appears twice (two turns), but same source_id only once
+    assert "active/sessions/session-test.md" in read_indexed_paths(tmp_path)
+    content = (tmp_path / "source-index.md").read_text()
+    assert content.count("active/sessions/session-test.md") == 2
+    assert content.count("turn-002") == 1
 
 
 def test_source_index_uses_shared_markdown_table_parser():
