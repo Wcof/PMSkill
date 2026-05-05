@@ -2,66 +2,56 @@
 
 ![PRD Helper Skill Kit overview](support/assets/prd-helper-project-overview.svg)
 
-一句话：PRD Helper 是一个可安装的单体 Agent Skill，把产品讨论、会议纪要、客户反馈、旧文档和 Agent 会话，按“采集、精炼、关联、生成”四个模块转成可追溯的 PRD 上下文。
+## 一句话讲通
 
-安装器界面由 `skills@latest` 控制，当前可能显示英文；安装完成后，`prd-helper` 会跟随用户语言输出，中文用户默认中文，英文用户默认英文，无法判断时会先询问语言。
+PRD Helper 是一个可安装的单体 Agent Skill，把产品讨论、会议纪要、客户反馈、旧文档和 Agent 会话，按“采集 Collect → 精炼 Refine → 关联 Relate → 生成 Generate → 检查 Check”的流程，变成可追溯、可审计、可交给 Agent 和人类继续使用的 PRD 上下文。
 
 ## 项目介绍
 
-PRD Helper 不是一个普通脚本包，也不是四个分散的小 Skill。它是一个完整 Skill：根目录的 `SKILL.md` 是唯一入口，`modules/` 显式承载四个业务模块，`checks/` 提供贯穿全流程的质量门禁，`scripts/` 提供安装、采集、检查和卸载自动化。
+PRD Helper 不是四个分散的小工具，也不是直接把聊天记录丢给 AI 生成 PRD。它的核心是一个根入口 `SKILL.md`，下面显式拆成四个业务模块：
 
-四个模块的职责是：
+| 模块 | 做什么 | 关键产物 |
+|------|--------|----------|
+| Collect 采集 | 保存原始材料，支持主动会话采集和被动文件投放，只做索引、摘要和轻量噪音标记 | `01-collect/`、`source-index.md`、`collect-state.md` |
+| Refine 精炼 | 按用户故事（US）组织事实、决策、约束、目标、冲突、问题和 AI 推断 | `02-refine/index.md`、`US-*/` |
+| Relate 关联 | 把 US 和实体织成关系网络，沉淀主题、决策链路和概念层级 | `03-relate/relations.md`、`themes.md`、`context-map.md` |
+| Generate 生成 | 基于精炼与关联结果生成 Agent 维度和人类维度 PRD | `04-generate/agent/`、`04-generate/human/` |
 
-| 模块 | 目标 | 产物 |
-|------|------|------|
-| Collect 采集 | 保存原始材料，支持主动会话采集和被动文件投放 | `01-collect/`、`source-index.md`、`collect-state.md` |
-| Refine 精炼 | 从原始材料中拆出事实、目标、决策、约束、问题和 AI 推断 | `02-refine/` |
-| Relate 关联 | 建立事实到页面、功能、规则、数据、验收的关系链 | `03-relate/`、`context-map.md` |
-| Generate 生成 | 输出前端、后端、测试、产品可使用的 PRD 和 Agent 上下文 | `04-generate/`、`05-check/` |
+`checks/` 不是第五个业务模块，而是横向质量门禁。每个阶段都要产出 `check.md`，最终通过 `/prd-check` 汇总到 `05-check/final-check.md`。
 
-检查不是第五个业务模块；它是每一步都必须执行的质量门禁。
+当前项目的关键能力：
 
-当前能力边界：
-
-| 场景 | 当前实现 | 说明 |
-|------|----------|------|
-| 安装 | `npx skills@latest add Wcof/PRDContextEngine` | 安装器只会发现一个 Skill：`prd-helper`，这是预期行为 |
-| 初始化 | `/prd-helper` | 初始化项目目录、Agent 配置块、Claude 命令文件和 Codex 插件 |
-| Claude Code 主动采集 | `.claude/commands/` + `.claude/settings.json` hooks | `/prd-start`/`/prd-resume` 启用 Hook，`/prd-pause`/`/prd-stop` 清理 Hook |
-| Codex 主动采集 | `~/.codex/plugins/prd-helper/` + JSONL 会话兜底 | Codex 没有进程级 Hook，`/prd-stop` 会扫描当前项目的 Codex 会话补录 |
-| 被动采集 | `docs/prd-helper/01-collect/passive/` | 会议纪要、评审记录、旧 PRD、客户反馈等文件直接放这里 |
+| 能力 | 当前实现 |
+|------|----------|
+| Skill 安装 | `npx skills@latest add Wcof/PRDContextEngine`，安装器只会发现一个 Skill：`prd-helper` |
+| 项目初始化 | `/prd-helper` 幂等初始化项目，创建目录、配置 Agent、生成后续命令 |
+| Claude Code 采集 | 生成 `.claude/commands/prd-*.md`，`/prd-start` 和 `/prd-resume` 写入 Hook，`/prd-pause` 和 `/prd-stop` 清理 Hook |
+| Codex 采集 | 安装 `~/.codex/plugins/prd-helper/` 插件，结合 `AGENTS.md` 指令和 JSONL 会话扫描兜底 |
+| 被动材料 | 人工把会议纪要、旧 PRD、客户反馈等放入 `docs/prd-helper/01-collect/passive/` |
+| 生成模式 | `/prd-generate` 支持全部生成、分级生成、部分生成、更新和模板入库 |
+| 全流程检查 | `/prd-check` 或 `checks/scripts/check-all.py` 顺序运行四个模块检查 |
 
 ## 怎么用
 
-### Step 0：安装 Skill
+### Step 0：安装
 
-推荐使用免交互安装，避免安装器英文提示干扰：
-
-```bash
-npx skills@latest add Wcof/PRDContextEngine --all
-```
-
-如果你想手动选择 Agent，也可以运行交互式安装器：
+推荐直接安装到当前项目：
 
 ```bash
 npx skills@latest add Wcof/PRDContextEngine
 ```
 
-安装器会让你选择 Skill 和编码 Agent。这个仓库只提供一个完整 Skill：`prd-helper`，所以刚安装完只看到 `/prd-helper` 是正常的。它内部包含采集、精炼、关联、生成四个模块，不需要分别安装 collect、refine、relate、generate。
+安装器界面由 `skills@latest` 控制，可能显示英文。常用操作是：
 
-交互方式：
-
-| 操作 | 说明 |
+| 操作 | 含义 |
 |------|------|
 | `↑` / `↓` | 上下移动 |
 | `Space` | 勾选或取消 |
 | `Enter` | 确认 |
 
-建议默认全选：
+安装时选择 `prd-helper`，再选择你要使用的编码 Agent，例如 Claude Code、Codex、Trae。这个仓库只提供一个完整 Skill，所以安装后只看到 `/prd-helper` 是正常的。
 
-- Skill：`prd-helper`
-- Agent：你当前项目会用到的全部编码 Agent，例如 Codex、Claude Code、Trae
-- 首次入口：`/prd-helper`
+### Step 1：初始化项目
 
 安装完成后，在 Agent 对话中运行：
 
@@ -69,87 +59,158 @@ npx skills@latest add Wcof/PRDContextEngine
 /prd-helper
 ```
 
-运行 `/prd-helper` 会自动初始化或修复当前项目。初始化会完成：
+它会自动初始化或修复当前项目：
 
-- 创建 PRD Helper 文档目录，默认 `docs/prd-helper/`
+- 创建默认文档目录 `docs/prd-helper/`
 - 写入 `CLAUDE.md`、`AGENTS.md` 或 Trae `project_rules.md` 中的 PRD Helper 配置块
-- 在 Claude Code 项目中生成 `.claude/commands/prd-start.md` 等真实斜杠命令文件
-- 在 Codex 项目中安装 `~/.codex/plugins/prd-helper/` 插件，注册原生斜杠命令
-- 设置主动采集策略：默认只在 `/prd-start` 后采集，Hook 在 `/prd-start`/`/prd-resume` 时启用，在 `/prd-pause`/`/prd-stop` 时清理
+- 为 Claude Code 生成 `.claude/commands/prd-start.md` 等项目级斜杠命令
+- 为 Codex 安装 `~/.codex/plugins/prd-helper/` 插件命令
+- 准备 `01-collect/active/`、`01-collect/passive/`、`source-index.md`、`collect-state.md`
 
-完成后，项目会准备好 `docs/prd-helper/` 结构。Claude Code 的斜杠命令列表通常在会话启动时加载，所以刚生成 `.claude/commands/prd-start.md` 后，可能需要开启新会话或刷新命令列表才会显示 `/prd-start` 等命令。
-
-如果重开会话后仍然只看到 `/prd-helper`，先检查当前项目是否生成了命令文件：
+如果 Claude Code 刚生成命令后没有立即显示 `/prd-start`，重开一次 Claude Code 会话再输入 `/prd-start`。如果还是没有，检查：
 
 ```bash
 ls .claude/commands/prd-*.md
 ```
 
-如果没有看到 `prd-start.md`，说明项目处于半初始化状态。再次发送 `/prd-helper`，它会幂等补齐 `.claude/commands/` 下的命令文件；补齐后重开 Claude Code 会话再输入 `/prd-start`。如果文件存在但命令列表仍不刷新，这是 Claude Code 本地命令缓存问题，不是 Skill 未安装。
+### Step 2：采集材料
 
-### 安装后快速自检
-
-初始化完成后，建议立刻做一次最小自检：
-
-```text
-/prd-status
-```
-
-看到采集状态（capture_mode/session_id/turn_count）即可说明命令入口和项目初始化已生效。
-
-### Step 1：开始采集
-
-在 Agent 对话中运行：
+开启主动采集：
 
 ```text
 /prd-start
 ```
 
-开启后，Claude Code 会写入 `.claude/settings.json` hooks，并把后续会话按 `User Query + Agent Answer` 自动写入主动采集目录。`/prd-start` 本身只开启状态，不会采集开启命令这一轮。发送 `/prd-pause` 或 `/prd-stop` 后，Hook 会被清理，不再常驻生效。
+主动采集只在显式开启后生效，不会默认采集所有会话。采集状态命令：
 
-### Codex 采集机制
+| 命令 | 用途 |
+|------|------|
+| `/prd-start` | 开启主动采集 |
+| `/prd-pause` | 暂停主动采集，并清理 Claude Code Hook |
+| `/prd-resume` | 恢复主动采集，并重新启用 Claude Code Hook |
+| `/prd-stop` | 停止采集，生成采集摘要和检查；Codex 会扫描 JSONL 会话做兜底补录 |
+| `/prd-status` | 查看当前采集状态 |
 
-Codex 没有 Claude Code 那种进程级 Hook，采用混合采集方案：
-
-1. **Codex 插件命令**：安装时写入 `~/.codex/plugins/prd-helper/`，提供 `/prd-start`、`/prd-stop` 等命令入口
-2. **AGENTS.md 指令注入**：采集模式开启时，每轮回答后 Agent 调用 `capture-source.py` 记录对话
-3. **JSONL 会话扫描兜底**：`/prd-stop` 时自动扫描 `~/.codex/sessions/` 下的 JSONL 会话文件，补录未采集的轮次
-
-Codex 会话数据存储在 `~/.codex/sessions/YYYY/MM/DD/rollout-{时间}-{uuid}.jsonl`，格式为 JSONL，每行一个 JSON 对象。扫描脚本通过 `session_meta.cwd` 过滤当前项目的会话，提取 `role=user` 和 `role=assistant` 的消息对。
-
-已有材料直接放入被动采集目录：
+被动材料直接放入：
 
 ```text
 docs/prd-helper/01-collect/passive/
 ```
 
-适合投放的材料包括会议纪要、评审记录、客户反馈、旧 PRD、原型说明、历史 Agent 会话摘要等。
+采集模块只保存原貌、建立索引、标记元信息和可能噪音，不做事实提取，也不生成 PRD。
 
-### Step 2-4：完成四模块闭环
+### Step 3：精炼为用户故事
 
-采集完成后，按顺序推进：
+采集完成后进入 Refine。输出结构以 US 目录为中心：
 
 ```text
-Collect 采集 → Refine 精炼 → Relate 关联 → Generate 生成
+docs/prd-helper/02-refine/
+├── index.md
+├── US-001-xxx/
+│   ├── user-story.md
+│   ├── facts.md
+│   ├── decisions.md
+│   ├── constraints.md
+│   ├── goals.md
+│   ├── conflicts.md
+│   ├── questions.md
+│   ├── assumptions.md
+│   └── changelog.md
+└── check.md
 ```
 
-每一步都要留下可追溯来源、状态、待确认项和检查结果。最终产物默认保存在：
+精炼阶段的重点是区分事实与推断、保留来源、暴露冲突和待确认问题。
+
+### Step 4：建立关系网络
+
+Relate 不再维护旧的 `page-map.md`、`feature-map.md`、`rule-map.md` 等扁平 map 文件，而是用 `relations.md` 表达网状关系：
 
 ```text
-docs/prd-helper/
+docs/prd-helper/03-relate/
+├── relations.md
+├── themes.md
+├── decisions-trail.md
+├── concept-hierarchy.md
+├── context-map.md
+└── check.md
+```
+
+标准关系类型包括：影响、约束、依赖、依据、包含、冲突、补充、触发。
+
+### Step 5：生成 PRD
+
+触发生成：
+
+```text
+/prd-generate
+```
+
+Generate 支持四种模式：
+
+| 模式 | 说明 |
+|------|------|
+| 全部生成 | 一次生成 Agent 维度和人类维度全部产物 |
+| 分级生成 | 先生成 Agent 维度，再生成人类维度，方便中途审查 |
+| 部分生成 | 只生成指定部分，例如 pages、rules、data |
+| 更新 | 检测输入变化后重新生成 |
+
+输出结构：
+
+```text
+docs/prd-helper/04-generate/
+├── agent/
+│   ├── overview/
+│   ├── pages/
+│   ├── rules/
+│   ├── data/
+│   ├── acceptance/
+│   ├── agent-context/
+│   └── implementation/
+├── human/
+│   ├── system-prd.md
+│   └── page-prd/
+└── check.md
+```
+
+Agent 维度给代码 Agent 继续执行，Human 维度给产品、业务、评审和归档阅读。
+
+### Step 6：全流程检查
+
+在 Agent 中运行：
+
+```text
+/prd-check
+```
+
+也可以在仓库根目录手动运行：
+
+```bash
+python3 checks/scripts/check-all.py docs/prd-helper
+```
+
+单模块检查命令：
+
+```bash
+python3 modules/collect/scripts/check-collect.py --root docs/prd-helper/01-collect
+python3 modules/refine/scripts/check-refine.py docs/prd-helper
+python3 modules/relate/scripts/check-relate.py docs/prd-helper
+python3 modules/generate/scripts/check-generated.py docs/prd-helper
+python3 scripts/check-structure.py docs/prd-helper
 ```
 
 ## 常用命令
 
 | 命令 | 用途 |
 |------|------|
-| `/prd-helper` | 初始化或修复当前项目配置、`docs/prd-helper/` 结构和 Claude Code 后续命令 |
-| `/prd-start` | 开启主动采集，并启用 Claude Code 采集 Hook |
-| `/prd-pause` | 暂停主动采集，并清理 Claude Code 采集 Hook |
-| `/prd-resume` | 恢复主动采集，并重新启用 Claude Code 采集 Hook |
-| `/prd-stop` | 停止采集，清理 Claude Code 采集 Hook，并生成采集摘要和检查 |
+| `/prd-helper` | 初始化或修复当前项目 |
+| `/prd-start` | 开启主动采集 |
+| `/prd-pause` | 暂停主动采集 |
+| `/prd-resume` | 恢复主动采集 |
+| `/prd-stop` | 停止采集并生成采集摘要 |
 | `/prd-status` | 查看采集状态 |
-| `/prd-remove` | 卸载 PRD Helper，并清理 Agent 配置引用 |
+| `/prd-generate` | 生成 PRD，支持模板入库和多种生成模式 |
+| `/prd-check` | 运行四模块检查并汇总结果 |
+| `/prd-remove` | 卸载 PRD Helper 并清理 Agent 配置 |
 
 ## 卸载
 
@@ -159,71 +220,47 @@ docs/prd-helper/
 /prd-remove
 ```
 
-卸载会先清理当前项目中的 Agent 配置块，例如 `AGENTS.md`、`CLAUDE.md`、Trae `project_rules.md`，同时移除 Claude Code 命令、Claude Hook 和 Codex 插件引用，再调用 `skills remove` 删除 Skill。只执行 `skills remove` 不会清理这些配置引用。
-
-卸载默认保留已经生成的 `docs/prd-helper/` 项目文档，避免误删业务资产。
-
-## 运行检查
-
-在仓库根目录运行：
-
-```bash
-python3 modules/collect/scripts/check-collect.py --root examples/robot-inspection/docs/prd-helper/01-collect
-python3 modules/refine/scripts/check-refine.py examples/robot-inspection/docs/prd-helper
-python3 modules/relate/scripts/check-relate.py examples/robot-inspection/docs/prd-helper
-python3 scripts/check-structure.py examples/robot-inspection/docs/prd-helper
-python3 modules/generate/scripts/check-generated.py examples/robot-inspection/docs/prd-helper
-python3 "$HOME/.codex/skills/.system/skill-creator/scripts/quick_validate.py" .
-```
-
-开发时建议同时运行：
-
-```bash
-python3 -m py_compile scripts/*.py scripts/lib/*.py modules/*/scripts/*.py
-python3 -m pytest tests
-```
+卸载会清理 Agent 配置块、Claude Code 命令、Claude Hook、Codex 插件引用，并调用 `skills remove` 删除 Skill。默认保留 `docs/prd-helper/`，避免误删业务文档。
 
 ## 项目结构
 
 ```text
 PRDContextEngine/
-├── SKILL.md              # Skill 根入口，Agent 首先读取这里
-├── modules/              # 四个业务模块
-│   ├── collect/          # 采集：主动会话 + 被动材料
-│   │   └── scripts/      # 采集脚本：控制、采集、扫描、检查
-│   ├── refine/           # 精炼：事实、决策、约束、问题、推断
-│   │   └── scripts/      # 精炼检查脚本
-│   ├── relate/           # 关联：页面、功能、规则、数据、验收链路
-│   │   └── scripts/      # 关联检查脚本
-│   └── generate/         # 生成：PRD、Agent 上下文、验收材料
-│       └── scripts/      # 生成检查脚本
-├── checks/               # 横向质量门禁，不是第五业务模块
-├── scripts/              # 全局脚本：安装、卸载、配置清理、结构检查
-│   └── lib/              # 共享库：状态、索引、ID、常量、哈希等
-├── examples/             # 可运行示例
-├── support/              # Agent 适配器、安装说明、图片资源
-│   └── adapters/         # Claude Code、Codex、Trae 适配器
-│       └── codex/plugin/ # Codex 插件结构（commands、agents）
-├── CONTEXT.md            # 领域词汇表
-└── docs/adr/             # 架构决策记录
+├── SKILL.md                       # Skill 根入口
+├── modules/
+│   ├── collect/                   # 采集模块
+│   ├── refine/                    # 精炼模块：US + 实体
+│   ├── relate/                    # 关联模块：relations + themes
+│   └── generate/                  # 生成模块：agent + human
+├── checks/                        # 横向质量门禁
+│   └── scripts/check-all.py       # 全流程检查入口
+├── scripts/
+│   ├── setup-prd-helper.py        # 初始化
+│   ├── remove-prd-helper.py       # 卸载
+│   └── lib/                       # 共享库
+├── support/
+│   ├── adapters/                  # Claude Code / Codex / Trae 适配器
+│   └── assets/                    # README 图片资源
+├── docs/adr/                      # 架构决策记录
+└── tests/                         # 自动化测试
 ```
 
-## 开发说明
+## 开发检查
 
-仓库根目录是唯一源码。安装器在项目中生成的 `.agents/`、`.claude/` 和 `skills-lock.json` 都是本地安装产物，不参与提交，也不作为脚本真实来源。开发和修复时只改仓库根目录下的 `SKILL.md`、`modules/`、`scripts/`、`support/`、`checks/`、`tests/` 等源码文件。
+开发或调整 Skill 后建议运行：
 
-脚本共享边界：
-
-- `scripts/lib/constants.py` 统一保存默认路径、命令名和生成目录结构等静态配置。
-- `scripts/lib/markdown_util.py` 统一解析 Markdown 表格，`state.py` 和 `source_index.py` 只处理各自领域语义。
-- `scripts/lib/id_registry.py` 是实体类型、ID 前缀、必填字段和实体生命周期的唯一注册表。
-- Claude Code 采集 Hook 由 `scripts/lib/claude_hooks.py` 管理，`/prd-start`、`/prd-resume` 启用，`/prd-pause`、`/prd-stop`、`/prd-remove` 清理。
-- Codex 会话发现由 `scripts/lib/codex_discovery.py` 管理，`/prd-stop` 时扫描 JSONL 补录未采集轮次。
+```bash
+python3 -m py_compile scripts/*.py scripts/lib/*.py modules/*/scripts/*.py checks/scripts/*.py
+python3 -m pytest tests
+python3 "$HOME/.codex/skills/.system/skill-creator/scripts/quick_validate.py" .
+```
 
 ## 设计约束
 
-- 单仓库、单 Skill、四模块，不把四个模块拆成四个 Skill。
-- 原始材料先保存原貌，噪音只做轻量标记，清洗留给精炼模块。
-- 主动采集必须由 `/prd-start` 显式开启，不默认采集所有会话。
-- 每个决策、约束、推断和生成文档都要能追溯到来源。
-- 安装和卸载都优先通过 Agent 斜杠命令完成，降低新手使用门槛。
+- 单仓库、单 Skill、四模块，不把 collect/refine/relate/generate 拆成四个 Skill。
+- 原始材料先保存原貌，噪音只做轻量标记，清洗留给 Refine。
+- 主动采集必须由 `/prd-start` 显式开启。
+- Refine 必须区分事实、决策、约束、冲突、问题和 AI 推断。
+- Relate 使用 `relations.md` 表达网状关系，不回退到旧的五个 map 文件。
+- Generate 必须基于 `02-refine/` 和 `03-relate/`，不能凭空新增业务规则。
+- 每个阶段都必须保留来源、状态、待确认项和检查结果。
