@@ -34,7 +34,7 @@ from lib.discovery import (
     session_filename,
     write_session,
 )
-from lib.state import read_collect_state, write_collect_state
+from lib.state import read_collect_state, write_collect_state, safe_int
 from lib.source_index import read_indexed_paths, ensure_index
 from lib.time_util import now_iso, now_id
 from lib.constants import DEFAULT_COLLECT_ROOT
@@ -67,7 +67,7 @@ def ensure_collect_structure(root: Path, agent: str) -> dict:
     # Create initial state
     session_id = f"scan-{now_id()}"
     state = {
-        "capture_mode": "on",
+        "capture_mode": "off",
         "active_root": str(root / "active"),
         "passive_root": str(root / "passive"),
         "session_id": session_id,
@@ -124,9 +124,9 @@ def main() -> int:
 
     # Update state
     state = read_collect_state(collect_root)
-    state["turn_count"] = str(int(state.get("turn_count", "0")) + total_captured)
-    state["active_source_count"] = str(int(state.get("active_source_count", "0")) + total_captured)
-    state["total_sources"] = str(int(state.get("total_sources", "0")) + total_captured)
+    state["turn_count"] = str(safe_int(state.get("turn_count")) + total_captured)
+    state["active_source_count"] = str(safe_int(state.get("active_source_count")) + total_captured)
+    state["total_sources"] = str(safe_int(state.get("total_sources")) + total_captured)
     state["last_collect_at"] = now_iso()
     write_collect_state(collect_root, state)
 

@@ -19,7 +19,7 @@ else:
     raise RuntimeError("Unable to locate PRD Helper scripts/lib")
 
 from lib.id_registry import REFINE_ENTITIES, FACT, DECISION, CONSTRAINT, CONFLICT, ASSUMPTION
-from lib.markdown_util import has_field
+from lib.markdown_util import has_field, extract_template_sections
 from lib.constants import DEFAULT_PRD_ROOT
 
 
@@ -35,6 +35,18 @@ def _entity_blocks(content: str, entity) -> list[tuple[str, str]]:
     return blocks
 
 
+def _check_background(refine_dir: Path) -> dict:
+    """Check background.md for required sections."""
+    bg_path = refine_dir / "background.md"
+    if not bg_path.exists():
+        return {"exists": False, "missing_sections": []}
+    content = bg_path.read_text()
+    template_path = refine_dir.parent.parent / "modules" / "refine" / "templates" / "02-refine-background-template.md"
+    required = extract_template_sections(template_path)
+    missing = [s for s in required if s not in content]
+    return {"exists": True, "missing_sections": missing}
+
+
 def check_refine(root: Path) -> dict:
     refine_dir = root / "02-refine"
     result = {
@@ -42,6 +54,7 @@ def check_refine(root: Path) -> dict:
         "files": {},
         "traceability": {},
         "missing_files": [],
+        "background": _check_background(refine_dir) if refine_dir.exists() else {"exists": False, "missing_sections": []},
     }
     if not refine_dir.exists():
         return result
@@ -78,7 +91,10 @@ def write_check(root: Path, result: dict) -> Path:
     refine_dir.mkdir(parents=True, exist_ok=True)
     check_file = refine_dir / "check.md"
 
-    classification_ok = result["exists"] and not result["missing_files"]
+    bg = result.get("background", {})
+    has_all_files = result["exists"] and not result["missing_files"]
+    bg_ok = bg.get("exists", False) and not bg.get("missing_sections")
+    classification_ok = has_all_files and bg_ok
     trace_failures = [
         f"{fname}:{item['id']} 缺少 {', '.join(item['missing'])}"
         for fname, data in result["traceability"].items()
@@ -92,6 +108,8 @@ def write_check(root: Path, result: dict) -> Path:
         pending.append("02-refine/ 缺失")
     if result["missing_files"]:
         pending.append("缺少文件：" + ", ".join(result["missing_files"]))
+    if bg.get("missing_sections"):
+        pending.append("background.md 缺少章节：" + ", ".join(bg["missing_sections"]))
     pending.extend(trace_failures[:5])
 
     lines = [
@@ -132,7 +150,7 @@ def write_check(root: Path, result: dict) -> Path:
         "- [x] 没有把推断写成事实（自动检查：assumptions.md 独立存在）",
         "- [x] 没有隐藏冲突点（自动检查：conflicts.md 存在）",
         "- [x] 没有跳过待确认问题（自动检查：questions.md 存在）",
-        "- [x] 没有删除重要背景（自动检查：background.md 存在）",
+        f"- [{'x' if bg.get('exists') and not bg.get('missing_sections') else ' '}] 没有删除重要背景（自动检查：background.md 内容完整）",
         "- [x] 没有凭空新增业务规则（精炼阶段不生成规则）",
         "",
         "## 4. 精炼结论",

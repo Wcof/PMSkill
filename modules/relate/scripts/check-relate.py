@@ -72,7 +72,7 @@ def check_relate(root: Path) -> dict:
         "questions_mapped": bool(not questions or questions <= mapped_questions),
         "conflicts_mapped": bool(not conflicts or conflicts <= mapped_conflicts),
         "assumptions_mapped": bool(not assumptions or assumptions <= mapped_assumptions),
-        "fact_to_page_or_feature": bool(facts and (PAGE.extract_ids(context) or FEATURE.extract_ids(context))),
+        "fact_to_page_or_feature": bool(not facts or not (facts - mapped_facts)),
         "feature_to_rule": bool(FEATURE.extract_ids(context) and RULE.extract_ids(context)),
         "rule_to_data": bool(RULE.extract_ids(context) and DATA.extract_ids(context)),
         "rule_to_acceptance": bool(RULE.extract_ids(context) and ACCEPTANCE.extract_ids(context)),
@@ -94,7 +94,7 @@ def write_check(root: Path, result: dict) -> Path:
             orphan_issues.append(f"缺少 {label} 实体")
 
     chain_checks = [
-        (label, not result["unmapped_facts"] and result[code] if code == "fact_to_page_or_feature" else result[code])
+        (label, result[code])
         for code, label, _path in RELATION_CHAIN_RULES
     ]
     isolated_checks = [

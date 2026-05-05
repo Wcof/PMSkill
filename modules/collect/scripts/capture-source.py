@@ -23,7 +23,7 @@ for _parent in Path(__file__).resolve().parents:
 else:
     raise RuntimeError("Unable to locate PRD Helper scripts/lib")
 
-from lib.state import read_collect_state, write_collect_state
+from lib.state import read_collect_state, write_collect_state, safe_int
 from lib.time_util import now_iso, now_id
 from lib.hash_util import content_hash
 from lib.source_index import append_index
@@ -79,11 +79,11 @@ def main():
     # Generate IDs
     ts = now_id()
     session_id = state.get("session_id", "unknown")
-    turn_index = str(int(state.get("turn_count", "0")) + 1)
+    turn_index = str(safe_int(state.get("turn_count")) + 1)
     source_id = f"turn-{ts}-{turn_index.zfill(3)}"
 
-    # Compute hash
-    combined = user_query + agent_answer
+    # Compute hash (separator prevents collision between split points)
+    combined = user_query + "\n---\n" + agent_answer
     c_hash = content_hash(combined)
 
     # Detect noise
@@ -148,10 +148,10 @@ status: collected
     state["last_source_id"] = source_id
     state["last_content_hash"] = c_hash
     state["last_write_file"] = str(session_file)
-    state["active_source_count"] = str(int(state.get("active_source_count", "0")) + 1)
-    state["total_sources"] = str(int(state.get("total_sources", "0")) + 1)
+    state["active_source_count"] = str(safe_int(state.get("active_source_count")) + 1)
+    state["total_sources"] = str(safe_int(state.get("total_sources")) + 1)
     if noise_hint == "possible_noise":
-        state["possible_noise_count"] = str(int(state.get("possible_noise_count", "0")) + 1)
+        state["possible_noise_count"] = str(safe_int(state.get("possible_noise_count")) + 1)
     write_collect_state(root, state)
 
     # Update source index

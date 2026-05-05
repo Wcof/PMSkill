@@ -522,7 +522,7 @@ def build_session_content(
 
 def combined_hash(turns: list[tuple[str, str, str]]) -> str:
     """Compute content hash for a session's combined turns."""
-    combined = "".join(f"{u}{a}" for u, a, _ in turns)
+    combined = "\n---\n".join(f"{u}\n---\n{a}" for u, a, _ in turns)
     return content_hash(combined)
 
 

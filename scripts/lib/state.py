@@ -12,6 +12,14 @@ from .markdown_util import extract_table_rows_with_headers
 
 STATE_FILE = "collect-state.md"
 
+
+def safe_int(value: str, default: int = 0) -> int:
+    """Convert string to int, returning default on failure."""
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return default
+
 # 状态表格的标准 key 顺序
 STATE_KEYS = (
     "capture_mode",

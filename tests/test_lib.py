@@ -122,11 +122,26 @@ recorder: product manager
 owner: business owner
 priority: high
 """
-    incomplete = """
+    partial = """
 - 来源：会议纪要
 - 记录时间：2026-05-02
+"""
+    missing = """
+- 一些无关内容
+"""
+
+    source_type_only = """
+- 材料类型：会议纪要
+"""
+    core_with_type = """
+- 来源：会议纪要
+- 记录时间：2026-05-02
+- 材料类型：meeting
 """
 
     assert metadata_status_for_text(chinese) == "complete"
     assert metadata_status_for_text(english) == "complete"
-    assert metadata_status_for_text(incomplete) == "missing"
+    assert metadata_status_for_text(partial) == "partial"
+    assert metadata_status_for_text(missing) == "missing"
+    assert metadata_status_for_text(source_type_only) == "missing"
+    assert metadata_status_for_text(core_with_type) == "partial"

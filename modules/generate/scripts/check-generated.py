@@ -29,6 +29,16 @@ from lib.id_registry import ALL_ENTITIES
 from lib.markdown_util import extract_template_sections
 from lib.constants import DEFAULT_PRD_ROOT
 
+
+def _safe_rglob(directory: Path, pattern: str = "*.md"):
+    """rglob that skips hidden directories (starting with '.')."""
+    for item in directory.rglob(pattern):
+        # Skip files in hidden directories
+        if any(part.startswith(".") for part in item.relative_to(directory).parts):
+            continue
+        yield item
+
+
 # Patterns that indicate unresolved content
 UNRESOLVED_PATTERNS = [
     (r"<!--\s*TODO", "<!-- TODO"),
@@ -43,46 +53,40 @@ UNRESOLVED_PATTERNS = [
 ]
 
 
-def check_unresolved_content(root_path: Path) -> list[dict]:
+def _read_generated_files(root_path: Path) -> list[tuple[str, str]]:
+    """Read all generated .md files once, returning (rel_path, content) pairs."""
+    gen_dir = root_path / "04-generate"
+    if not gen_dir.exists():
+        return []
+    files = []
+    for md_file in _safe_rglob(gen_dir):
+        if md_file.name == "check.md":
+            continue
+        files.append((str(md_file.relative_to(root_path)), md_file.read_text()))
+    return files
+
+
+def check_unresolved_content(files: list[tuple[str, str]]) -> list[dict]:
     """Check for unresolved TODOs and markers in generated content."""
     results = []
-    gen_dir = root_path / "04-generate"
-
-    if not gen_dir.exists():
-        return results
-
-    for md_file in gen_dir.rglob("*.md"):
-        if md_file == gen_dir / "check.md":
-            continue
-        content = md_file.read_text()
-        rel_path = md_file.relative_to(root_path)
-
+    for rel_path, content in files:
         for pattern, label in UNRESOLVED_PATTERNS:
             matches = re.findall(pattern, content)
             if matches:
-                results.append({
-                    "file": str(rel_path),
-                    "pattern": label,
-                    "count": len(matches),
-                })
-
+                results.append({"file": rel_path, "pattern": label, "count": len(matches)})
     return results
 
 
-def check_pending_questions_consolidation(root_path: Path) -> dict:
+def check_pending_questions_consolidation(root_path: Path, files: list[tuple[str, str]]) -> dict:
     """Check if pending questions from generated docs are consolidated in 05-check."""
-    gen_dir = root_path / "04-generate"
     check_dir = root_path / "05-check"
 
-    if not gen_dir.exists():
-        return {"checked": False, "reason": "04-generate not found"}
+    if not files:
+        return {"checked": True, "pending_count": 0, "all_consolidated": True}
 
-    # Collect all pending questions from generated docs
+    # Collect all pending questions from pre-read files
     pending_questions = []
-    for md_file in gen_dir.rglob("*.md"):
-        content = md_file.read_text()
-        rel_path = str(md_file.relative_to(root_path))
-        # Find "待确认" entries
+    for rel_path, content in files:
         for line in content.split("\n"):
             if "待确认" in line and line.strip().startswith(("-", "|", "*")):
                 pending_questions.append({
@@ -93,31 +97,40 @@ def check_pending_questions_consolidation(root_path: Path) -> dict:
     if not pending_questions:
         return {"checked": True, "pending_count": 0, "all_consolidated": True}
 
-    # Check if context-delta.md or generated-check.md mentions these
-    consolidated_files = []
+    # Collect text from 05-check consolidation files
+    consolidated_text = ""
     for fname in ["context-delta.md", "generated-check.md", "full-check.md"]:
         fpath = check_dir / fname
         if fpath.exists():
-            consolidated_files.append(fpath.read_text())
+            consolidated_text += "\n" + fpath.read_text()
 
-    all_text = "\n".join(consolidated_files)
-    has_consolidation = "待确认" in all_text or "question" in all_text.lower()
+    # Check each question: at least its question ID or first 15 chars should appear
+    unconsolidated = []
+    for q in pending_questions:
+        line = q["line"]
+        # Extract question ID (e.g. question_001) if present
+        qid_match = re.search(r"question[_-]\d+", line)
+        if qid_match:
+            key = qid_match.group()
+        else:
+            # Use first 15 meaningful chars as match key
+            key = re.sub(r"[\s\-\|*：:]+", "", line)[:15]
+        if key and key not in consolidated_text:
+            unconsolidated.append(q)
 
     return {
         "checked": True,
         "pending_count": len(pending_questions),
-        "all_consolidated": has_consolidation,
-        "pending_questions": pending_questions[:5],  # Show first 5
+        "all_consolidated": len(unconsolidated) == 0,
+        "unconsolidated": unconsolidated[:5],
+        "pending_questions": pending_questions[:5],
     }
 
 
-def check_traceability(root_path: Path) -> list[dict]:
+def check_traceability(files: list[tuple[str, str]]) -> list[dict]:
     """Check if generated docs keep source or relation traceability."""
-    results = []
-    gen_dir = root_path / "04-generate"
-
-    if not gen_dir.exists():
-        return results
+    if not files:
+        return []
 
     # 从注册表动态构建可追溯性模式
     trace_patterns = [entity.id_pattern for entity in ALL_ENTITIES]
@@ -129,14 +142,11 @@ def check_traceability(root_path: Path) -> list[dict]:
         r"关联验收",
     ])
 
-    for md_file in gen_dir.rglob("*.md"):
-        if md_file == gen_dir / "check.md":
-            continue
-        content = md_file.read_text()
-        rel_path = md_file.relative_to(root_path)
+    results = []
+    for rel_path, content in files:
         has_trace = any(re.search(pattern, content) for pattern in trace_patterns)
         results.append({
-            "file": str(rel_path),
+            "file": rel_path,
             "status": "PASS" if has_trace else "FAIL",
         })
 
@@ -145,74 +155,40 @@ def check_traceability(root_path: Path) -> list[dict]:
 
 def check_page_completeness(root_path: Path) -> list[dict]:
     """Check if page documents have required sections from template."""
-    results = []
-    pages_dir = root_path / "04-generate" / "pages"
-
-    if not pages_dir.exists():
-        return results
-
-    # 从模板动态获取必填章节
-    template_path = Path(__file__).parent.parent / "modules" / "generate" / "templates" / "04-generate-page-prd-template.md"
-    required_sections = extract_template_sections(template_path)
-
-    for md_file in pages_dir.glob("*.md"):
-        content = md_file.read_text()
-        rel_path = md_file.relative_to(root_path)
-
-        missing = []
-        for section in required_sections:
-            if section not in content:
-                missing.append(section)
-
-        if missing:
-            results.append({
-                "file": str(rel_path),
-                "status": "FAIL",
-                "missing_sections": missing,
-            })
-        else:
-            results.append({
-                "file": str(rel_path),
-                "status": "PASS",
-                "missing_sections": [],
-            })
-
-    return results
+    return _check_doc_completeness(
+        root_path / "04-generate" / "pages",
+        Path(__file__).parent.parent / "modules" / "generate" / "templates" / "04-generate-page-prd-template.md",
+        root_path,
+    )
 
 
 def check_rule_completeness(root_path: Path) -> list[dict]:
     """Check if rule documents have required sections from template."""
-    results = []
-    rules_dir = root_path / "04-generate" / "rules"
+    return _check_doc_completeness(
+        root_path / "04-generate" / "rules",
+        Path(__file__).parent.parent / "modules" / "generate" / "templates" / "04-generate-rule-prd-template.md",
+        root_path,
+    )
 
-    if not rules_dir.exists():
+
+def _check_doc_completeness(docs_dir: Path, template_path: Path, root_path: Path) -> list[dict]:
+    """Check if documents in a directory have required sections from a template."""
+    results = []
+    if not docs_dir.exists():
         return results
 
-    # 从模板动态获取必填章节
-    template_path = Path(__file__).parent.parent / "modules" / "generate" / "templates" / "04-generate-rule-prd-template.md"
     required_sections = extract_template_sections(template_path)
 
-    for md_file in rules_dir.glob("*.md"):
+    for md_file in docs_dir.glob("*.md"):
         content = md_file.read_text()
         rel_path = md_file.relative_to(root_path)
 
-        missing = []
-        for section in required_sections:
-            if section not in content:
-                missing.append(section)
-
-        if missing:
-            results.append({
-                "file": str(rel_path),
-                "status": "FAIL",
-                "missing_sections": missing,
-            })
-        else:
-            results.append({
-                "file": str(rel_path),
-                "status": "PASS",
-                "missing_sections": [],
-            })
+        missing = [s for s in required_sections if s not in content]
+        results.append({
+            "file": str(rel_path),
+            "status": "FAIL" if missing else "PASS",
+            "missing_sections": missing,
+        })
 
     return results
 
@@ -309,7 +285,12 @@ def write_check_md(
     pending.extend(f"{r['file']} 缺少章节" for r in pages if r["status"] == "FAIL")
     pending.extend(f"{r['file']} 缺少章节" for r in rules if r["status"] == "FAIL")
     if consolidation["checked"] and not consolidation["all_consolidated"]:
-        pending.append("待确认问题未汇总到 05-check")
+        unconsol = consolidation.get("unconsolidated", [])
+        if unconsol:
+            for q in unconsol[:3]:
+                pending.append(f"待确认问题未汇总: {q['line'][:40]}")
+        else:
+            pending.append("待确认问题未汇总到 05-check")
 
     lines = [
         "# 生成检查",
@@ -369,9 +350,10 @@ def main():
         print(f"Error: Directory '{root}' does not exist.")
         sys.exit(1)
 
-    unresolved = check_unresolved_content(root_path)
-    consolidation = check_pending_questions_consolidation(root_path)
-    traceability = check_traceability(root_path)
+    files = _read_generated_files(root_path)
+    unresolved = check_unresolved_content(files)
+    consolidation = check_pending_questions_consolidation(root_path, files)
+    traceability = check_traceability(files)
     pages = check_page_completeness(root_path)
     rules = check_rule_completeness(root_path)
 

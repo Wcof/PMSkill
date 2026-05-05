@@ -22,7 +22,7 @@ for _parent in Path(__file__).resolve().parents:
 else:
     raise RuntimeError("Unable to locate PRD Helper scripts/lib")
 
-from lib.state import read_collect_state, STATE_FILE
+from lib.state import read_collect_state, STATE_FILE, safe_int
 from lib.source_index import INDEX_FILE, read_indexed_paths
 from lib.constants import DEFAULT_COLLECT_ROOT
 
@@ -46,15 +46,30 @@ def check(root: Path) -> dict:
         "summary_exists": summary_file.exists(),
         "mode": state.get("capture_mode", "off"),
         "started": bool(state.get("started_at", "")),
-        "active_count": int(state.get("active_source_count", "0")),
-        "passive_count": int(state.get("passive_source_count", "0")),
+        "active_count": safe_int(state.get("active_source_count")),
+        "passive_count": safe_int(state.get("passive_source_count")),
         "sessions_dir_exists": sessions_dir.exists(),
-        "session_file_count": len(list(sessions_dir.glob("session-*.md"))) if sessions_dir.exists() else 0,
-        "turn_count": int(state.get("turn_count", "0")),
+        "session_file_count": 0,
+        "turn_count": safe_int(state.get("turn_count")),
         "missing_index_refs": [],
-        "noise_count": int(state.get("possible_noise_count", "0")),
-        "anomaly_count": int(state.get("anomaly_count", "0")),
+        "noise_count": safe_int(state.get("possible_noise_count")),
+        "anomaly_count": safe_int(state.get("anomaly_count")),
+        "has_yaml_frontmatter": False,
+        "has_turn_structure": False,
+        "has_user_query": False,
+        "has_agent_answer": False,
     }
+
+    # Single glob: count files and inspect first one for structural correctness
+    if sessions_dir.exists():
+        session_files = sorted(sessions_dir.glob("session-*.md"))
+        result["session_file_count"] = len(session_files)
+        if session_files:
+            sample = session_files[0].read_text(encoding="utf-8")
+            result["has_yaml_frontmatter"] = sample.startswith("---") and "\n---" in sample[3:]
+            result["has_turn_structure"] = "## Turn" in sample
+            result["has_user_query"] = "### User Query" in sample
+            result["has_agent_answer"] = "### Agent Answer" in sample
 
     # Check source-index references
     if index_file.exists():
@@ -119,9 +134,9 @@ def write_check_md(root: Path, result: dict):
     lines.extend(["", "## 2. 主动采集检查", ""])
     lines.append(f"- [{'x' if mode in ('on', 'paused', 'off') else ' '}] `capture_mode` 状态正确")
     lines.append(f"- [{'x' if result['sessions_dir_exists'] else ' '}] `active/sessions/` 存在")
-    lines.append(f"- [{'x' if result['session_file_count'] > 0 else ' '}] 主动采集记录完整保存 User Query")
-    lines.append(f"- [{'x' if result['session_file_count'] > 0 else ' '}] 主动采集记录完整保存 Agent Answer")
-    lines.append(f"- [{'x' if result['session_file_count'] > 0 else ' '}] 主动采集记录包含 YAML front matter")
+    lines.append(f"- [{'x' if result['has_user_query'] else ' '}] 主动采集记录完整保存 User Query")
+    lines.append(f"- [{'x' if result['has_agent_answer'] else ' '}] 主动采集记录完整保存 Agent Answer")
+    lines.append(f"- [{'x' if result['has_yaml_frontmatter'] else ' '}] 主动采集记录包含 YAML front matter")
     lines.extend(["", "## 3. 被动采集检查", ""])
     lines.append(f"- [{'x' if result['passive_dir_exists'] else ' '}] `passive/` 可以被扫描")
     lines.append(f"- [{'x' if result['passive_count'] > 0 else ' '}] 被动材料已进入 `source-index.md`")
