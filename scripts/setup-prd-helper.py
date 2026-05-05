@@ -33,6 +33,7 @@ _COLLECT_DESCRIPTIONS = {
     "resume": "恢复 PRD Helper 主动采集",
     "stop": "停止 PRD Helper 主动采集并生成摘要",
     "status": "查看 PRD Helper 采集状态",
+    "scan": "扫描所有 AI 工具的项目 session 并批量采集",
 }
 CLAUDE_COMMANDS = {}
 for _name in COMMAND_NAMES:
@@ -123,7 +124,7 @@ def adapter_block(agent: str) -> str:
 
 def install_codex_plugin(skill_root: Path, docs_root: str) -> Path:
     """Install PRD Helper as a Codex plugin to ~/.codex/plugins/prd-helper/."""
-    from lib.codex_discovery import find_codex_home
+    from lib.discovery import find_codex_home
     from lib.constants import CODEX_PLUGIN_DIR
 
     codex_home = find_codex_home()

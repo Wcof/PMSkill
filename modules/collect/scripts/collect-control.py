@@ -2,7 +2,7 @@
 """
 PRD Helper - Collect Control
 
-Controls PRD Capture Session: start, pause, resume, stop, status.
+Controls PRD Capture Session: start, pause, resume, stop, status, scan.
 
 Usage:
     python collect-control.py <command> [--root <collect-root>] [--agent <agent-name>]
@@ -13,6 +13,7 @@ Commands:
     resume  - Resume the current session
     stop    - Stop the current session, generate summary and check
     status  - Show current capture state
+    scan    - Scan all AI tool sessions for the current project
 """
 
 import argparse
@@ -136,15 +137,12 @@ def cmd_resume(root: Path, agent: str, project: Path, docs_root: str):
     print(f"Session resumed: {state.get('session_id')}")
 
 
-def scan_codex_sessions(root: Path, project: Path, agent: str, state: dict) -> None:
-    """Scan Codex session JSONL files to backfill uncaptured turns."""
-    if agent != "codex":
-        return
-    scan_script = Path(__file__).resolve().parent / "scan-codex-sessions.py"
+def _run_scan(root: Path, project: Path, agent: str) -> int:
+    """Run scan-all-sessions.py and return its exit code."""
+    scan_script = Path(__file__).resolve().parent / "scan-all-sessions.py"
     if not scan_script.exists():
-        print(f"Codex session scanner not found: {scan_script}")
-        return
-    since = state.get("started_at", "")
+        print(f"Session scanner not found: {scan_script}")
+        return 1
     cmd = [
         sys.executable,
         str(scan_script),
@@ -155,10 +153,7 @@ def scan_codex_sessions(root: Path, project: Path, agent: str, state: dict) -> N
         "--agent",
         agent,
     ]
-    if since:
-        cmd.extend(["--since", since])
-    print("Scanning Codex sessions for uncaptured turns...")
-    subprocess.run(cmd, cwd=str(project), check=False)
+    return subprocess.run(cmd, cwd=str(project), check=False).returncode
 
 
 def cmd_stop(root: Path, agent: str, project: Path):
@@ -168,8 +163,8 @@ def cmd_stop(root: Path, agent: str, project: Path):
         print(f"Cannot stop: current mode is '{state.get('capture_mode', 'off')}'")
         return
 
-    # Scan Codex sessions before stopping
-    scan_codex_sessions(root, project, agent, state)
+    # Scan all AI tool sessions before stopping
+    _run_scan(root, project, agent)
 
     state["capture_mode"] = "off"
     state["ended_at"] = now_iso()
@@ -214,9 +209,14 @@ def cmd_status(root: Path):
     print("=" * 50)
 
 
+def cmd_scan(root: Path, project: Path, agent: str):
+    """Scan all AI tool sessions for the current project."""
+    return _run_scan(root, project, agent)
+
+
 def main():
     parser = argparse.ArgumentParser(description="PRD Collect Control")
-    parser.add_argument("command", choices=["start", "pause", "resume", "stop", "status"])
+    parser.add_argument("command", choices=["start", "pause", "resume", "stop", "status", "scan"])
     parser.add_argument("--root", default=DEFAULT_COLLECT_ROOT, help="Collect root directory")
     parser.add_argument("--project", default=".", help="Project root directory")
     parser.add_argument("--docs-root", default=DEFAULT_PRD_ROOT, help="PRD Helper docs root directory")
@@ -232,6 +232,7 @@ def main():
         "resume": lambda: cmd_resume(root, args.agent, project, args.docs_root),
         "stop": lambda: cmd_stop(root, args.agent, project),
         "status": lambda: cmd_status(root),
+        "scan": lambda: cmd_scan(root, project, args.agent),
     }
 
     commands[args.command]()

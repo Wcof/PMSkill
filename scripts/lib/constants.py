@@ -11,6 +11,7 @@ COMMAND_NAMES = (
     "prd-resume",
     "prd-stop",
     "prd-status",
+    "prd-scan",
     "prd-remove",
 )
 

@@ -12,7 +12,7 @@ PRD Helper 不是四个分散的小工具，也不是直接把聊天记录丢给
 
 | 模块 | 做什么 | 关键产物 |
 |------|--------|----------|
-| Collect 采集 | 保存原始材料，支持主动会话采集和被动文件投放，只做索引、摘要和轻量噪音标记 | `01-collect/`、`source-index.md`、`collect-state.md` |
+| Collect 采集 | 保存原始材料，支持主动会话采集、多工具批量扫描和被动文件投放，只做索引、摘要和轻量噪音标记 | `01-collect/`、`source-index.md`、`collect-state.md` |
 | Refine 精炼 | 按用户故事（US）组织事实、决策、约束、目标、冲突、问题和 AI 推断 | `02-refine/index.md`、`US-*/` |
 | Relate 关联 | 把 US 和实体织成关系网络，沉淀主题、决策链路和概念层级 | `03-relate/relations.md`、`themes.md`、`context-map.md` |
 | Generate 生成 | 基于精炼与关联结果生成 Agent 维度和人类维度 PRD | `04-generate/agent/`、`04-generate/human/` |
@@ -27,6 +27,7 @@ PRD Helper 不是四个分散的小工具，也不是直接把聊天记录丢给
 | 项目初始化 | `/prd-helper` 幂等初始化项目，创建目录、配置 Agent、生成后续命令 |
 | Claude Code 采集 | 生成 `.claude/commands/prd-*.md`，`/prd-start` 和 `/prd-resume` 写入 Hook，`/prd-pause` 和 `/prd-stop` 清理 Hook |
 | Codex 采集 | 安装 `~/.codex/plugins/prd-helper/` 插件，结合 `AGENTS.md` 指令和 JSONL 会话扫描兜底 |
+| 多工具批量扫描 | `/prd-scan` 一次性扫描 Claude Code、Cursor、Trae、Codex 的历史 session，双层去重（文件名 + content_hash） |
 | 被动材料 | 人工把会议纪要、旧 PRD、客户反馈等放入 `docs/prd-helper/01-collect/passive/` |
 | 生成模式 | `/prd-generate` 支持全部生成、分级生成、部分生成、更新和模板入库 |
 | 全流程检查 | `/prd-check` 或 `checks/scripts/check-all.py` 顺序运行四个模块检查 |
@@ -88,8 +89,11 @@ ls .claude/commands/prd-*.md
 | `/prd-start` | 开启主动采集 |
 | `/prd-pause` | 暂停主动采集，并清理 Claude Code Hook |
 | `/prd-resume` | 恢复主动采集，并重新启用 Claude Code Hook |
-| `/prd-stop` | 停止采集，生成采集摘要和检查；Codex 会扫描 JSONL 会话做兜底补录 |
+| `/prd-stop` | 停止采集，生成采集摘要和检查 |
 | `/prd-status` | 查看当前采集状态 |
+| `/prd-scan` | 扫描当前项目在所有 AI 编码工具中的历史 session 并批量采集 |
+
+批量扫描（`/prd-scan`）可独立运行，无需先执行 `/prd-start`。支持 Claude Code、Cursor、Trae、Codex 四种工具，自动创建目录结构和状态文件，双层去重（文件名快速跳过 + content_hash 精确去重）。
 
 被动材料直接放入：
 
@@ -208,6 +212,7 @@ python3 scripts/check-structure.py docs/prd-helper
 | `/prd-resume` | 恢复主动采集 |
 | `/prd-stop` | 停止采集并生成采集摘要 |
 | `/prd-status` | 查看采集状态 |
+| `/prd-scan` | 批量扫描所有 AI 工具的历史 session |
 | `/prd-generate` | 生成 PRD，支持模板入库和多种生成模式 |
 | `/prd-check` | 运行四模块检查并汇总结果 |
 | `/prd-remove` | 卸载 PRD Helper 并清理 Agent 配置 |
@@ -237,7 +242,7 @@ PRDContextEngine/
 ├── scripts/
 │   ├── setup-prd-helper.py        # 初始化
 │   ├── remove-prd-helper.py       # 卸载
-│   └── lib/                       # 共享库
+│   └── lib/                       # 共享库（discovery、state、hash、source_index 等）
 ├── support/
 │   ├── adapters/                  # Claude Code / Codex / Trae 适配器
 │   └── assets/                    # README 图片资源
@@ -260,6 +265,7 @@ python3 "$HOME/.codex/skills/.system/skill-creator/scripts/quick_validate.py" .
 - 单仓库、单 Skill、四模块，不把 collect/refine/relate/generate 拆成四个 Skill。
 - 原始材料先保存原貌，噪音只做轻量标记，清洗留给 Refine。
 - 主动采集必须由 `/prd-start` 显式开启。
+- 批量扫描（`/prd-scan`）可独立运行，统一 discovery 模块处理四种工具的 session 发现与解析。
 - Refine 必须区分事实、决策、约束、冲突、问题和 AI 推断。
 - Relate 使用 `relations.md` 表达网状关系，不回退到旧的五个 map 文件。
 - Generate 必须基于 `02-refine/` 和 `03-relate/`，不能凭空新增业务规则。

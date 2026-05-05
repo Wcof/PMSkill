@@ -33,6 +33,7 @@
 | `/prd-resume` | 恢复当前 PRD Capture Session | 设置 `capture_mode: on`，继续当前 session |
 | `/prd-stop` | 关闭 PRD Capture Session | 设置 `capture_mode: off`，生成摘要和检查 |
 | `/prd-status` | 查看采集状态 | 返回当前 session、turn 数、最近采集时间等 |
+| `/prd-scan` | 扫描所有 AI 工具 session | 扫描 Claude Code、Cursor、Trae、Codex 的项目 session 并批量采集 |
 
 ### 执行保证
 
@@ -54,6 +55,34 @@ python3 modules/collect/scripts/capture-source.py \
 ```
 
 记录内容包括：User Query 原文、Agent Answer 原文、元信息、content_hash、轻量噪音提示。
+
+## 批量扫描采集
+
+`/prd-scan` 扫描当前项目在所有 AI 编码工具中的历史 session，一次性批量采集。
+
+### 支持的工具
+
+| 工具 | 存储位置 | 说明 |
+|------|---------|------|
+| Claude Code | `~/.claude/projects/` | JSONL session 文件 |
+| Cursor | `~/Library/Application Support/Cursor/` | SQLite composerData |
+| Trae / Trae CN | `~/Library/Application Support/Trae[ CN]/` | SQLite agent storage |
+| Codex | `~/.codex/sessions/` | JSONL session 文件 |
+
+### 去重策略
+
+1. **文件名快速跳过** — 已存在的 `session-{tool}-{id}.md` 直接跳过
+2. **content_hash 精确去重** — 新 session 计算 sha256 哈希，与 source-index.md 比对
+
+### 使用方式
+
+```bash
+python3 modules/collect/scripts/collect-control.py scan --project /path/to/project
+```
+
+或通过 Agent 指令：`/prd-scan`
+
+`/prd-scan` 可独立运行，无需先执行 `/prd-start`。如果 collect-state.md 不存在，会自动创建目录结构和状态文件。
 
 ## 被动采集
 

@@ -21,7 +21,7 @@ CLAUDE_COMMANDS = tuple(f"{name}.md" for name in COMMAND_NAMES) + LEGACY_CLAUDE_
 
 def remove_codex_plugin() -> None:
     """Remove PRD Helper Codex plugin from ~/.codex/plugins/prd-helper/."""
-    from lib.codex_discovery import find_codex_home
+    from lib.discovery import find_codex_home
     from lib.constants import CODEX_PLUGIN_DIR
 
     codex_home = find_codex_home()
