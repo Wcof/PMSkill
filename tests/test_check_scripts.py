@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 from scripts.lib.source_index import append_index, ensure_index
-from scripts.lib.state import write_collect_state
+from scripts.lib.state import read_collect_state, write_collect_state
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -551,3 +551,53 @@ def test_transition_accepts_valid():
     assert transition("paused", "on") == "on"
     assert transition("on", "off") == "off"
     assert transition("paused", "off") == "off"
+
+
+def test_cmd_start_reuses_existing_session(tmp_path: Path):
+    """/prd-start 应该复用已有 session（capture_mode == 'off' 时）。"""
+    module = load_script("modules/collect/scripts/collect-control.py")
+    root = tmp_path / "01-collect"
+    root.mkdir(parents=True, exist_ok=True)
+    project = tmp_path
+
+    # 写入已有状态：capture_mode 为 off，有 session_id
+    write_collect_state(root, {
+        "capture_mode": "off",
+        "session_id": "prd-session-existing-123",
+        "agent": "claude-code",
+        "started_at": "2025-01-01T00:00:00Z",
+        "ended_at": "2025-01-01T01:00:00Z",
+        "total_sources": "5",
+        "passive_source_count": "2",
+    })
+
+    # 调用 cmd_start
+    module.cmd_start(root, "claude-code", project, str(tmp_path / "docs" / "prd-helper"))
+
+    # 验证 session_id 被复用
+    state = read_collect_state(root)
+    assert state["session_id"] == "prd-session-existing-123", "应该复用已有 session_id"
+    assert state["capture_mode"] == "on"
+
+
+def test_cmd_stop_outputs_refine_hint(tmp_path: Path, capsys):
+    """/prd-stop 应该输出精炼提示。"""
+    module = load_script("modules/collect/scripts/collect-control.py")
+    root = tmp_path / "01-collect"
+    root.mkdir(parents=True, exist_ok=True)
+    project = tmp_path
+
+    # 写入已有状态：capture_mode 为 on
+    write_collect_state(root, {
+        "capture_mode": "on",
+        "session_id": "prd-session-test-456",
+        "agent": "claude-code",
+        "started_at": "2025-01-01T00:00:00Z",
+    })
+
+    # 调用 cmd_stop
+    module.cmd_stop(root, "claude-code", project)
+
+    # 验证输出包含精炼提示
+    captured = capsys.readouterr()
+    assert "/prd-refine" in captured.out, "应该提示可以用 /prd-refine"

@@ -63,7 +63,21 @@ def cmd_start(root: Path, agent: str, project: Path, docs_root: str):
         print(f"Already capturing (session: {state.get('session_id', 'unknown')})")
         if agent == "claude-code":
             print("Claude Code hooks verified.")
-        print("Use '/prd-pause' to pause or '/prd-stop' to stop first.")
+        print("Use '/prd-stop' to stop first.")
+        return
+
+    # 复用已有 session（stop 后再 start）
+    existing_session_id = state.get("session_id", "")
+    if existing_session_id and state.get("capture_mode") == "off":
+        state["capture_mode"] = "on"
+        state["agent"] = agent
+        state["resumed_at"] = now_iso()
+        state["ended_at"] = ""
+        write_collect_state(root, state)
+        sync_claude_hooks(project, docs_root, agent, True)
+        print(f"PRD Capture Session resumed: {existing_session_id}")
+        print(f"Agent: {agent}")
+        print(f"Capture mode: on")
         return
 
     session_id = f"prd-session-{now_id()}"
@@ -187,7 +201,7 @@ def cmd_stop(root: Path, agent: str, project: Path):
 
     print(f"Session stopped: {state.get('session_id')}")
     print(f"Summary written to: {summary_file}")
-    print("Run 'check-collect.py' to verify collect is ready for refine.")
+    print("可以用 `/prd-refine` 开始精炼。")
 
 
 def cmd_status(root: Path):
