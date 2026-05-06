@@ -8,8 +8,6 @@
   "commands": [
     "./commands/prd-helper.md",
     "./commands/prd-start.md",
-    "./commands/prd-pause.md",
-    "./commands/prd-resume.md",
     "./commands/prd-stop.md",
     "./commands/prd-status.md",
     "./commands/prd-scan.md",

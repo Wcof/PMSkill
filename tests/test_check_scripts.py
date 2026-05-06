@@ -175,12 +175,6 @@ def test_collect_control_toggles_claude_hooks(tmp_path: Path):
     assert "claude-capture-hook.py" in settings["hooks"]["UserPromptSubmit"][0]["hooks"][0]["command"]
     assert "claude-capture-hook.py" in settings["hooks"]["Stop"][0]["hooks"][0]["command"]
 
-    module.cmd_pause(root, "claude-code", tmp_path)
-    assert "claude-capture-hook.py" not in settings_file.read_text()
-
-    module.cmd_resume(root, "claude-code", tmp_path, "docs/prd-helper")
-    assert "claude-capture-hook.py" in settings_file.read_text()
-
     module.cmd_stop(root, "claude-code", tmp_path)
     assert "claude-capture-hook.py" not in settings_file.read_text()
 

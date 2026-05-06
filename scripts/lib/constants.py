@@ -7,8 +7,6 @@ DEFAULT_PRD_ROOT = "docs/prd-helper"
 # 这里列出初始化后由脚本生成的 Claude Code 原子命令。
 COMMAND_NAMES = (
     "prd-start",
-    "prd-pause",
-    "prd-resume",
     "prd-stop",
     "prd-status",
     "prd-scan",

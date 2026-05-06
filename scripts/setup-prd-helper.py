@@ -29,8 +29,6 @@ ADAPTER_FILES = {
 # /prd-helper 同时写成项目级命令，作为 Claude Code skill 入口补全不刷新时的兜底。
 _COLLECT_DESCRIPTIONS = {
     "start": "开启 PRD Helper 主动采集",
-    "pause": "暂停 PRD Helper 主动采集",
-    "resume": "恢复 PRD Helper 主动采集",
     "stop": "停止 PRD Helper 主动采集并生成摘要",
     "status": "查看 PRD Helper 采集状态",
     "scan": "扫描所有 AI 工具的项目 session 并批量采集",
@@ -276,10 +274,8 @@ def main() -> int:
             "",
             "## 指令（Commands）",
             "",
-            "- `/prd-start`：开启显式主动采集（active capture）",
-            "- `/prd-pause`：暂停主动采集",
-            "- `/prd-resume`：恢复主动采集",
-            "- `/prd-stop`：停止主动采集并生成采集摘要",
+            "- `/prd-start`：开启显式主动采集（active capture），支持 session 续接",
+            "- `/prd-stop`：停止主动采集并生成采集摘要，提示可用 `/prd-refine` 精炼",
             "- `/prd-status`：查看采集状态",
             "- `/prd-grill`：开启 Grill 战斗模式 — 压力测试产品方案",
             "- `/prd-remove`：从当前项目卸载 PRD Helper",
@@ -360,7 +356,7 @@ def main() -> int:
             print(f"- {path}")
     if codex_plugin_dir:
         print(f"已安装 Codex 插件：{codex_plugin_dir}")
-    print("下一步：准备采集产品上下文时，在 Agent 中发送 /prd-start；Hook 会在 start/resume 时启用，在 pause/stop 时清理。")
+    print("下一步：准备采集产品上下文时，在 Agent 中发送 /prd-start；Hook 会在 start 时启用，在 stop 时清理。")
     return 0
 
 

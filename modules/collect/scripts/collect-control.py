@@ -117,35 +117,6 @@ def cmd_start(root: Path, agent: str, project: Path, docs_root: str):
     print(f"Capture mode: on")
 
 
-def cmd_pause(root: Path, agent: str, project: Path):
-    """Pause the current PRD Capture Session."""
-    state = read_collect_state(root)
-    if state.get("capture_mode") != "on":
-        print(f"Cannot pause: current mode is '{state.get('capture_mode', 'off')}'")
-        return
-
-    state["capture_mode"] = "paused"
-    state["paused_at"] = now_iso()
-    state["grill_mode"] = "off"
-    write_collect_state(root, state)
-    sync_claude_hooks(project, "", agent, False)
-    print(f"Session paused: {state.get('session_id')}")
-
-
-def cmd_resume(root: Path, agent: str, project: Path, docs_root: str):
-    """Resume the current PRD Capture Session."""
-    state = read_collect_state(root)
-    if state.get("capture_mode") != "paused":
-        print(f"Cannot resume: current mode is '{state.get('capture_mode', 'off')}'")
-        return
-
-    state["capture_mode"] = "on"
-    state["resumed_at"] = now_iso()
-    write_collect_state(root, state)
-    sync_claude_hooks(project, docs_root, agent, True)
-    print(f"Session resumed: {state.get('session_id')}")
-
-
 def _run_scan(root: Path, project: Path, agent: str) -> int:
     """Run scan-all-sessions.py and return its exit code."""
     scan_script = Path(__file__).resolve().parent / "scan-all-sessions.py"
@@ -226,7 +197,7 @@ def cmd_scan(root: Path, project: Path, agent: str):
 
 def main():
     parser = argparse.ArgumentParser(description="PRD Collect Control")
-    parser.add_argument("command", choices=["start", "pause", "resume", "stop", "status", "scan"])
+    parser.add_argument("command", choices=["start", "stop", "status", "scan"])
     parser.add_argument("--root", default=DEFAULT_COLLECT_ROOT, help="Collect root directory")
     parser.add_argument("--project", default=".", help="Project root directory")
     parser.add_argument("--docs-root", default=DEFAULT_PRD_ROOT, help="PRD Helper docs root directory")
@@ -238,8 +209,6 @@ def main():
 
     commands = {
         "start": lambda: cmd_start(root, args.agent, project, args.docs_root),
-        "pause": lambda: cmd_pause(root, args.agent, project),
-        "resume": lambda: cmd_resume(root, args.agent, project, args.docs_root),
         "stop": lambda: cmd_stop(root, args.agent, project),
         "status": lambda: cmd_status(root),
         "scan": lambda: cmd_scan(root, project, args.agent),

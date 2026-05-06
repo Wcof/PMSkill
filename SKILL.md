@@ -18,7 +18,7 @@ allowed-tools: Bash
 - 如果用户主要使用英文，默认使用英文，并在第一次出现关键模块时保留中文括注。
 - 如果用户中英混合，使用中英双语关键字段，正文跟随用户主要语言。
 - 如果无法判断用户偏好，在第一次响应时询问：`请选择语言 / Choose language: 中文 or English`。
-- `/prd-helper`、`/prd-start`、`/prd-grill`、`/prd-status`、`/prd-remove` 的提示必须跟随上述语言策略。
+- `/prd-helper`、`/prd-start`、`/prd-stop`、`/prd-grill`、`/prd-status`、`/prd-remove` 的提示必须跟随上述语言策略。
 
 在项目中使用前，先安装完整的 `prd-helper` Skill。
 
@@ -31,7 +31,7 @@ allowed-tools: Bash
 - 如果 `docs/prd-helper/prd-helper-config.md` 不存在，视为未初始化。
 - 如果当前项目缺少 `CLAUDE.md` 或 `AGENTS.md` 中的 PRD Helper 配置块，也应补写配置块。
 - 如果当前 Agent 是 Claude Code，还必须创建 `.claude/commands/prd-start.md`、`.claude/commands/prd-status.md` 等命令文件，让 `/prd-start` 成为真实可见的斜杠命令。
-- 如果当前 Agent 是 Claude Code，`/prd-start` 与 `/prd-resume` 必须写入 `.claude/settings.json` 中的 `UserPromptSubmit` 与 `Stop` hooks，让会话轮次自动落盘；`/prd-pause` 与 `/prd-stop` 必须清理这些 hooks。
+- 如果当前 Agent 是 Claude Code，`/prd-start` 必须写入 `.claude/settings.json` 中的 `UserPromptSubmit` 与 `Stop` hooks，让会话轮次自动落盘；`/prd-stop` 必须清理这些 hooks。
 - 如果 docs 配置已存在但 `.claude/commands/prd-start.md` 不存在，视为半初始化，必须重新执行 setup 修复。
 
 默认自动初始化命令：
@@ -64,7 +64,7 @@ npx skills@latest add Wcof/PRDContextEngine
 /prd-helper
 ```
 
-Agent 应自动初始化当前项目，默认使用 `docs/prd-helper/`、启用已安装 Agent，并设置采集策略为只通过 `/prd-start` 显式开启。初始化完成后，Claude Code 项目会生成 `/prd-start`、`/prd-pause`、`/prd-resume`、`/prd-stop`、`/prd-status`、`/prd-remove`。
+Agent 应自动初始化当前项目，默认使用 `docs/prd-helper/`、启用已安装 Agent，并设置采集策略为只通过 `/prd-start` 显式开启。初始化完成后，Claude Code 项目会生成 `/prd-start`、`/prd-stop`、`/prd-status`、`/prd-remove`。
 
 通过斜杠命令从当前项目卸载：
 
@@ -116,10 +116,8 @@ npx skills@latest remove prd-helper --agent '*' --global -y
 | Command | Action |
 |---------|--------|
 | `/prd-helper` | 初始化当前项目：创建 docs 根目录、写入配置、准备采集目录、生成后续命令文件。 |
-| `/prd-start` | 开启 PRD 采集会话。创建 `collect-state.md`、`active/`、`passive/`、`source-index.md`，设置 `capture_mode: on`，并启用 Claude Code hooks 自动采集后续完整会话轮次。 |
-| `/prd-pause` | 暂停当前采集会话，设置 `capture_mode: paused`，清理 Claude Code hooks，停止写入会话轮次。 |
-| `/prd-resume` | 恢复当前采集会话，设置 `capture_mode: on`，重新启用 Claude Code hooks。 |
-| `/prd-stop` | 停止当前采集会话，设置 `capture_mode: off`，清理 Claude Code hooks，生成 `collect-summary.md` 和 `check.md`。 |
+| `/prd-start` | 开启 PRD 采集会话。创建 `collect-state.md`、`active/`、`passive/`、`source-index.md`，设置 `capture_mode: on`，并启用 Claude Code hooks 自动采集后续完整会话轮次。支持 session 续接：stop 后再 start 复用同一 session。 |
+| `/prd-stop` | 停止当前采集会话，设置 `capture_mode: off`，清理 Claude Code hooks，生成 `collect-summary.md` 和 `check.md`。提示可用 `/prd-refine` 开始精炼。 |
 | `/prd-status` | 从 `collect-state.md` 查看当前采集状态。 |
 | `/prd-grill` | 开启 Grill 战斗模式：扫描已采集材料找矛盾，持续压力测试产品方案，实时更新 CONTEXT.md，按需创建 ADR。需先 `/prd-start`。 |
 | `/prd-remove` | 从当前项目卸载 PRD Helper：先清理 Agent 配置块，再卸载 Skill。 |
