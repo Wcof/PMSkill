@@ -1,53 +1,73 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
-  <title id="title">PRD Helper 项目介绍图</title>
-  <desc id="desc">展示 PRD Helper 的价值、四模块流程和快速使用方式</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1440" viewBox="0 0 1080 1440" role="img" aria-labelledby="title desc">
+  <title id="title">PRD Helper 小红书项目介绍图</title>
+  <desc id="desc">适合小红书传播的 PRD Helper 项目介绍竖版海报</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#0b1220"/>
-      <stop offset="100%" stop-color="#111827"/>
+      <stop offset="0%" stop-color="#fff7ed"/>
+      <stop offset="45%" stop-color="#eef2ff"/>
+      <stop offset="100%" stop-color="#ecfeff"/>
     </linearGradient>
-    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#111b2e"/>
-      <stop offset="100%" stop-color="#17243c"/>
+    <linearGradient id="hero" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ef4444"/>
+      <stop offset="48%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#0891b2"/>
     </linearGradient>
     <style>
-      .h1 { font: 700 62px -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; fill: #f8fafc; }
-      .h2 { font: 600 28px -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; fill: #cbd5e1; }
-      .b { font: 600 24px -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; fill: #e2e8f0; }
-      .t { font: 500 21px -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; fill: #cbd5e1; }
-      .code { font: 600 21px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; fill: #93c5fd; }
-      .tag { font: 600 18px -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; fill: #dbeafe; }
+      .title { font: 800 82px -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; fill: #111827; letter-spacing: 0; }
+      .subtitle { font: 700 42px -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; fill: #111827; letter-spacing: 0; }
+      .body { font: 600 32px -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; fill: #334155; letter-spacing: 0; }
+      .small { font: 600 26px -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; fill: #475569; letter-spacing: 0; }
+      .tag { font: 800 28px -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; fill: #ffffff; letter-spacing: 0; }
+      .code { font: 700 25px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; fill: #1d4ed8; letter-spacing: 0; }
     </style>
   </defs>
 
-  <rect width="1280" height="640" fill="url(#bg)"/>
-  <rect x="34" y="34" width="1212" height="572" rx="18" fill="url(#card)" stroke="#334155" stroke-width="1.5"/>
+  <rect width="1080" height="1440" fill="url(#bg)"/>
 
-  <text x="80" y="128" class="h1">PRD Helper</text>
-  <text x="80" y="172" class="h2">One Skill · Four Modules · Traceable PRD Workflow</text>
+  <rect x="66" y="64" width="948" height="1312" rx="36" fill="#ffffff" stroke="#e2e8f0" stroke-width="3"/>
 
-  <text x="80" y="250" class="b">项目价值</text>
-  <text x="80" y="290" class="t">把分散的产品上下文，转成可追溯、可检查、可复用的结构化 PRD 资产。</text>
+  <text x="108" y="168" class="title">PRD Helper</text>
+  <text x="108" y="228" class="subtitle">别再让需求散落在聊天里</text>
 
-  <text x="80" y="360" class="b">快速使用</text>
-  <text x="80" y="398" class="code">npx skills@latest add Wcof/PRDContextEngine</text>
-  <text x="80" y="433" class="code">/prd-helper → /prd-start → Collect → Refine → Relate → Generate</text>
+  <rect x="108" y="278" width="864" height="112" rx="24" fill="url(#hero)"/>
+  <text x="146" y="324" class="tag">一句话讲清楚</text>
+  <text x="146" y="362" class="tag">把会议、聊天、旧文档变成可追溯 PRD</text>
 
-  <g transform="translate(760,210)">
-    <rect x="0" y="0" width="430" height="310" rx="14" fill="#0c1628" stroke="#334155"/>
-    <text x="24" y="44" class="b">四模块流程</text>
+  <text x="108" y="468" class="subtitle">解决什么问题？</text>
+  <text x="132" y="528" class="body">需求资料太散，最后没人说得清来源</text>
+  <text x="132" y="582" class="body">AI 直接写 PRD，容易漏项和幻觉</text>
+  <text x="132" y="636" class="body">产品、研发、测试看到的上下文不一致</text>
 
-    <rect x="24" y="70" width="170" height="46" rx="8" fill="#1d4ed8"/><text x="44" y="100" class="tag">01 Collect 采集</text>
-    <rect x="224" y="70" width="170" height="46" rx="8" fill="#0f766e"/><text x="244" y="100" class="tag">02 Refine 精炼</text>
-    <rect x="24" y="136" width="170" height="46" rx="8" fill="#7c3aed"/><text x="44" y="166" class="tag">03 Relate 关联</text>
-    <rect x="224" y="136" width="170" height="46" rx="8" fill="#b45309"/><text x="244" y="166" class="tag">04 Generate 生成</text>
+  <text x="108" y="742" class="subtitle">四步工作流</text>
 
-    <path d="M194 93 H224" stroke="#94a3b8" stroke-width="3"/>
-    <path d="M109 116 V136" stroke="#94a3b8" stroke-width="3"/>
-    <path d="M309 116 V136" stroke="#94a3b8" stroke-width="3"/>
-    <path d="M194 159 H224" stroke="#94a3b8" stroke-width="3"/>
+  <g transform="translate(108,790)">
+    <rect x="0" y="0" width="186" height="118" rx="22" fill="#2563eb"/>
+    <text x="30" y="50" class="tag">采集</text>
+    <text x="30" y="86" class="tag">Collect</text>
 
-    <text x="24" y="232" class="t">输出目录：docs/prd-helper/</text>
-    <text x="24" y="268" class="t">命令入口：/prd-helper</text>
+    <rect x="226" y="0" width="186" height="118" rx="22" fill="#0f766e"/>
+    <text x="256" y="50" class="tag">精炼</text>
+    <text x="256" y="86" class="tag">Refine</text>
+
+    <rect x="452" y="0" width="186" height="118" rx="22" fill="#7c3aed"/>
+    <text x="482" y="50" class="tag">关联</text>
+    <text x="482" y="86" class="tag">Relate</text>
+
+    <rect x="678" y="0" width="186" height="118" rx="22" fill="#ea580c"/>
+    <text x="708" y="50" class="tag">生成</text>
+    <text x="708" y="86" class="tag">Generate</text>
+
+    <path d="M194 59 H220" stroke="#64748b" stroke-width="8" stroke-linecap="round"/>
+    <path d="M420 59 H446" stroke="#64748b" stroke-width="8" stroke-linecap="round"/>
+    <path d="M646 59 H672" stroke="#64748b" stroke-width="8" stroke-linecap="round"/>
   </g>
+
+  <text x="108" y="1018" class="subtitle">怎么用？</text>
+  <rect x="108" y="1052" width="864" height="178" rx="24" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="142" y="1108" class="code">npx skills@latest add Wcof/PRDContextEngine</text>
+  <text x="142" y="1164" class="code">/prd-helper  →  /prd-start</text>
+  <text x="142" y="1210" class="small">然后按 Collect → Refine → Relate → Generate 推进</text>
+
+  <text x="108" y="1302" class="small">适合：产品经理 / 独立开发者 / AI 编程工作流</text>
+  <text x="108" y="1346" class="small">GitHub: Wcof/PRDContextEngine</text>
 </svg>

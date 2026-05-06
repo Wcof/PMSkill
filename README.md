@@ -1,111 +1,86 @@
 # PRD Helper
 
-![PRD Helper 项目导览图](support/assets/prd-helper-project-overview.svg)
+[中文](README.md) | [English](README.en.md)
 
-[中文](#中文) | [English](#english)
+![PRD Helper 项目介绍图](support/assets/prd-helper-project-overview.svg)
 
----
+## 一句话价值
 
-## 中文
+PRD Helper 把分散在会议、聊天、评审和旧文档里的产品上下文，沉淀成可追溯、可检查、可复用的结构化 PRD 资产。
 
-### 一句话价值
+## 它解决什么问题
 
-PRD Helper 把分散的产品讨论与文档，转成可追溯、可检查、可复用的结构化 PRD 资产，减少需求丢失和跨角色沟通成本。
+很多团队不是没有需求资料，而是资料散、来源乱、版本多，最后 PRD 变成“谁记得就听谁的”。PRD Helper 的目标是让 Agent 和团队先保存原始材料，再精炼信息、建立关系，最后生成 PRD，避免直接让 AI 从碎片聊天里凭感觉写文档。
 
-### 这个项目解决什么问题
-
-- 原始材料很散：会议纪要、聊天记录、评审结论、旧文档分布在多处。
-- 需求不可追溯：最后 PRD 很难回溯“这条规则从哪来”。
-- AI 直接生成容易幻觉：跳过采集和精炼会导致误解和漏项。
-- 团队协作不一致：产品、研发、测试看到的上下文版本不统一。
-
-### 核心能力（功能 + 用处）
+## 核心功能
 
 | 功能 | 用处 | 解决的问题 |
 |---|---|---|
-| `/prd-helper` 初始化 | 幂等创建项目配置、命令、采集目录 | 安装后命令不可用、项目未就绪 |
-| `/prd-start` `/prd-pause` `/prd-resume` `/prd-stop` | 显式控制主动采集状态，并维护采集状态文件 | 采集边界不清、会话遗漏 |
-| Claude Hook 自动记录（start/resume 时启用） | 自动落盘 User Query + Agent Answer | 人工复制粘贴成本高、遗漏多 |
-| `/prd-scan` 批量扫描 | 扫描多工具历史 session 进入采集池 | 历史上下文不连续 |
-| 被动材料目录 `01-collect/passive/` | 手工投放会议纪要/评审记录/旧 PRD | 非会话材料无法纳管 |
-| 四模块流程（Collect/Refine/Relate/Generate） | 先收集、再提炼、再建关系、最后生成 | 直接生成 PRD 的质量波动 |
-| 各阶段 check 脚本 | 每个阶段都有可执行检查 | 文档完整性和可追溯性无法验证 |
-| `/prd-grill` 压力测试模式 | 对采集内容做矛盾/模糊点挑战，更新 CONTEXT/ADR | 术语不清、决策未固化 |
-| `/prd-remove` 卸载 | 清理项目配置和命令入口 | 安装残留与污染 |
+| 项目初始化 `/prd-helper` | 创建配置、目录和后续命令 | 安装后项目还不能直接用 |
+| 主动采集 `/prd-start` | 开始记录后续产品讨论 | 关键会话容易遗漏 |
+| 暂停/恢复/停止采集 | 控制采集边界并清理 Hook | 采集范围不清、误采集 |
+| 批量扫描 `/prd-scan` | 导入历史 Agent 会话 | 旧上下文无法进入流程 |
+| 被动材料目录 | 手动放入会议纪要、旧 PRD、客户反馈 | 非聊天材料无法统一管理 |
+| 四模块流程 | Collect -> Refine -> Relate -> Generate | 直接生成 PRD 容易漏项和幻觉 |
+| 检查脚本 | 每个阶段都能被验证 | 产物不可审计 |
+| Grill 模式 `/prd-grill` | 质询模糊概念和冲突点 | 术语不清、决策没沉淀 |
+| 卸载 `/prd-remove` | 清理命令、配置和 Hook | 项目被安装残留污染 |
 
-### 项目结构（你会常用到的）
+## 快速开始
 
-```text
-PRDContextEngine/
-├── SKILL.md
-├── modules/
-│   ├── collect/
-│   ├── refine/
-│   ├── relate/
-│   └── generate/
-├── commands/
-│   ├── prd-helper.md
-│   ├── prd-start.md ... prd-remove.md
-├── scripts/
-│   ├── setup-prd-helper.py
-│   ├── remove-prd-helper.py
-│   └── lib/
-└── support/assets/
-```
-
-### 怎么用（推荐路径）
-
-#### 1) 安装
+### 1. 安装 Skill
 
 ```bash
 npx skills@latest add Wcof/PRDContextEngine
 ```
 
-> 安装器界面通常是英文：`↑/↓` 移动，`Space` 勾选，`Enter` 确认。
+安装器里用 `↑/↓` 移动，`Space` 勾选，`Enter` 确认。选择 `prd-helper`，并选择你要安装到的 Agent，例如 Claude Code 或 Codex。
 
-#### 2) 初始化（首次必做）
+### 2. 初始化当前项目
 
-在 Agent 会话中执行：
+在 Agent 会话中输入：
 
 ```text
 /prd-helper
 ```
 
-初始化后应可见（或可执行）命令：
+初始化会创建默认目录 `docs/prd-helper/`，并生成后续命令。
+
+### 3. 使用采集命令
 
 ```text
-/prd-start   # 开启主动采集（开始记录会话）
-/prd-pause   # 暂停主动采集（临时停止记录）
-/prd-resume  # 恢复主动采集（继续记录）
-/prd-stop    # 停止采集并生成采集摘要/检查
-/prd-status  # 查看当前采集状态（on/paused/off）
-/prd-scan    # 扫描并导入历史会话（多工具）
-/prd-grill   # 进入压力测试模式（挑战矛盾与模糊点）
+/prd-start   # 开启主动采集，开始记录产品讨论
+/prd-pause   # 暂停主动采集，临时停止记录并清理 Hook
+/prd-resume  # 恢复主动采集，继续记录
+/prd-stop    # 停止采集，生成采集摘要和检查结果
+/prd-status  # 查看当前采集状态
+/prd-scan    # 扫描历史 Agent 会话并导入采集池
+/prd-grill   # 进入压力测试模式，挑战矛盾和模糊点
 /prd-remove  # 卸载 PRD Helper 并清理项目配置
 ```
 
-#### 3) 开始采集
+主动采集内容会进入：
 
 ```text
-/prd-start
+docs/prd-helper/01-collect/active/
 ```
 
-- 主动会话会进入 `docs/prd-helper/01-collect/active/`
-- 被动材料放入 `docs/prd-helper/01-collect/passive/`
-- 历史会话补采可用：
+手动材料放入：
 
 ```text
-/prd-scan
+docs/prd-helper/01-collect/passive/
 ```
 
-#### 4) 按四模块推进
+## 四模块工作流
 
-1. Collect: `modules/collect/guide.md`
-2. Refine: `modules/refine/guide.md`
-3. Relate: `modules/relate/guide.md`
-4. Generate: `modules/generate/guide.md`
+| 模块 | 目录 | 产物目标 |
+|---|---|---|
+| Collect 采集 | `modules/collect/` | 保存原始材料、建立索引、轻量标记噪音 |
+| Refine 精炼 | `modules/refine/` | 提炼事实、决策、约束、问题、推断 |
+| Relate 关联 | `modules/relate/` | 建立事实、页面、规则、数据、验收之间的关系 |
+| Generate 生成 | `modules/generate/` | 生成给产品、研发、测试使用的 PRD 上下文 |
 
-#### 5) 运行检查（示例）
+## 检查命令
 
 ```bash
 python3 modules/collect/scripts/check-collect.py --root docs/prd-helper/01-collect
@@ -115,134 +90,19 @@ python3 modules/generate/scripts/check-generated.py docs/prd-helper
 python3 scripts/check-structure.py docs/prd-helper
 ```
 
-### 常见问题（快速排错）
+## 常见问题
 
-- 只看到 `/prd-helper`，没有 `/prd-start`：先执行一次 `/prd-helper` 完成项目初始化；必要时重开会话刷新命令列表。
-- 安装后命令没出现：确认当前目录是项目目录，且安装时选中了目标 Agent。
-- 采集没写入：确认已 `/prd-start`，`/prd-status` 为 `on`，并检查 `docs/prd-helper/01-collect/collect-state.md`。
+只看到 `/prd-helper`，没有 `/prd-start`：先执行一次 `/prd-helper` 完成项目初始化。Claude Code 有时需要重开会话刷新命令列表。
 
-### 开源协作与治理文件
+采集没有写入：先运行 `/prd-status`，确认状态是 `on`；再检查 `docs/prd-helper/01-collect/collect-state.md`。
+
+不想继续使用：运行 `/prd-remove`，它会清理项目配置、命令和 Hook，但默认保留已经生成的 `docs/prd-helper/` 文档。
+
+## 开源协作
 
 - 贡献指南：`CONTRIBUTING.md`
 - 行为准则：`CODE_OF_CONDUCT.md`
 - 安全策略：`SECURITY.md`
 - 支持方式：`SUPPORT.md`
 - 版本记录：`CHANGELOG.md`
-- Issue/PR 模板与 CI：`.github/`
 - GitHub 介绍图 Prompt 指南：`docs/github-project-kit.md`
-
----
-
-## English
-
-### One-line Value
-
-PRD Helper turns scattered product discussions and docs into traceable, checkable, reusable PRD assets, reducing requirement loss and cross-team misalignment.
-
-### What Problem This Solves
-
-- Raw context is fragmented across meetings, chats, reviews, and legacy docs.
-- Final PRDs are often not traceable to source evidence.
-- Direct AI generation can hallucinate when collection/refinement is skipped.
-- Product, engineering, and QA frequently work from different context versions.
-
-### Core Capabilities (Feature + Why It Matters)
-
-| Feature | Why it matters | Problem solved |
-|---|---|---|
-| `/prd-helper` init | Idempotent setup of config, commands, and folders | Skill installed but project not ready |
-| `/prd-start` `/prd-pause` `/prd-resume` `/prd-stop` | Explicit control of active capture lifecycle | Unclear capture boundaries |
-| Claude hook auto-capture | Writes User Query + Agent Answer to docs | Manual copy/paste loss |
-| `/prd-scan` batch import | Imports historical sessions from multiple tools | Broken historical continuity |
-| Passive intake folder | Drop meeting notes / feedback / old PRDs | Non-chat sources unmanaged |
-| 4-stage workflow | Collect -> Refine -> Relate -> Generate | Quality drift from direct generation |
-| Stage checks | Scripted validation per stage | No quality gate for outputs |
-| `/prd-grill` mode | Challenge ambiguities and contradictions, update CONTEXT/ADR | Vague terminology, weak decisions |
-| `/prd-remove` uninstall | Cleans project-level setup and command entries | Residual config pollution |
-
-### Project Layout
-
-```text
-PRDContextEngine/
-├── SKILL.md
-├── modules/{collect,refine,relate,generate}
-├── commands/
-├── scripts/
-└── support/assets/
-```
-
-### How to Use
-
-#### 1) Install
-
-```bash
-npx skills@latest add Wcof/PRDContextEngine
-```
-
-#### 2) Initialize (required once per project)
-
-Run in your agent session:
-
-```text
-/prd-helper
-```
-
-Then you should have:
-
-```text
-/prd-start   # Start active capture
-/prd-pause   # Pause active capture
-/prd-resume  # Resume active capture
-/prd-stop    # Stop capture and generate summary/check
-/prd-status  # Show current capture state
-/prd-scan    # Import historical sessions from tools
-/prd-grill   # Run challenge/grill mode
-/prd-remove  # Uninstall and clean project config
-```
-
-#### 3) Start collection
-
-```text
-/prd-start
-```
-
-- Active chat capture goes to `docs/prd-helper/01-collect/active/`
-- Passive files go to `docs/prd-helper/01-collect/passive/`
-- Import existing sessions with:
-
-```text
-/prd-scan
-```
-
-#### 4) Execute the 4 modules
-
-1. Collect: `modules/collect/guide.md`
-2. Refine: `modules/refine/guide.md`
-3. Relate: `modules/relate/guide.md`
-4. Generate: `modules/generate/guide.md`
-
-#### 5) Run checks (example)
-
-```bash
-python3 modules/collect/scripts/check-collect.py --root docs/prd-helper/01-collect
-python3 modules/refine/scripts/check-refine.py docs/prd-helper
-python3 modules/relate/scripts/check-relate.py docs/prd-helper
-python3 modules/generate/scripts/check-generated.py docs/prd-helper
-python3 scripts/check-structure.py docs/prd-helper
-```
-
-### Troubleshooting
-
-- Only `/prd-helper` appears: run `/prd-helper` once to initialize project commands, then reopen session if needed.
-- Commands not visible after install: confirm you installed to the current agent and current project scope.
-- No capture output: verify `/prd-status` is `on` and inspect `docs/prd-helper/01-collect/collect-state.md`.
-
-### Open-source Governance Files
-
-- Contributing: `CONTRIBUTING.md`
-- Code of Conduct: `CODE_OF_CONDUCT.md`
-- Security Policy: `SECURITY.md`
-- Support: `SUPPORT.md`
-- Changelog: `CHANGELOG.md`
-- Issue/PR templates and CI: `.github/`
-- GitHub cover prompt guide: `docs/github-project-kit.md`
