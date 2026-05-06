@@ -380,6 +380,20 @@ def test_bootstrap_file_does_not_exist():
     assert not bootstrap_path.exists(), "bootstrap.py 应该被删除，所有脚本使用内联 sys.path 引导"
 
 
+def test_get_entity_returns_correct_type():
+    """get_entity() 应该按前缀名返回正确的 EntityType。"""
+    from scripts.lib.id_registry import get_entity, FACT, RELATE_ENTITIES
+
+    assert get_entity("fact") is FACT
+    assert get_entity("page").source_module == "relate"
+
+    try:
+        get_entity("nonexistent")
+        assert False, "Should have raised KeyError"
+    except KeyError:
+        pass
+
+
 def test_module_scripts_do_not_contain_inline_bootstrap():
     """模块脚本不应包含内联的 sys.path 引导代码。"""
     bootstrap_pattern = "for _parent in Path(__file__).resolve().parents:"

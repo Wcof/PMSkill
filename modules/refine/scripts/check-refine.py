@@ -11,7 +11,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(next(p / "scripts" for p in Path(__file__).resolve().parents if (p / "scripts" / "lib").exists())))  # noqa: E501
 
-from lib.id_registry import REFINE_ENTITIES, FACT, DECISION, CONSTRAINT, CONFLICT, ASSUMPTION
+from lib.id_registry import REFINE_ENTITIES, get_entity
 from lib.markdown_util import has_field, extract_template_sections
 from lib.constants import DEFAULT_PRD_ROOT
 from lib.template_path import module_template_path
@@ -69,7 +69,7 @@ def check_refine(root: Path) -> dict:
             file_result["items"].append({"id": item_id, "missing": missing})
         result["files"][entity.filename] = file_result
 
-    for entity in (FACT, DECISION, CONSTRAINT, CONFLICT, ASSUMPTION):
+    for entity in (get_entity(n) for n in ("fact", "decision", "constraint", "conflict", "assumption")):
         data = result["files"].get(entity.filename, {})
         items = data.get("items", [])
         result["traceability"][entity.filename] = {

@@ -11,19 +11,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(next(p / "scripts" for p in Path(__file__).resolve().parents if (p / "scripts" / "lib").exists())))  # noqa: E501
 
-from lib.id_registry import (
-    FACT,
-    QUESTION,
-    CONFLICT,
-    ASSUMPTION,
-    PAGE,
-    FEATURE,
-    RULE,
-    DATA,
-    ACCEPTANCE,
-    RELATE_ENTITIES,
-    RELATION_CHAIN_RULES,
-)
+from lib.id_registry import RELATE_ENTITIES, RELATION_CHAIN_RULES, get_entity
 from lib.constants import DEFAULT_PRD_ROOT
 from lib.check_framework import CheckWriter
 
@@ -38,24 +26,34 @@ def check_relate(root: Path) -> dict:
     context = _read(relate_dir / "context-map.md")
     all_relate_text = "\n".join(_read(relate_dir / entity.filename) for entity in RELATE_ENTITIES)
 
-    facts = FACT.extract_ids(_read(refine_dir / "facts.md"))
-    questions = QUESTION.extract_ids(_read(refine_dir / "questions.md"))
-    conflicts = CONFLICT.extract_ids(_read(refine_dir / "conflicts.md"))
-    assumptions = ASSUMPTION.extract_ids(_read(refine_dir / "assumptions.md"))
+    fact = get_entity("fact")
+    question = get_entity("question")
+    conflict = get_entity("conflict")
+    assumption = get_entity("assumption")
+    page = get_entity("page")
+    feature = get_entity("feature")
+    rule = get_entity("rule")
+    data = get_entity("data")
+    acceptance = get_entity("acceptance")
+
+    facts = fact.extract_ids(_read(refine_dir / "facts.md"))
+    questions = question.extract_ids(_read(refine_dir / "questions.md"))
+    conflicts = conflict.extract_ids(_read(refine_dir / "conflicts.md"))
+    assumptions = assumption.extract_ids(_read(refine_dir / "assumptions.md"))
 
     entity_ids = {
         "facts": facts,
-        "pages": PAGE.extract_ids(all_relate_text),
-        "features": FEATURE.extract_ids(all_relate_text),
-        "rules": RULE.extract_ids(all_relate_text),
-        "data": DATA.extract_ids(all_relate_text),
-        "acceptance": ACCEPTANCE.extract_ids(all_relate_text),
+        "pages": page.extract_ids(all_relate_text),
+        "features": feature.extract_ids(all_relate_text),
+        "rules": rule.extract_ids(all_relate_text),
+        "data": data.extract_ids(all_relate_text),
+        "acceptance": acceptance.extract_ids(all_relate_text),
     }
 
-    mapped_facts = FACT.extract_ids(all_relate_text + "\n" + context)
-    mapped_questions = QUESTION.extract_ids(all_relate_text + "\n" + context)
-    mapped_conflicts = CONFLICT.extract_ids(all_relate_text + "\n" + context)
-    mapped_assumptions = ASSUMPTION.extract_ids(all_relate_text + "\n" + context)
+    mapped_facts = fact.extract_ids(all_relate_text + "\n" + context)
+    mapped_questions = question.extract_ids(all_relate_text + "\n" + context)
+    mapped_conflicts = conflict.extract_ids(all_relate_text + "\n" + context)
+    mapped_assumptions = assumption.extract_ids(all_relate_text + "\n" + context)
 
     return {
         "relate_exists": relate_dir.exists(),
@@ -67,10 +65,10 @@ def check_relate(root: Path) -> dict:
         "conflicts_mapped": bool(not conflicts or conflicts <= mapped_conflicts),
         "assumptions_mapped": bool(not assumptions or assumptions <= mapped_assumptions),
         "fact_to_page_or_feature": bool(not facts or not (facts - mapped_facts)),
-        "feature_to_rule": bool(FEATURE.extract_ids(context) and RULE.extract_ids(context)),
-        "rule_to_data": bool(RULE.extract_ids(context) and DATA.extract_ids(context)),
-        "rule_to_acceptance": bool(RULE.extract_ids(context) and ACCEPTANCE.extract_ids(context)),
-        "page_to_feature_or_rule": bool(PAGE.extract_ids(context) and (FEATURE.extract_ids(context) or RULE.extract_ids(context))),
+        "feature_to_rule": bool(feature.extract_ids(context) and rule.extract_ids(context)),
+        "rule_to_data": bool(rule.extract_ids(context) and data.extract_ids(context)),
+        "rule_to_acceptance": bool(rule.extract_ids(context) and acceptance.extract_ids(context)),
+        "page_to_feature_or_rule": bool(page.extract_ids(context) and (feature.extract_ids(context) or rule.extract_ids(context))),
     }
 
 

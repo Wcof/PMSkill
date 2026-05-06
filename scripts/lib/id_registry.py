@@ -1,4 +1,4 @@
-"""
+r"""
 ID 注册表 — 所有实体类型的唯一真实来源。
 
 脚本和模板都应引用此注册表来获取：
@@ -185,6 +185,14 @@ RELATION_CHAIN_RULES: tuple[tuple[str, str, str], ...] = (
     ("rule_to_acceptance", "每个核心规则有关联验收标准", "rule -> acceptance"),
     ("page_to_feature_or_rule", "每个核心页面有关联功能或规则", "page -> feature/rule"),
 )
+
+
+def get_entity(name: str) -> EntityType:
+    """按前缀名查找实体类型。未找到时抛出 KeyError。"""
+    try:
+        return ENTITY_BY_PREFIX[name]
+    except KeyError:
+        raise KeyError(f"Unknown entity: {name}. Known: {sorted(ENTITY_BY_PREFIX)}") from None
 
 
 def extract_all_ids(content: str) -> dict[str, set[str]]:
