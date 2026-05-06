@@ -315,6 +315,52 @@ def test_remove_prd_helper_cleans_commands_and_hooks(tmp_path: Path):
     assert "claude-capture-hook.py" not in (tmp_path / ".claude" / "settings.json").read_text()
 
 
+def test_check_generated_template_paths_resolve_to_real_files():
+    """check-generated.py 的模板路径必须指向实际存在的文件。"""
+    module = load_script("modules/generate/scripts/check-generated.py")
+
+    # page 模板路径应该存在
+    page_template = (
+        ROOT / "modules" / "generate" / "templates" / "04-generate-page-prd-template.md"
+    )
+    assert page_template.exists(), f"Page template missing: {page_template}"
+
+    # rule 模板路径应该存在
+    rule_template = (
+        ROOT / "modules" / "generate" / "templates" / "04-generate-rule-prd-template.md"
+    )
+    assert rule_template.exists(), f"Rule template missing: {rule_template}"
+
+    # check_page_completeness 内部使用的路径应该和实际路径一致
+    # 当前 bug: Path(__file__).parent.parent / "modules" / "generate" / "templates" / ...
+    # 实际解析为 modules/generate/modules/generate/templates/... (不存在)
+    script_file = ROOT / "modules" / "generate" / "scripts" / "check-generated.py"
+    buggy_path = script_file.parent.parent / "modules" / "generate" / "templates" / "04-generate-page-prd-template.md"
+    assert not buggy_path.exists(), f"Bug path should NOT exist: {buggy_path}"
+
+    # 正确路径
+    correct_path = script_file.parent.parent / "templates" / "04-generate-page-prd-template.md"
+    assert correct_path.exists(), f"Correct path should exist: {correct_path}"
+
+
+def test_check_page_completeness_detects_missing_sections(tmp_path: Path):
+    """check_page_completeness 应该能检测到页面缺少模板要求的章节。"""
+    module = load_script("modules/generate/scripts/check-generated.py")
+
+    # 创建一个缺少章节的页面文件
+    pages_dir = tmp_path / "04-generate" / "pages"
+    pages_dir.mkdir(parents=True)
+    write(pages_dir / "test-page.md", "# Test Page\n\nSome content without required sections.\n")
+
+    # 调用 check_page_completeness
+    results = module.check_page_completeness(tmp_path)
+
+    # 应该返回结果（不是空列表），并且状态为 FAIL
+    assert len(results) > 0, "check_page_completeness returned empty — template path is broken"
+    assert results[0]["status"] == "FAIL"
+    assert len(results[0]["missing_sections"]) > 0
+
+
 def test_claude_plugin_manifest_references_existing_commands():
     plugin = json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text())
     marketplace = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text())
@@ -332,3 +378,176 @@ def test_claude_plugin_manifest_references_existing_commands():
         content = path.read_text()
         assert "allowed-tools: Bash" in content
         assert "find_prd_helper_root" in content
+
+
+def test_bootstrap_sets_sys_path_for_lib_imports():
+    """bootstrap 应该让 lib.* 模块可从任意深度的脚本导入。"""
+    import importlib
+    # 清除已有的 lib 模块缓存，模拟从新脚本导入
+    to_remove = [k for k in sys.modules if k.startswith("lib.")]
+    for k in to_remove:
+        del sys.modules[k]
+    if "lib.bootstrap" in sys.modules:
+        del sys.modules["lib.bootstrap"]
+
+    # bootstrap 本身应该能从 scripts/lib/ 导入
+    spec = importlib.util.spec_from_file_location(
+        "lib.bootstrap", ROOT / "scripts" / "lib" / "bootstrap.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    # bootstrap 后 lib.state 应该可导入
+    assert "lib.state" in sys.modules or any(
+        str(ROOT / "scripts") in p for p in sys.path
+    ), "bootstrap did not add scripts/ to sys.path"
+
+
+def test_module_scripts_do_not_contain_inline_bootstrap():
+    """模块脚本不应包含内联的 sys.path 引导代码。"""
+    bootstrap_pattern = "for _parent in Path(__file__).resolve().parents:"
+    scripts = [
+        "modules/collect/scripts/collect-control.py",
+        "modules/collect/scripts/capture-source.py",
+        "modules/collect/scripts/scan-all-sessions.py",
+        "modules/collect/scripts/check-collect.py",
+        "modules/collect/scripts/scan-passive.py",
+        "modules/generate/scripts/check-generated.py",
+        "modules/refine/scripts/check-refine.py",
+        "modules/relate/scripts/check-relate.py",
+    ]
+    for script_path in scripts:
+        content = (ROOT / script_path).read_text()
+        assert bootstrap_pattern not in content, (
+            f"{script_path} still contains inline bootstrap — use `from lib.bootstrap import *` instead"
+        )
+
+
+def test_default_state_contains_all_state_keys():
+    """default_state() 应该为 STATE_KEYS 中的每个 key 提供默认值。"""
+    from scripts.lib.state import STATE_KEYS, default_state
+    state = default_state()
+    for key in STATE_KEYS:
+        assert key in state, f"default_state() missing key: {key}"
+
+
+def test_write_collect_state_warns_on_unknown_keys(tmp_path: Path):
+    """write_collect_state 应该对不在 STATE_KEYS 中的 key 发出警告。"""
+    import warnings
+    from scripts.lib.state import write_collect_state
+    state = {"capture_mode": "on", "typo_key": "bad_value"}
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        write_collect_state(tmp_path, state)
+        assert len(w) == 1
+        assert "typo_key" in str(w[0].message)
+
+
+def test_session_writer_creates_file_with_frontmatter(tmp_path: Path):
+    """session_writer 应该创建包含标准 frontmatter 的会话文件。"""
+    from scripts.lib.session_writer import create_session_file
+    session_file = create_session_file(
+        sessions_dir=tmp_path / "sessions",
+        source_id="test-001",
+        agent="claude-code",
+        session_id="sess-001",
+        turns=[("What is X?", "X is Y")],
+    )
+    assert session_file.exists()
+    content = session_file.read_text()
+    assert "source_id: test-001" in content
+    assert "agent: claude-code" in content
+    assert "## Turn 1" in content
+    assert "### User Query" in content
+    assert "What is X?" in content
+    assert "### Agent Answer" in content
+    assert "X is Y" in content
+
+
+def test_session_writer_appends_turn_to_existing(tmp_path: Path):
+    """session_writer 应该能向已有会话文件追加新轮次。"""
+    from scripts.lib.session_writer import create_session_file, append_turn
+    session_file = create_session_file(
+        sessions_dir=tmp_path / "sessions",
+        source_id="test-002",
+        agent="claude-code",
+        session_id="sess-002",
+        turns=[("Q1", "A1")],
+    )
+    append_turn(session_file, turn_index=2, user_query="Q2", agent_answer="A2")
+    content = session_file.read_text()
+    assert "## Turn 1" in content
+    assert "## Turn 2" in content
+    assert "Q2" in content
+    assert "A2" in content
+
+
+def test_check_writer_produces_valid_check_md(tmp_path: Path):
+    """CheckWriter 应该生成结构完整的 check.md。"""
+    from scripts.lib.check_framework import CheckWriter
+    output_dir = tmp_path / "02-refine"
+    w = CheckWriter(output_dir, "精炼检查")
+    w.add_meta("检查来源", "check-refine.py 自动生成")
+    w.add_meta("检查状态", "通过")
+    w.add_section("1. 文件检查", [
+        (True, "facts.md 存在"),
+        (False, "decisions.md 缺失"),
+    ])
+    w.add_conclusion(can_proceed=False, reason="decisions.md 缺失")
+    check_file = w.write()
+
+    assert check_file.exists()
+    content = check_file.read_text()
+    assert "# 精炼检查" in content
+    assert "## 0. 检查信息" in content
+    assert "检查来源" in content
+    assert "## 1. 文件检查" in content
+    assert "- [x] facts.md 存在" in content
+    assert "- [ ] decisions.md 缺失" in content
+    assert "## 结论" in content
+    assert "- [x] 不可以" in content
+
+
+def test_valid_transitions_define_lifecycle():
+    """VALID_TRANSITIONS 应该定义完整的采集生命周期。"""
+    from scripts.lib.state import VALID_TRANSITIONS
+    assert "off" in VALID_TRANSITIONS
+    assert "on" in VALID_TRANSITIONS
+    assert "paused" in VALID_TRANSITIONS
+    # off -> on 是合法转换
+    assert "on" in VALID_TRANSITIONS["off"]
+    # on -> paused 是合法转换
+    assert "paused" in VALID_TRANSITIONS["on"]
+    # paused -> on 是合法转换
+    assert "on" in VALID_TRANSITIONS["paused"]
+    # on -> off 是合法转换
+    assert "off" in VALID_TRANSITIONS["on"]
+    # paused -> off 是合法转换
+    assert "off" in VALID_TRANSITIONS["paused"]
+
+
+def test_transition_rejects_invalid():
+    """transition() 应该拒绝非法状态转换。"""
+    from scripts.lib.state import transition, InvalidTransition
+    # off -> paused 不合法
+    try:
+        transition("off", "paused")
+        assert False, "Should have raised InvalidTransition"
+    except InvalidTransition:
+        pass
+    # off -> off 不合法
+    try:
+        transition("off", "off")
+        assert False, "Should have raised InvalidTransition"
+    except InvalidTransition:
+        pass
+
+
+def test_transition_accepts_valid():
+    """transition() 应该接受合法状态转换。"""
+    from scripts.lib.state import transition
+    assert transition("off", "on") == "on"
+    assert transition("on", "paused") == "paused"
+    assert transition("paused", "on") == "on"
+    assert transition("on", "off") == "off"
+    assert transition("paused", "off") == "off"

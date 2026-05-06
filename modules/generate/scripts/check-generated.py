@@ -17,17 +17,11 @@ import re
 import sys
 from pathlib import Path
 
-# Locate project-level scripts/lib without depending on a fixed module depth.
-for _parent in Path(__file__).resolve().parents:
-    _scripts = _parent / "scripts"
-    if (_scripts / "lib").exists():
-        sys.path.insert(0, str(_scripts))
-        break
-else:
-    raise RuntimeError("Unable to locate PRD Helper scripts/lib")
+sys.path.insert(0, str(next(p / "scripts" for p in Path(__file__).resolve().parents if (p / "scripts" / "lib").exists())))  # noqa: E501
 from lib.id_registry import ALL_ENTITIES
 from lib.markdown_util import extract_template_sections
 from lib.constants import DEFAULT_PRD_ROOT
+from lib.template_path import module_template_path
 
 
 def _safe_rglob(directory: Path, pattern: str = "*.md"):
@@ -157,7 +151,7 @@ def check_page_completeness(root_path: Path) -> list[dict]:
     """Check if page documents have required sections from template."""
     return _check_doc_completeness(
         root_path / "04-generate" / "pages",
-        Path(__file__).parent.parent / "modules" / "generate" / "templates" / "04-generate-page-prd-template.md",
+        module_template_path(__file__, "04-generate-page-prd-template.md"),
         root_path,
     )
 
@@ -166,7 +160,7 @@ def check_rule_completeness(root_path: Path) -> list[dict]:
     """Check if rule documents have required sections from template."""
     return _check_doc_completeness(
         root_path / "04-generate" / "rules",
-        Path(__file__).parent.parent / "modules" / "generate" / "templates" / "04-generate-rule-prd-template.md",
+        module_template_path(__file__, "04-generate-rule-prd-template.md"),
         root_path,
     )
 

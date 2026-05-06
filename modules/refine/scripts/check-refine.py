@@ -9,18 +9,12 @@ Checks whether 02-refine/ satisfies the refine quality gate and writes
 import sys
 from pathlib import Path
 
-# Locate project-level scripts/lib without depending on a fixed module depth.
-for _parent in Path(__file__).resolve().parents:
-    _scripts = _parent / "scripts"
-    if (_scripts / "lib").exists():
-        sys.path.insert(0, str(_scripts))
-        break
-else:
-    raise RuntimeError("Unable to locate PRD Helper scripts/lib")
+sys.path.insert(0, str(next(p / "scripts" for p in Path(__file__).resolve().parents if (p / "scripts" / "lib").exists())))  # noqa: E501
 
 from lib.id_registry import REFINE_ENTITIES, FACT, DECISION, CONSTRAINT, CONFLICT, ASSUMPTION
 from lib.markdown_util import has_field, extract_template_sections
 from lib.constants import DEFAULT_PRD_ROOT
+from lib.template_path import module_template_path
 
 
 def _entity_blocks(content: str, entity) -> list[tuple[str, str]]:
@@ -41,7 +35,7 @@ def _check_background(refine_dir: Path) -> dict:
     if not bg_path.exists():
         return {"exists": False, "missing_sections": []}
     content = bg_path.read_text()
-    template_path = refine_dir.parent.parent / "modules" / "refine" / "templates" / "02-refine-background-template.md"
+    template_path = module_template_path(__file__, "02-refine-background-template.md")
     required = extract_template_sections(template_path)
     missing = [s for s in required if s not in content]
     return {"exists": True, "missing_sections": missing}

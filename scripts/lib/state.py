@@ -42,7 +42,38 @@ STATE_KEYS = (
     "passive_source_count",
     "anomaly_count",
     "possible_noise_count",
+    "grill_mode",
 )
+
+
+def default_state() -> dict:
+    """返回包含所有 STATE_KEYS 默认值的状态字典。"""
+    return {key: "" for key in STATE_KEYS}
+
+
+class InvalidTransition(Exception):
+    """非法状态转换。"""
+
+
+VALID_TRANSITIONS: dict[str, set[str]] = {
+    "off": {"on"},
+    "on": {"paused", "off"},
+    "paused": {"on", "off"},
+}
+
+
+def transition(current: str, target: str) -> str:
+    """验证并执行状态转换。返回目标状态。
+
+    Raises InvalidTransition if the transition is not allowed.
+    """
+    allowed = VALID_TRANSITIONS.get(current, set())
+    if target not in allowed:
+        raise InvalidTransition(
+            f"Cannot transition from '{current}' to '{target}'. "
+            f"Allowed: {allowed or '(none)'}"
+        )
+    return target
 
 
 def read_collect_state(root: Path) -> dict:
@@ -62,8 +93,15 @@ def read_collect_state(root: Path) -> dict:
 def write_collect_state(root: Path, state: dict):
     """将 state 字典写入 collect-state.md。
 
-    按 STATE_KEYS 顺序输出，未知 key 追加到末尾。
+    按 STATE_KEYS 顺序输出。
+    未知 key 会触发警告但不会阻止写入（向后兼容）。
     """
+    known_keys = set(STATE_KEYS)
+    unknown = set(state.keys()) - known_keys
+    if unknown:
+        import warnings
+        warnings.warn(f"Unknown state keys: {unknown}", UserWarning, stacklevel=2)
+
     state_file = root / STATE_FILE
     lines = ["# Collect State", ""]
     lines.append("| key | value |")

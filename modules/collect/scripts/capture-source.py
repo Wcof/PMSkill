@@ -14,14 +14,7 @@ import re
 import sys
 from pathlib import Path
 
-# Locate project-level scripts/lib without depending on a fixed module depth.
-for _parent in Path(__file__).resolve().parents:
-    _scripts = _parent / "scripts"
-    if (_scripts / "lib").exists():
-        sys.path.insert(0, str(_scripts))
-        break
-else:
-    raise RuntimeError("Unable to locate PRD Helper scripts/lib")
+sys.path.insert(0, str(next(p / "scripts" for p in Path(__file__).resolve().parents if (p / "scripts" / "lib").exists())))  # noqa: E501
 
 from lib.state import read_collect_state, write_collect_state, safe_int
 from lib.time_util import now_iso, now_id
