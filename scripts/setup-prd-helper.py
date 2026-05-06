@@ -26,7 +26,7 @@ ADAPTER_FILES = {
 }
 
 # 从 COMMAND_NAMES 和命名规则推导初始化后生成的命令元数据。
-# /prd-helper 是根 Skill 入口，不在这里生成，避免覆盖安装器注册的入口。
+# /prd-helper 同时写成项目级命令，作为 Claude Code skill 入口补全不刷新时的兜底。
 _COLLECT_DESCRIPTIONS = {
     "start": "开启 PRD Helper 主动采集",
     "pause": "暂停 PRD Helper 主动采集",
@@ -35,7 +35,9 @@ _COLLECT_DESCRIPTIONS = {
     "status": "查看 PRD Helper 采集状态",
     "scan": "扫描所有 AI 工具的项目 session 并批量采集",
 }
-CLAUDE_COMMANDS = {}
+CLAUDE_COMMANDS = {
+    "prd-helper": {"description": "初始化或修复 PRD Helper 项目配置", "script": "setup", "command": ""}
+}
 for _name in COMMAND_NAMES:
     _action = _name.removeprefix("prd-")
     if _action == "remove":

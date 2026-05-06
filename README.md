@@ -52,6 +52,8 @@ npx skills@latest add Wcof/PRDContextEngine
 
 安装时选择 `prd-helper`，再选择你要使用的编码 Agent，例如 Claude Code、Codex、Trae。这个仓库只提供一个完整 Skill，所以安装后只看到 `/prd-helper` 是正常的。
 
+如果 Claude Code 的 `/` 菜单没有马上显示 `/prd-helper`，不要先判断安装失败。请在同一个项目目录完整输入 `/prd-helper` 并回车；Claude Code 的命令解析层通常已经能执行该 Skill，只是补全菜单可能没有刷新。
+
 ### Step 1：初始化项目
 
 安装完成后，在 Agent 对话中运行：
@@ -64,7 +66,7 @@ npx skills@latest add Wcof/PRDContextEngine
 
 - 创建默认文档目录 `docs/prd-helper/`
 - 写入 `CLAUDE.md`、`AGENTS.md` 或 Trae `project_rules.md` 中的 PRD Helper 配置块
-- 为 Claude Code 生成 `.claude/commands/prd-start.md` 等项目级斜杠命令
+- 为 Claude Code 生成 `.claude/commands/prd-helper.md`、`.claude/commands/prd-start.md` 等项目级斜杠命令
 - 为 Codex 安装 `~/.codex/plugins/prd-helper/` 插件命令
 - 准备 `01-collect/active/`、`01-collect/passive/`、`source-index.md`、`collect-state.md`
 
@@ -72,6 +74,19 @@ npx skills@latest add Wcof/PRDContextEngine
 
 ```bash
 ls .claude/commands/prd-*.md
+```
+
+正常初始化后至少应看到：
+
+```text
+prd-helper.md
+prd-start.md
+prd-pause.md
+prd-resume.md
+prd-stop.md
+prd-status.md
+prd-scan.md
+prd-remove.md
 ```
 
 ### Step 2：采集材料

@@ -125,9 +125,11 @@ def test_setup_installs_agent_configs_and_claude_commands(tmp_path: Path):
     assert tmp_path / "CLAUDE.md" in config_files
     assert "<!-- PRD-HELPER:START -->" in (tmp_path / "AGENTS.md").read_text()
     assert "<!-- PRD-HELPER:START -->" in (tmp_path / "CLAUDE.md").read_text()
+    assert tmp_path / ".claude" / "commands" / "prd-helper.md" in command_files
     assert tmp_path / ".claude" / "commands" / "prd-start.md" in command_files
     assert not (tmp_path / ".claude" / "commands" / "prd-init.md").exists()
     assert not (tmp_path / ".claude" / "commands" / "prd-setup.md").exists()
+    assert "setup-prd-helper.py" in (tmp_path / ".claude" / "commands" / "prd-helper.md").read_text()
     assert "collect-control.py\" start" in (tmp_path / ".claude" / "commands" / "prd-start.md").read_text()
     assert "--project . --docs-root docs/prd-helper --agent claude-code" in (
         tmp_path / ".claude" / "commands" / "prd-start.md"
@@ -156,6 +158,7 @@ def test_setup_main_repairs_partial_claude_initialization(tmp_path: Path, monkey
 
     assert module.main() == 0
     assert (docs_root / "prd-helper-config.md").read_text() == "# existing config\n"
+    assert (tmp_path / ".claude" / "commands" / "prd-helper.md").exists()
     assert (tmp_path / ".claude" / "commands" / "prd-start.md").exists()
     assert (tmp_path / ".claude" / "commands" / "prd-status.md").exists()
     assert not (tmp_path / ".claude" / "settings.json").exists()
@@ -280,6 +283,7 @@ def test_scan_passive_indexes_new_files_and_updates_state(tmp_path: Path, monkey
 def test_remove_prd_helper_cleans_commands_and_hooks(tmp_path: Path):
     module = load_script("scripts/remove-prd-helper.py")
     commands = tmp_path / ".claude" / "commands"
+    write(commands / "prd-helper.md", "helper")
     write(commands / "prd-start.md", "start")
     write(commands / "prd-stop.md", "stop")
     write(commands / "unrelated.md", "keep")
@@ -304,6 +308,7 @@ def test_remove_prd_helper_cleans_commands_and_hooks(tmp_path: Path):
     hook_file = module.remove_claude_hooks(tmp_path)
 
     assert not (commands / "prd-start.md").exists()
+    assert not (commands / "prd-helper.md").exists()
     assert not (commands / "prd-stop.md").exists()
     assert (commands / "unrelated.md").exists()
     assert hook_file == tmp_path / ".claude" / "settings.json"
