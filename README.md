@@ -121,6 +121,16 @@ python3 scripts/check-structure.py docs/prd-helper
 - 安装后命令没出现：确认当前目录是项目目录，且安装时选中了目标 Agent。
 - 采集没写入：确认已 `/prd-start`，`/prd-status` 为 `on`，并检查 `docs/prd-helper/01-collect/collect-state.md`。
 
+### 开源协作与治理文件
+
+- 贡献指南：`CONTRIBUTING.md`
+- 行为准则：`CODE_OF_CONDUCT.md`
+- 安全策略：`SECURITY.md`
+- 支持方式：`SUPPORT.md`
+- 版本记录：`CHANGELOG.md`
+- Issue/PR 模板与 CI：`.github/`
+- GitHub 介绍图 Prompt 指南：`docs/github-project-kit.md`
+
 ---
 
 ## English
@@ -226,3 +236,13 @@ python3 scripts/check-structure.py docs/prd-helper
 - Only `/prd-helper` appears: run `/prd-helper` once to initialize project commands, then reopen session if needed.
 - Commands not visible after install: confirm you installed to the current agent and current project scope.
 - No capture output: verify `/prd-status` is `on` and inspect `docs/prd-helper/01-collect/collect-state.md`.
+
+### Open-source Governance Files
+
+- Contributing: `CONTRIBUTING.md`
+- Code of Conduct: `CODE_OF_CONDUCT.md`
+- Security Policy: `SECURITY.md`
+- Support: `SUPPORT.md`
+- Changelog: `CHANGELOG.md`
+- Issue/PR templates and CI: `.github/`
+- GitHub cover prompt guide: `docs/github-project-kit.md`
