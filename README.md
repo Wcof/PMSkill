@@ -74,14 +74,14 @@ npx skills@latest add Wcof/PRDContextEngine
 初始化后应可见（或可执行）命令：
 
 ```text
-/prd-start
-/prd-pause
-/prd-resume
-/prd-stop
-/prd-status
-/prd-scan
-/prd-grill
-/prd-remove
+/prd-start   # 开启主动采集（开始记录会话）
+/prd-pause   # 暂停主动采集（临时停止记录）
+/prd-resume  # 恢复主动采集（继续记录）
+/prd-stop    # 停止采集并生成采集摘要/检查
+/prd-status  # 查看当前采集状态（on/paused/off）
+/prd-scan    # 扫描并导入历史会话（多工具）
+/prd-grill   # 进入压力测试模式（挑战矛盾与模糊点）
+/prd-remove  # 卸载 PRD Helper 并清理项目配置
 ```
 
 #### 3) 开始采集
@@ -180,7 +180,14 @@ Run in your agent session:
 Then you should have:
 
 ```text
-/prd-start /prd-pause /prd-resume /prd-stop /prd-status /prd-scan /prd-grill /prd-remove
+/prd-start   # Start active capture
+/prd-pause   # Pause active capture
+/prd-resume  # Resume active capture
+/prd-stop    # Stop capture and generate summary/check
+/prd-status  # Show current capture state
+/prd-scan    # Import historical sessions from tools
+/prd-grill   # Run challenge/grill mode
+/prd-remove  # Uninstall and clean project config
 ```
 
 #### 3) Start collection
