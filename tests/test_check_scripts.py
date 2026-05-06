@@ -374,27 +374,10 @@ def test_claude_plugin_manifest_references_existing_commands():
         assert "find_prd_helper_root" in content
 
 
-def test_bootstrap_sets_sys_path_for_lib_imports():
-    """bootstrap 应该让 lib.* 模块可从任意深度的脚本导入。"""
-    import importlib
-    # 清除已有的 lib 模块缓存，模拟从新脚本导入
-    to_remove = [k for k in sys.modules if k.startswith("lib.")]
-    for k in to_remove:
-        del sys.modules[k]
-    if "lib.bootstrap" in sys.modules:
-        del sys.modules["lib.bootstrap"]
-
-    # bootstrap 本身应该能从 scripts/lib/ 导入
-    spec = importlib.util.spec_from_file_location(
-        "lib.bootstrap", ROOT / "scripts" / "lib" / "bootstrap.py"
-    )
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-
-    # bootstrap 后 lib.state 应该可导入
-    assert "lib.state" in sys.modules or any(
-        str(ROOT / "scripts") in p for p in sys.path
-    ), "bootstrap did not add scripts/ to sys.path"
+def test_bootstrap_file_does_not_exist():
+    """bootstrap.py 应该被删除 — 所有脚本使用内联 one-liner。"""
+    bootstrap_path = ROOT / "scripts" / "lib" / "bootstrap.py"
+    assert not bootstrap_path.exists(), "bootstrap.py 应该被删除，所有脚本使用内联 sys.path 引导"
 
 
 def test_module_scripts_do_not_contain_inline_bootstrap():
