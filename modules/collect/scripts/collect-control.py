@@ -21,14 +21,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-# Locate project-level scripts/lib without depending on a fixed module depth.
-for _parent in Path(__file__).resolve().parents:
-    _scripts = _parent / "scripts"
-    if (_scripts / "lib").exists():
-        sys.path.insert(0, str(_scripts))
-        break
-else:
-    raise RuntimeError("Unable to locate PRD Helper scripts/lib")
+sys.path.insert(0, str(next(p / "scripts" for p in Path(__file__).resolve().parents if (p / "scripts" / "lib").exists())))  # noqa: E501
 
 from lib.state import read_collect_state, write_collect_state
 from lib.time_util import now_iso, now_id
@@ -96,6 +89,7 @@ def cmd_start(root: Path, agent: str, project: Path, docs_root: str):
         "passive_source_count": state.get("passive_source_count", "0"),
         "anomaly_count": "0",
         "possible_noise_count": "0",
+        "grill_mode": "off",
     }
 
     write_collect_state(root, new_state)
@@ -118,6 +112,7 @@ def cmd_pause(root: Path, agent: str, project: Path):
 
     state["capture_mode"] = "paused"
     state["paused_at"] = now_iso()
+    state["grill_mode"] = "off"
     write_collect_state(root, state)
     sync_claude_hooks(project, "", agent, False)
     print(f"Session paused: {state.get('session_id')}")
@@ -167,6 +162,7 @@ def cmd_stop(root: Path, agent: str, project: Path):
     _run_scan(root, project, agent)
 
     state["capture_mode"] = "off"
+    state["grill_mode"] = "off"
     state["ended_at"] = now_iso()
     write_collect_state(root, state)
     sync_claude_hooks(project, "", agent, False)
