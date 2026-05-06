@@ -186,6 +186,9 @@ def main() -> None:
     else:
         print("  ✅ Refine checks passed")
     print(f"\nCheck written to: {check_file}")
+    # 报告模式：无数据时不阻断，有数据时检查错误
+    if not result["exists"]:
+        sys.exit(0)
     sys.exit(1 if failures else 0)
 
 

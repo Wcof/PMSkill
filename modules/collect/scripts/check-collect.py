@@ -215,6 +215,9 @@ def main():
     check_file = write_check_md(root, result)
     print(f"\nCheck written to: {check_file}")
 
+    # 报告模式：无数据时不阻断，有数据时检查错误
+    if not result["state_exists"]:
+        sys.exit(0)
     sys.exit(1 if failed > 0 else 0)
 
 

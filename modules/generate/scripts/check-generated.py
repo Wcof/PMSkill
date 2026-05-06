@@ -355,6 +355,11 @@ def main():
     check_file = write_check_md(root_path, unresolved, consolidation, traceability, pages, rules)
     print(f"\nCheck written to: {check_file}")
 
+    # 报告模式：无数据时不阻断，有数据时检查错误
+    gen_dir = root_path / "04-generate"
+    if not gen_dir.exists() or not files:
+        sys.exit(0)
+
     has_unresolved = len(unresolved) > 0
     has_consolidation_fail = consolidation["checked"] and not consolidation["all_consolidated"]
     has_traceability_fail = any(r["status"] == "FAIL" for r in traceability)
