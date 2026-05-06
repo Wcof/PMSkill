@@ -18,12 +18,13 @@ PRD Helper 把分散在会议、聊天、评审和旧文档里的产品上下文
 |---|---|---|
 | 项目初始化 `/prd-helper` | 创建配置、目录和后续命令 | 安装后项目还不能直接用 |
 | 主动采集 `/prd-start` | 开始记录后续产品讨论 | 关键会话容易遗漏 |
-| 暂停/恢复/停止采集 | 控制采集边界并清理 Hook | 采集范围不清、误采集 |
+| 停止采集 `/prd-stop` | 停止主动采集、清理 Hook、生成采集摘要 | 采集边界不清、误采集 |
 | 批量扫描 `/prd-scan` | 导入历史 Agent 会话 | 旧上下文无法进入流程 |
+| 外部导入 `/prd-import` | 导入第三方文件夹作为被动材料 | 旧资料无法快速纳入上下文 |
 | 被动材料目录 | 手动放入会议纪要、旧 PRD、客户反馈 | 非聊天材料无法统一管理 |
-| 四模块流程 | Collect -> Refine -> Relate -> Generate | 直接生成 PRD 容易漏项和幻觉 |
+| 阶段命令 `/prd-refine` `/prd-relate` `/prd-generate` | 依次精炼、关联、生成 PRD 文档 | 直接生成 PRD 容易漏项和幻觉 |
 | 检查脚本 | 每个阶段都能被验证 | 产物不可审计 |
-| Grill 模式 `/prd-grill` | 质询模糊概念和冲突点 | 术语不清、决策没沉淀 |
+| 研讨模式 `/prd-discuss` | 质询模糊概念和冲突点 | 术语不清、决策没沉淀 |
 | 卸载 `/prd-remove` | 清理命令、配置和 Hook | 项目被安装残留污染 |
 
 ## 快速开始
@@ -46,16 +47,18 @@ npx skills@latest add Wcof/PRDContextEngine
 
 初始化会创建默认目录 `docs/prd-helper/`，并生成后续命令。
 
-### 3. 使用采集命令
+### 3. 使用项目命令
 
 ```text
 /prd-start   # 开启主动采集，开始记录产品讨论
-/prd-pause   # 暂停主动采集，临时停止记录并清理 Hook
-/prd-resume  # 恢复主动采集，继续记录
 /prd-stop    # 停止采集，生成采集摘要和检查结果
 /prd-status  # 查看当前采集状态
 /prd-scan    # 扫描历史 Agent 会话并导入采集池
-/prd-grill   # 进入压力测试模式，挑战矛盾和模糊点
+/prd-import  # 导入第三方文件夹数据作为被动材料
+/prd-refine  # 精炼采集材料，提取事实、决策、约束、问题和推断
+/prd-relate  # 建立事实、页面、规则、数据、验收之间的关系
+/prd-generate # 生成结构化 PRD 文档和 Agent 上下文
+/prd-discuss  # 进入需求研讨模式，挑战矛盾和模糊点
 /prd-remove  # 卸载 PRD Helper 并清理项目配置
 ```
 

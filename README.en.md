@@ -18,12 +18,13 @@ Many teams do not lack requirement material. The problem is that the material is
 |---|---|---|
 | `/prd-helper` project setup | Creates config, folders, and follow-up commands | The project is installed but not ready |
 | `/prd-start` active capture | Starts recording product discussions | Important context gets lost |
-| Pause/resume/stop capture | Controls capture boundaries and hook state | Accidental or unclear capture scope |
+| `/prd-stop` stop capture | Stops capture, cleans hooks, and writes summary output | Accidental or unclear capture scope |
 | `/prd-scan` batch scan | Imports historical Agent sessions | Existing context is disconnected |
+| `/prd-import` external import | Imports a third-party folder as passive material | Existing documents are hard to onboard |
 | Passive intake folder | Stores meeting notes, old PRDs, customer feedback | Non-chat materials are unmanaged |
-| Four-module workflow | Collect -> Refine -> Relate -> Generate | Direct PRD generation causes omissions |
+| `/prd-refine` `/prd-relate` `/prd-generate` stage commands | Refine, relate, and generate PRD documents | Direct PRD generation causes omissions |
 | Check scripts | Validates each stage | Outputs are not auditable |
-| `/prd-grill` mode | Challenges vague terms and contradictions | Ambiguous language and weak decisions |
+| `/prd-discuss` mode | Challenges vague terms and contradictions | Ambiguous language and weak decisions |
 | `/prd-remove` uninstall | Cleans commands, configs, and hooks | Installation leftovers pollute the project |
 
 ## Quick Start
@@ -46,16 +47,18 @@ Run this in your Agent session:
 
 Initialization creates the default docs root `docs/prd-helper/` and generates follow-up commands.
 
-### 3. Use Capture Commands
+### 3. Use Project Commands
 
 ```text
 /prd-start   # Start active capture
-/prd-pause   # Pause active capture and clean hooks
-/prd-resume  # Resume active capture
 /prd-stop    # Stop capture and generate summary/check output
 /prd-status  # Show current capture state
 /prd-scan    # Scan historical Agent sessions into the capture pool
-/prd-grill   # Challenge contradictions and ambiguous concepts
+/prd-import  # Import a third-party folder as passive material
+/prd-refine  # Refine collected materials into facts, decisions, constraints, questions, assumptions
+/prd-relate  # Build relations across facts, pages, rules, data, and acceptance criteria
+/prd-generate # Generate structured PRD docs and Agent context
+/prd-discuss  # Challenge contradictions and ambiguous concepts
 /prd-remove  # Uninstall PRD Helper and clean project config
 ```
 
