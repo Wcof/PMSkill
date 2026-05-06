@@ -2,18 +2,18 @@
 
 ## 采集概况
 
-- 采集 session：
-- 采集 agent：
-- 开始时间：
-- 结束时间：
-- 总采集轮次：
+- 采集 session：{session_id}
+- 采集 agent：{agent}
+- 开始时间：{started_at}
+- 结束时间：{ended_at}
+- 总采集轮次：{turn_count}
 
 ## 材料统计
 
-- 主动采集材料数：
-- 被动采集材料数：
-- 异常材料数：
-- 可能噪音数：
+- 主动采集材料数：{active_source_count}
+- 被动采集材料数：{passive_source_count}
+- 异常材料数：{anomaly_count}
+- 可能噪音数：{possible_noise_count}
 
 ## 涉及模块
 

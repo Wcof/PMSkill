@@ -85,7 +85,7 @@ def read_collect_state(root: Path) -> dict:
     state_file = root / STATE_FILE
     if not state_file.exists():
         return {}
-    content = state_file.read_text()
+    content = state_file.read_text(encoding="utf-8")
     rows = extract_table_rows_with_headers(content, ("key", "value"))
     return {row["key"]: row["value"] for row in rows if row.get("key")}
 
@@ -115,7 +115,7 @@ def write_collect_state(root: Path, state: dict):
         if key not in written:
             lines.append(f"| {key} | {value} |")
     lines.append("")
-    state_file.write_text("\n".join(lines))
+    state_file.write_text("\n".join(lines), encoding="utf-8")
 
 
 def require_state(root: Path) -> dict:

@@ -48,7 +48,7 @@ def extract_template_sections(template_path: Path, level: int = 2) -> list[str]:
     """Extract required heading lines from a template."""
     if not template_path.exists():
         return []
-    content = template_path.read_text()
+    content = template_path.read_text(encoding="utf-8")
     marker = "#" * level
     return re.findall(rf"^{re.escape(marker)} .+", content, re.MULTILINE)
 

@@ -61,9 +61,9 @@ def main():
     user_query = args.user_query or ""
     agent_answer = args.agent_answer or ""
     if args.user_query_file:
-        user_query = Path(args.user_query_file).read_text()
+        user_query = Path(args.user_query_file).read_text(encoding="utf-8")
     if args.agent_answer_file:
-        agent_answer = Path(args.agent_answer_file).read_text()
+        agent_answer = Path(args.agent_answer_file).read_text(encoding="utf-8")
 
     if not user_query.strip() and not agent_answer.strip():
         print("Error: Both user query and agent answer are empty.")

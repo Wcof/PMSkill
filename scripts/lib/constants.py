@@ -1,22 +1,13 @@
 """Shared constants for PRD Helper scripts."""
 
+from .command_registry import GENERATED_COMMAND_NAMES
+
 DEFAULT_COLLECT_ROOT = "docs/prd-helper/01-collect"
 DEFAULT_PRD_ROOT = "docs/prd-helper"
 
 # /prd-helper 是安装器暴露的根 Skill 入口，用于初始化。
-# 这里列出初始化后由脚本生成的 Claude Code 原子命令。
-COMMAND_NAMES = (
-    "prd-start",
-    "prd-stop",
-    "prd-status",
-    "prd-scan",
-    "prd-import",
-    "prd-refine",
-    "prd-relate",
-    "prd-generate",
-    "prd-discuss",
-    "prd-remove",
-)
+# 这里列出初始化后由脚本生成的原子命令，并从命令注册表派生。
+COMMAND_NAMES = GENERATED_COMMAND_NAMES
 
 # Codex 相关常量
 CODEX_HOME_ENV = "CODEX_HOME"

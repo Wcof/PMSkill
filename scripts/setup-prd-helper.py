@@ -10,9 +10,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from lib.constants import COMMAND_NAMES
+from lib.command_registry import ALL_COMMANDS, GENERATED_COMMANDS, command_markdown_list
 from lib.source_index import INDEX_HEADER
 from lib.state import write_collect_state
+from lib.template_renderer import render_template
 
 
 AGENTS = ("codex", "claude-code", "trae", "trae-cn")
@@ -25,28 +26,7 @@ ADAPTER_FILES = {
     "trae-cn": ("project_rules.md", "support/adapters/trae/project_rules.md"),
 }
 
-# 从 COMMAND_NAMES 和命名规则推导初始化后生成的命令元数据。
 # /prd-helper 同时写成项目级命令，作为 Claude Code skill 入口补全不刷新时的兜底。
-_COLLECT_DESCRIPTIONS = {
-    "start": "开启 PRD Helper 主动采集",
-    "stop": "停止 PRD Helper 主动采集并生成摘要",
-    "status": "查看 PRD Helper 采集状态",
-    "scan": "扫描所有 AI 工具的项目 session 并批量采集",
-    "import": "导入第三方文件夹数据作为被动材料",
-    "refine": "直接精炼采集材料（不强制要求先完成采集）",
-    "relate": "直接建立关联关系（不强制要求先完成精炼）",
-    "generate": "直接生成 PRD 文档（不强制要求先完成关联）",
-    "discuss": "开启需求研讨模式 — 压力测试产品方案",
-}
-CLAUDE_COMMANDS = {
-    "prd-helper": {"description": "初始化或修复 PRD Helper 项目配置", "script": "setup", "command": ""}
-}
-for _name in COMMAND_NAMES:
-    _action = _name.removeprefix("prd-")
-    if _action == "remove":
-        CLAUDE_COMMANDS[_name] = {"description": "卸载 PRD Helper 并清理 Agent 配置", "script": "remove", "command": ""}
-    else:
-        CLAUDE_COMMANDS[_name] = {"description": _COLLECT_DESCRIPTIONS[_action], "script": "collect", "command": _action}
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _SKILL_ROOT = _SCRIPT_DIR.parent
 _COLLECT_CONTROL = _SKILL_ROOT / "modules" / "collect" / "scripts" / "collect-control.py"
@@ -175,22 +155,30 @@ def install_agent_configs(project: Path, agents: list[str]) -> list[Path]:
     return written
 
 
-def claude_command_content(name: str, meta: dict[str, str], docs_root: str) -> str:
+def _command_script_kind(name: str) -> str:
+    if name == "prd-helper":
+        return "setup"
+    if name == "prd-remove":
+        return "remove"
+    return "collect"
+
+
+def claude_command_content(name: str, description: str, docs_root: str) -> str:
     setup_script = Path(__file__).resolve()
     collect_root = f"{docs_root}/01-collect"
-    description = meta["description"]
+    script_kind = _command_script_kind(name)
 
-    if meta["script"] == "setup":
+    if script_kind == "setup":
         command = f'python3 "{setup_script}" --project . --docs-root {docs_root} --agent claude-code'
-    elif meta["script"] == "remove":
+    elif script_kind == "remove":
         command = f'python3 "{_REMOVE_SCRIPT}" --project . --agent claude-code'
     else:
         command = (
-            f'python3 "{_COLLECT_CONTROL}" {meta["command"]} '
+            f'python3 "{_COLLECT_CONTROL}" {name.removeprefix("prd-")} '
             f"--root {collect_root} --project . --docs-root {docs_root} --agent claude-code"
         )
 
-    if meta["script"] in ("setup", "remove"):
+    if script_kind in ("setup", "remove"):
         return "\n".join(
             [
                 "---",
@@ -244,14 +232,17 @@ def install_claude_commands(project: Path, docs_root: str) -> list[Path]:
     commands_dir = project / ".claude" / "commands"
     commands_dir.mkdir(parents=True, exist_ok=True)
     written: list[Path] = []
-    for name, meta in CLAUDE_COMMANDS.items():
-        target = commands_dir / f"{name}.md"
+    for command in ALL_COMMANDS:
+        target = commands_dir / f"{command.name}.md"
         # 优先使用手写命令文件（如 prd-grill 的多步骤 prompt）
-        handwritten = _SKILL_ROOT / "commands" / f"{name}.md"
+        handwritten = _SKILL_ROOT / "commands" / f"{command.name}.md"
         if handwritten.exists():
             target.write_text(handwritten.read_text(encoding="utf-8"), encoding="utf-8")
         else:
-            target.write_text(claude_command_content(name, meta, docs_root), encoding="utf-8")
+            target.write_text(
+                claude_command_content(command.name, command.zh_description, docs_root),
+                encoding="utf-8",
+            )
         written.append(target)
     return written
 
@@ -265,30 +256,14 @@ def main() -> int:
     for relative in MODULE_DIRS:
         (docs_root / relative).mkdir(parents=True, exist_ok=True)
 
-    config = "\n".join(
-        [
-            "# PRD Helper 初始化配置（Setup）",
-            "",
-            "| 配置项（Key） | 值（Value） |",
-            "| --- | --- |",
-            f"| 文档目录（docs_root） | {args.docs_root} |",
-            f"| 启用 Agent（enabled_agents） | {', '.join(agents)} |",
-            f"| 采集策略（capture_policy） | {args.capture_policy} |",
-            "| 工作流（workflow） | 采集 Collect -> 精炼 Refine -> 关联 Relate -> 生成 Generate |",
-            "",
-            "## 指令（Commands）",
-            "",
-            "- `/prd-start`：开启显式主动采集（active capture），支持 session 续接",
-            "- `/prd-stop`：停止主动采集并生成采集摘要，提示可用 `/prd-refine` 精炼",
-            "- `/prd-status`：查看采集状态",
-            "- `/prd-import`：导入第三方文件夹数据作为被动材料",
-            "- `/prd-refine`：直接精炼采集材料（不强制要求先完成采集）",
-            "- `/prd-relate`：直接建立关联关系（不强制要求先完成精炼）",
-            "- `/prd-generate`：直接生成 PRD 文档（不强制要求先完成关联）",
-            "- `/prd-discuss`：开启需求研讨模式 — 压力测试产品方案",
-            "- `/prd-remove`：从当前项目卸载 PRD Helper",
-            "",
-        ]
+    config = render_template(
+        skill_root() / "modules" / "collect" / "templates" / "prd-helper-config-template.md",
+        {
+            "docs_root": args.docs_root,
+            "enabled_agents": ", ".join(agents),
+            "capture_policy": args.capture_policy,
+            "command_list": command_markdown_list(GENERATED_COMMANDS),
+        },
     )
     write_if_missing(docs_root / "prd-helper-config.md", config, args.force)
 
@@ -306,37 +281,9 @@ def main() -> int:
         )
     write_if_missing(collect_dir / "source-index.md", INDEX_HEADER, False)
 
-    collect_readme = "\n".join(
-        [
-            "# 01 Collect（信息采集）",
-            "",
-            "## 中文说明",
-            "",
-            "这是 PRD Helper 的信息采集目录。",
-            "",
-            "- `active/`：Agent 主动采集区，由 Agent 和脚本写入。包括 `sessions/`（会话采集）、`historical/`（历史补录）、`anomalies/`（异常材料）。",
-            "- `passive/`：人工材料投放区。请把会议纪要、评审记录、旧 PRD、客户反馈、Word、PDF、Markdown、TXT 等原始材料直接放到这里。",
-            "- `source-index.md`：材料索引，供下一环节精炼读取。",
-            "- `collect-state.md`：采集状态，记录当前采集 session、写入路径和时间戳。",
-            "- `collect-summary.md`：采集摘要，只做轻量说明，不做事实提取。",
-            "- `check.md`：采集检查结果。",
-            "",
-            "注意：不要改写 `passive/` 中的原始材料。Agent 只扫描、索引和标记元信息。",
-            "",
-            "## English",
-            "",
-            "This is the PRD Helper collect directory.",
-            "",
-            "- `active/`: Agent-managed active capture area. Includes `sessions/` (conversation turns), `historical/` (backfilled materials), `anomalies/` (anomalous materials).",
-            "- `passive/`: User-managed passive source drop zone. Put meeting notes, review records, legacy PRDs, customer feedback, Word, PDF, Markdown, TXT, and other raw materials here.",
-            "- `source-index.md`: Source index for the next refine step.",
-            "- `collect-state.md`: Capture state, including session, write roots, and timestamps.",
-            "- `collect-summary.md`: Lightweight collection summary, not fact extraction.",
-            "- `check.md`: Collect check result.",
-            "",
-            "Do not rewrite raw files in `passive/`. The Agent should only scan, index, and mark metadata.",
-            "",
-        ]
+    collect_readme = render_template(
+        skill_root() / "modules" / "collect" / "templates" / "collect-readme-template.md",
+        {},
     )
     write_if_missing(collect_dir / "README.md", collect_readme, False)
 

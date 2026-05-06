@@ -1,4 +1,4 @@
-from pathlib import Path
+﻿from pathlib import Path
 
 from scripts.lib.hash_util import content_hash, file_hash
 from scripts.lib.id_registry import ALL_ENTITIES, ENTITY_BY_PREFIX, entity_pattern
@@ -77,7 +77,7 @@ def test_source_index_append_and_read_paths(tmp_path: Path):
 
     # Same session file appears twice (two turns), but same source_id only once
     assert "active/sessions/session-test.md" in read_indexed_paths(tmp_path)
-    content = (tmp_path / "source-index.md").read_text()
+    content = (tmp_path / "source-index.md").read_text(encoding="utf-8")
     assert content.count("active/sessions/session-test.md") == 2
     assert content.count("turn-002") == 1
 
@@ -124,7 +124,7 @@ def test_source_index_batch_append_reads_existing_ids_once(tmp_path: Path):
         ],
     )
 
-    content = (tmp_path / "source-index.md").read_text()
+    content = (tmp_path / "source-index.md").read_text(encoding="utf-8")
     assert added == 1
     assert content.count("turn-001") == 1
     assert indexed_hashes_by_path_from_content(content) == {
@@ -135,7 +135,7 @@ def test_source_index_batch_append_reads_existing_ids_once(tmp_path: Path):
 def test_hash_util_is_consistent(tmp_path: Path):
     text = "hello prd helper"
     path = tmp_path / "source.txt"
-    path.write_text(text)
+    path.write_text(text, encoding="utf-8")
 
     assert content_hash(text) == file_hash(path)
     assert content_hash(text).startswith("sha256:")
@@ -190,3 +190,4 @@ priority: high
     assert metadata_status_for_text(missing) == "missing"
     assert metadata_status_for_text(source_type_only) == "missing"
     assert metadata_status_for_text(core_with_type) == "partial"
+

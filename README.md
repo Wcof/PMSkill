@@ -8,24 +8,39 @@
 
 PRD Helper 把分散在会议、聊天、评审和旧文档里的产品上下文，沉淀成可追溯、可检查、可复用的结构化 PRD 资产。
 
+它坚持一条主链路：**采集（Collect）→ 精炼（Refine）→ 关联（Relate）→ 生成（Generate）**。检查（Check）是横向质量门禁，不是第五阶段。
+
 ## 它解决什么问题
 
 很多团队不是没有需求资料，而是资料散、来源乱、版本多，最后 PRD 变成“谁记得就听谁的”。PRD Helper 的目标是让 Agent 和团队先保存原始材料，再精炼信息、建立关系，最后生成 PRD，避免直接让 AI 从碎片聊天里凭感觉写文档。
 
-## 核心功能
+## 当前指令清单
 
-| 功能 | 用处 | 解决的问题 |
-|---|---|---|
-| 项目初始化 `/prd-helper` | 创建配置、目录和后续命令 | 安装后项目还不能直接用 |
-| 主动采集 `/prd-start` | 开始记录后续产品讨论 | 关键会话容易遗漏 |
-| 停止采集 `/prd-stop` | 停止主动采集、清理 Hook、生成采集摘要 | 采集边界不清、误采集 |
-| 批量扫描 `/prd-scan` | 导入历史 Agent 会话 | 旧上下文无法进入流程 |
-| 外部导入 `/prd-import` | 导入第三方文件夹作为被动材料 | 旧资料无法快速纳入上下文 |
-| 被动材料目录 | 手动放入会议纪要、旧 PRD、客户反馈 | 非聊天材料无法统一管理 |
-| 阶段命令 `/prd-refine` `/prd-relate` `/prd-generate` | 依次精炼、关联、生成 PRD 文档 | 直接生成 PRD 容易漏项和幻觉 |
-| 检查脚本 | 每个阶段都能被验证 | 产物不可审计 |
-| 研讨模式 `/prd-discuss` | 质询模糊概念和冲突点 | 术语不清、决策没沉淀 |
-| 卸载 `/prd-remove` | 清理命令、配置和 Hook | 项目被安装残留污染 |
+当前权威指令集合来自 `scripts/lib/constants.py`、`commands/*.md`、`SKILL.md` 和插件声明。本轮检查后，README 按以下 11 个指令说明：
+
+| 指令 | 阶段/类型 | 作用 | 主要产物 |
+|---|---|---|---|
+| `/prd-helper` | 初始化入口 | 初始化或修复当前项目配置，创建 `docs/prd-helper/` 和项目级命令 | 配置、目录、Agent 规则 |
+| `/prd-start` | 采集 | 开启主动采集，后续产品讨论会写入采集区 | `01-collect/active/`、`collect-state.md` |
+| `/prd-stop` | 采集 | 停止主动采集，清理采集 Hook，并生成采集摘要和检查结果 | `collect-summary.md`、`01-collect/check.md` |
+| `/prd-status` | 采集工具 | 查看当前采集状态、session、写入目录和计数 | 状态摘要 |
+| `/prd-scan` | 采集工具 | 批量扫描历史 Agent 会话并导入采集池 | `01-collect/active/historical/`、`source-index.md` |
+| `/prd-import` | 采集工具 | 导入第三方文件夹作为被动材料，不提前清洗原文 | `01-collect/passive/`、`source-index.md` |
+| `/prd-refine` | 精炼 | 从采集材料中提炼事实、背景、目标、决策、约束、冲突、问题和推断 | `02-refine/` |
+| `/prd-relate` | 关联 | 建立事实、页面、功能、规则、数据、验收之间的上下游关系 | `03-relate/` |
+| `/prd-generate` | 生成 | 基于精炼与关联产物生成 PRD 文档和 Agent 上下文 | `04-generate/` |
+| `/prd-discuss` | 辅助研讨 | 在采集和精炼之间追问矛盾、模糊术语和未决问题，每次只追问一个问题 | 研讨摘要、待确认项 |
+| `/prd-remove` | 卸载 | 清理 PRD Helper 项目配置、命令和 Hook，默认保留已生成文档 | 清理结果 |
+
+平台说明：Claude Code 插件声明包含上述 11 个指令；`COMMAND_NAMES` 只记录初始化后生成的 10 个后续指令，`/prd-helper` 是根 Skill 入口。
+
+## 工程约束
+
+PRD Helper 遵循“Python 执行化，静态提示词约束化”：
+
+- 指令事实来自 `scripts/lib/command_registry.py`，`COMMAND_NAMES`、安装脚本和一致性测试都从这里派生。
+- 业务规则保留在 `SKILL.md`、`modules/*/guide.md` 和 `commands/*.md`，Python 不承担提示词职责。
+- 产物结构和检查清单优先放在 `modules/*/templates/`，脚本只填入状态、计数、检查结果和来源信息。
 
 ## 快速开始
 
@@ -47,20 +62,19 @@ npx skills@latest add Wcof/PRDContextEngine
 
 初始化会创建默认目录 `docs/prd-helper/`，并生成后续命令。
 
-### 3. 使用项目命令
+### 3. 按四阶段推进
 
 ```text
-/prd-start   # 开启主动采集，开始记录产品讨论
-/prd-stop    # 停止采集，生成采集摘要和检查结果
-/prd-status  # 查看当前采集状态
-/prd-scan    # 扫描历史 Agent 会话并导入采集池
-/prd-import  # 导入第三方文件夹数据作为被动材料
-/prd-refine  # 精炼采集材料，提取事实、决策、约束、问题和推断
-/prd-relate  # 建立事实、页面、规则、数据、验收之间的关系
-/prd-generate # 生成结构化 PRD 文档和 Agent 上下文
-/prd-discuss  # 进入需求研讨模式，挑战矛盾和模糊点
-/prd-remove  # 卸载 PRD Helper 并清理项目配置
+/prd-start    # 开启主动采集
+/prd-stop     # 停止主动采集并生成采集摘要
+/prd-scan     # 扫描历史 Agent 会话
+/prd-import   # 导入第三方文件夹作为被动材料
+/prd-refine   # 精炼采集材料
+/prd-relate   # 建立上下游关系链路
+/prd-generate # 生成 PRD 文档和 Agent 上下文
 ```
+
+需要查看状态时用 `/prd-status`，需要研讨模糊点时用 `/prd-discuss`，需要卸载时用 `/prd-remove`。
 
 主动采集内容会进入：
 
@@ -74,16 +88,18 @@ docs/prd-helper/01-collect/active/
 docs/prd-helper/01-collect/passive/
 ```
 
-## 四模块工作流
+## 四阶段工作流
 
-| 模块 | 目录 | 产物目标 |
-|---|---|---|
-| Collect 采集 | `modules/collect/` | 保存原始材料、建立索引、轻量标记噪音 |
-| Refine 精炼 | `modules/refine/` | 提炼事实、决策、约束、问题、推断 |
-| Relate 关联 | `modules/relate/` | 建立事实、页面、规则、数据、验收之间的关系 |
-| Generate 生成 | `modules/generate/` | 生成给产品、研发、测试使用的 PRD 上下文 |
+| 阶段 | 目录 | 做什么 | 不做什么 |
+|---|---|---|---|
+| Collect 采集 | `modules/collect/` | 保存原始材料、建立索引、记录 hash、维护采集状态 | 不提前改写事实、不生成规则 |
+| Refine 精炼 | `modules/refine/` | 区分事实、背景、目标、决策、约束、冲突、问题、推断 | 不把推断写成事实、不跳到 PRD |
+| Relate 关联 | `modules/relate/` | 建立 `fact -> page/feature -> rule -> data/acceptance` 链路 | 不让事实、规则、数据、验收断链 |
+| Generate 生成 | `modules/generate/` | 生成 PRD、验收、数据说明和 Agent 上下文 | 不新增未来源化、未关联的业务规则 |
 
 ## 检查命令
+
+这些是脚本级质量门禁，不是斜杠指令：
 
 ```bash
 python3 modules/collect/scripts/check-collect.py --root docs/prd-helper/01-collect
@@ -98,6 +114,8 @@ python3 scripts/check-structure.py docs/prd-helper
 只看到 `/prd-helper`，没有 `/prd-start`：先执行一次 `/prd-helper` 完成项目初始化。Claude Code 有时需要重开会话刷新命令列表。
 
 采集没有写入：先运行 `/prd-status`，确认状态是 `on`；再检查 `docs/prd-helper/01-collect/collect-state.md`。
+
+不知道先用 `/prd-scan` 还是 `/prd-import`：历史 Agent 会话用 `/prd-scan`；第三方文件夹、会议纪要、旧 PRD、客户反馈用 `/prd-import` 或直接放入 `01-collect/passive/`。
 
 不想继续使用：运行 `/prd-remove`，它会清理项目配置、命令和 Hook，但默认保留已经生成的 `docs/prd-helper/` 文档。
 

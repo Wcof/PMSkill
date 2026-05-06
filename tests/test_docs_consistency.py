@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from scripts.lib.command_registry import ALL_COMMANDS, GENERATED_COMMAND_NAMES
 from scripts.lib.constants import COMMAND_NAMES
 
 
@@ -28,12 +29,56 @@ def test_public_command_docs_use_current_command_set():
             assert command not in content, f"{path} still mentions legacy {command}"
 
 
+def test_constants_are_derived_from_command_registry():
+    assert COMMAND_NAMES == GENERATED_COMMAND_NAMES
+    assert {command.name for command in ALL_COMMANDS} == {command.removeprefix("/") for command in CURRENT_COMMANDS}
+
+
 def test_command_files_match_constants():
     command_files = {
         f"/{path.stem}"
         for path in (ROOT / "commands").glob("prd-*.md")
     }
     assert command_files == CURRENT_COMMANDS
+
+    for command in ALL_COMMANDS:
+        content = _read(f"commands/{command.name}.md")
+        assert command.slash in content
+        assert command.zh_description in content
+
+
+def test_codex_plugin_command_templates_match_current_command_set():
+    command_files = {
+        f"/{path.stem}"
+        for path in (ROOT / "support/adapters/codex/plugin/commands").glob("prd-*.md")
+    }
+    assert command_files == CURRENT_COMMANDS
+
+
+def test_setup_uses_static_templates_and_command_registry():
+    setup = _read("scripts/setup-prd-helper.py")
+    assert "_COLLECT_DESCRIPTIONS" not in setup
+    assert "CLAUDE_COMMANDS" not in setup
+    assert "prd-helper-config-template.md" in setup
+    assert "collect-readme-template.md" in setup
+    assert "command_markdown_list" in setup
+
+    config_template = _read("modules/collect/templates/prd-helper-config-template.md")
+    assert "{docs_root}" in config_template
+    assert "{command_list}" in config_template
+
+
+def test_check_scripts_are_template_driven():
+    scripts = {
+        "modules/collect/scripts/check-collect.py": "01-collect-check-template.md",
+        "modules/refine/scripts/check-refine.py": "02-refine-check-template.md",
+        "modules/relate/scripts/check-relate.py": "03-relate-check-template.md",
+        "modules/generate/scripts/check-generated.py": "04-generate-check-template.md",
+    }
+    for path, template in scripts.items():
+        content = _read(path)
+        assert template in content
+        assert "add_template_section" in content
 
 
 def test_guides_keep_four_stage_model_and_discuss_auxiliary():

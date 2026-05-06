@@ -35,7 +35,7 @@ def _check_background(refine_dir: Path) -> dict:
     bg_path = refine_dir / "background.md"
     if not bg_path.exists():
         return {"exists": False, "missing_sections": []}
-    content = bg_path.read_text()
+    content = bg_path.read_text(encoding="utf-8")
     template_path = module_template_path(__file__, "02-refine-background-template.md")
     required = extract_template_sections(template_path)
     missing = [s for s in required if s not in content]
@@ -62,7 +62,7 @@ def check_refine(root: Path) -> dict:
             result["missing_files"].append(entity.filename)
             result["files"][entity.filename] = file_result
             continue
-        content = path.read_text()
+        content = path.read_text(encoding="utf-8")
         file_result["ids"] = entity.extract_ids(content)
         for item_id, block in _entity_blocks(content, entity):
             missing = [field for field in entity.required_fields if not has_field(block, field)]
@@ -106,17 +106,21 @@ def write_check(root: Path, result: dict) -> Path:
         pending.append("background.md 缺少章节：" + ", ".join(bg["missing_sections"]))
     pending.extend(trace_failures[:5])
 
-    w = CheckWriter(refine_dir, "精炼检查")
+    w = CheckWriter(refine_dir, template_path=module_template_path(__file__, "02-refine-check-template.md"))
     w.add_meta("检查来源", "check-refine.py 自动生成")
     w.add_meta("检查状态", "通过" if can_relate else "不通过")
     w.add_meta("待确认项", "; ".join(pending) if pending else "无")
 
-    classification_items = [(True, "已区分背景")]
-    classification_items.extend(
-        (result["files"].get(entity.filename, {}).get("exists", False), f"已区分{entity.label}")
-        for entity in REFINE_ENTITIES
-    )
-    w.add_section("1. 信息分类检查", classification_items)
+    w.add_template_section("1. 信息分类检查", {
+        "已区分事实": result["files"].get("facts.md", {}).get("exists", False),
+        "已区分背景": bg.get("exists", False),
+        "已区分目标": result["files"].get("goals.md", {}).get("exists", False),
+        "已区分决策": result["files"].get("decisions.md", {}).get("exists", False),
+        "已区分约束": result["files"].get("constraints.md", {}).get("exists", False),
+        "已区分冲突": result["files"].get("conflicts.md", {}).get("exists", False),
+        "已区分待确认问题": result["files"].get("questions.md", {}).get("exists", False),
+        "已区分 AI 推断": result["files"].get("assumptions.md", {}).get("exists", False),
+    })
 
     source_items = [
         ("facts.md", "关键事实有来源"),
@@ -125,27 +129,25 @@ def write_check(root: Path, result: dict) -> Path:
         ("conflicts.md", "冲突点有来源"),
         ("assumptions.md", "AI 推断已标记"),
     ]
-    w.add_section("2. 来源检查", [
-        (result["traceability"].get(fname, {}).get("exists", False)
-         and not result["traceability"].get(fname, {}).get("failures", []), label)
+    w.add_template_section("2. 来源检查", {
+        label: (
+            result["traceability"].get(fname, {}).get("exists", False)
+            and not result["traceability"].get(fname, {}).get("failures", [])
+        )
         for fname, label in source_items
-    ])
+    })
 
-    w.add_section("3. 风险检查", [
-        (True, "没有把推断写成事实（自动检查：assumptions.md 独立存在）"),
-        (True, "没有隐藏冲突点（自动检查：conflicts.md 存在）"),
-        (True, "没有跳过待确认问题（自动检查：questions.md 存在）"),
-        (bg.get("exists", False) and not bg.get("missing_sections"),
-         "没有删除重要背景（自动检查：background.md 内容完整）"),
-        (True, "没有凭空新增业务规则（精炼阶段不生成规则）"),
-    ])
+    w.add_template_section("3. 风险检查", {
+        "没有把推断写成事实": True,
+        "没有隐藏冲突点": True,
+        "没有跳过待确认问题": True,
+        "没有删除重要背景": bg.get("exists", False) and not bg.get("missing_sections"),
+        "没有凭空新增业务规则": True,
+    })
 
     w.add_conclusion(
         can_proceed=can_relate,
         reason="自动检查通过" if can_relate else "; ".join(pending) if pending else "存在未通过项",
-        heading="4. 精炼结论",
-        prompt="本轮精炼是否可以进入关联阶段：",
-        proceed_label="可以",
     )
     return w.write()
 

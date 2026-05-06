@@ -14,10 +14,11 @@ sys.path.insert(0, str(next(p / "scripts" for p in Path(__file__).resolve().pare
 from lib.id_registry import RELATE_ENTITIES, RELATION_CHAIN_RULES, get_entity
 from lib.constants import DEFAULT_PRD_ROOT
 from lib.check_framework import CheckWriter
+from lib.template_path import module_template_path
 
 
 def _read(path: Path) -> str:
-    return path.read_text() if path.exists() else ""
+    return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
 def check_relate(root: Path) -> dict:
@@ -104,21 +105,18 @@ def write_check(root: Path, result: dict) -> Path:
     all_ok = result["relate_exists"] and not missing_files and all(ok for ok, _ in chain_checks + isolated_checks + impact_checks)
     pending = missing_files + orphan_issues
 
-    w = CheckWriter(relate_dir, "关联检查")
+    w = CheckWriter(relate_dir, template_path=module_template_path(__file__, "03-relate-check-template.md"))
     w.add_meta("检查来源", "check-relate.py 自动生成")
     w.add_meta("检查状态", "通过" if all_ok else "不通过")
     w.add_meta("待确认项", "; ".join(pending) if pending else "无")
 
-    w.add_section("1. 断链检查", chain_checks)
-    w.add_section("2. 孤立项检查", isolated_checks)
-    w.add_section("3. 待确认影响检查", impact_checks)
+    w.add_template_section("1. 断链检查", {label: ok for ok, label in chain_checks})
+    w.add_template_section("2. 孤立项检查", {label: ok for ok, label in isolated_checks})
+    w.add_template_section("3. 待确认影响检查", {label: ok for ok, label in impact_checks})
 
     w.add_conclusion(
         can_proceed=all_ok,
         reason="自动检查通过" if all_ok else "; ".join(pending) if pending else "存在未通过项",
-        heading="4. 关联结论",
-        prompt="本轮关联是否可以进入生成阶段：",
-        proceed_label="可以",
     )
     return w.write()
 

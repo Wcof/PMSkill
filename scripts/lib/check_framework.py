@@ -5,6 +5,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 from typing import Optional
+import re
 
 
 def print_header(title: str) -> None:
@@ -44,9 +45,12 @@ class CheckWriter:
         w.write()
     """
 
-    def __init__(self, output_dir: Path, title: str):
+    def __init__(self, output_dir: Path, title: str | None = None, template_path: Path | None = None):
         self._output_dir = output_dir
-        self._title = title
+        self._template_path = template_path
+        self._template_sections = _parse_template_sections(template_path) if template_path else {}
+        self._template_conclusion = _parse_template_conclusion(template_path) if template_path else None
+        self._title = title or _parse_template_title(template_path) or "检查"
         self._meta: list[tuple[str, str]] = []
         self._sections: list[tuple[str, list[tuple[bool, str]]]] = []
         self._conclusion: Optional[tuple[bool, str, str, str, str]] = None
@@ -57,14 +61,28 @@ class CheckWriter:
     def add_section(self, heading: str, items: list[tuple[bool, str]]) -> None:
         self._sections.append((heading, items))
 
+    def add_template_section(self, heading: str, status_by_item: dict[str, bool]) -> None:
+        template_items = self._template_sections.get(heading, [])
+        if not template_items:
+            raise KeyError(f"Template section not found: {heading}")
+        self.add_section(heading, [(status_by_item.get(item, False), item) for item in template_items])
+
     def add_conclusion(
         self,
         can_proceed: bool,
         reason: str,
-        heading: str = "结论",
-        prompt: str = "",
-        proceed_label: str = "可以进入下一阶段",
+        heading: str | None = None,
+        prompt: str | None = None,
+        proceed_label: str | None = None,
     ) -> None:
+        if self._template_conclusion:
+            template_heading, template_prompt, template_proceed = self._template_conclusion
+            heading = heading or template_heading
+            prompt = template_prompt if prompt is None else prompt
+            proceed_label = proceed_label or template_proceed
+        heading = heading or "结论"
+        prompt = prompt or ""
+        proceed_label = proceed_label or "可以进入下一阶段"
         self._conclusion = (can_proceed, reason, heading, prompt, proceed_label)
 
     def write(self) -> Path:
@@ -102,5 +120,56 @@ class CheckWriter:
             lines.append(f"- 原因：{reason}")
             lines.append("")
 
-        check_file.write_text("\n".join(lines))
+        check_file.write_text("\n".join(lines), encoding="utf-8")
         return check_file
+
+
+def _parse_template_title(template_path: Path | None) -> str:
+    if not template_path or not template_path.exists():
+        return ""
+    for line in template_path.read_text(encoding="utf-8").splitlines():
+        if line.startswith("# "):
+            return line.removeprefix("# ").strip()
+    return ""
+
+
+def _parse_template_sections(template_path: Path | None) -> dict[str, list[str]]:
+    if not template_path or not template_path.exists():
+        return {}
+    sections: dict[str, list[str]] = {}
+    current = ""
+    for line in template_path.read_text(encoding="utf-8").splitlines():
+        if line.startswith("## "):
+            current = line.removeprefix("## ").strip()
+            sections.setdefault(current, [])
+            continue
+        match = re.match(r"^- \[ \] (.+)$", line)
+        if current and match:
+            item = match.group(1).strip()
+            if item not in ("可以", "不可以"):
+                sections[current].append(item)
+    return sections
+
+
+def _parse_template_conclusion(template_path: Path | None) -> tuple[str, str, str] | None:
+    if not template_path or not template_path.exists():
+        return None
+    lines = template_path.read_text(encoding="utf-8").splitlines()
+    for index, line in enumerate(lines):
+        if not line.startswith("## ") or "结论" not in line:
+            continue
+        heading = line.removeprefix("## ").strip()
+        prompt = ""
+        proceed_label = "可以"
+        for following in lines[index + 1:]:
+            if following.startswith("## "):
+                break
+            if following.startswith("- [ ] "):
+                label = following.removeprefix("- [ ] ").strip()
+                if label != "不可以":
+                    proceed_label = label
+                    break
+            if following.strip() and not following.startswith("- "):
+                prompt = following.strip()
+        return heading, prompt, proceed_label
+    return None

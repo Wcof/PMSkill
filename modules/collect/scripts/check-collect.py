@@ -19,6 +19,7 @@ from lib.state import read_collect_state, STATE_FILE, safe_int
 from lib.source_index import INDEX_FILE, read_indexed_paths
 from lib.constants import DEFAULT_COLLECT_ROOT
 from lib.check_framework import CheckWriter
+from lib.template_path import module_template_path
 
 
 def check(root: Path) -> dict:
@@ -104,40 +105,40 @@ def write_check_md(root: Path, result: dict):
     if mode != "off":
         confirmed.append(f"capture_mode 仍为 {mode}，session 未结束")
 
-    w = CheckWriter(root, "采集检查")
+    w = CheckWriter(root, template_path=module_template_path(__file__, "01-collect-check-template.md"))
     w.add_meta("检查来源", "check-collect.py 自动生成")
     w.add_meta("检查状态", status)
     w.add_meta("待确认项", "; ".join(confirmed) if confirmed else "无")
 
-    w.add_section("1. 状态与目录检查", [
-        (result["started"], "通过 `/prd-start` 开启过采集 session"),
-        (result["state_exists"], "`collect-state.md` 存在且可读"),
-        (result["active_dir_exists"], "`active/` 目录存在"),
-        (result["passive_dir_exists"], "`passive/` 目录存在"),
-        (result["index_exists"], "`source-index.md` 存在"),
-    ])
+    w.add_template_section("1. 状态与目录检查", {
+        "通过 `/prd-start` 开启过采集 session": result["started"],
+        "`collect-state.md` 存在且可读": result["state_exists"],
+        "`active/` 目录存在": result["active_dir_exists"],
+        "`passive/` 目录存在": result["passive_dir_exists"],
+        "`source-index.md` 存在": result["index_exists"],
+    })
 
-    w.add_section("2. 主动采集检查", [
-        (mode in ("on", "paused", "off"), "`capture_mode` 状态正确"),
-        (result["sessions_dir_exists"], "`active/sessions/` 存在"),
-        (result["has_user_query"], "主动采集记录完整保存 User Query"),
-        (result["has_agent_answer"], "主动采集记录完整保存 Agent Answer"),
-        (result["has_yaml_frontmatter"], "主动采集记录包含 YAML front matter"),
-    ])
+    w.add_template_section("2. 主动采集检查", {
+        "`capture_mode` 状态正确": mode in ("on", "paused", "off"),
+        "`active/sessions/` 存在": result["sessions_dir_exists"],
+        "主动采集记录完整保存 User Query": result["has_user_query"],
+        "主动采集记录完整保存 Agent Answer": result["has_agent_answer"],
+        "主动采集记录包含 YAML front matter": result["has_yaml_frontmatter"],
+    })
 
-    w.add_section("3. 被动采集检查", [
-        (result["passive_dir_exists"], "`passive/` 可以被扫描"),
-        (result["passive_count"] > 0, "被动材料已进入 `source-index.md`"),
-        (True, "未改写 `passive/` 中的原始文件"),
-        (True, "元信息缺失时标记为 `metadata_status: missing`"),
-    ])
+    w.add_template_section("3. 被动采集检查", {
+        "`passive/` 可以被扫描": result["passive_dir_exists"],
+        "被动材料已进入 `source-index.md`": result["passive_count"] > 0,
+        "未改写 `passive/` 中的原始文件": True,
+        "元信息缺失时标记为 `metadata_status: missing`": True,
+    })
 
-    w.add_section("4. 索引与原文保留检查", [
-        (not result["missing_index_refs"], "`source-index.md` 引用的文件路径真实存在"),
-        (True, "未提前改写成 PRD"),
-        (True, "未混入 AI 推断"),
-        (True, "噪音只标记 `noise_hint`，不删除原文"),
-    ])
+    w.add_template_section("4. 索引与原文保留检查", {
+        "`source-index.md` 引用的文件路径真实存在": not result["missing_index_refs"],
+        "未提前改写成 PRD": True,
+        "未混入 AI 推断": True,
+        "噪音只标记 `noise_hint`，不删除原文": True,
+    })
 
     can_refine = auto_pass and mode == "off"
     if can_refine:
@@ -154,9 +155,6 @@ def write_check_md(root: Path, result: dict):
     w.add_conclusion(
         can_proceed=can_refine,
         reason=reason,
-        heading="5. 采集结论",
-        prompt="本轮采集是否可以进入精炼阶段：",
-        proceed_label="可以",
     )
 
     return w.write()

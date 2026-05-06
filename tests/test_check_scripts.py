@@ -1,4 +1,4 @@
-import importlib.util
+﻿import importlib.util
 import json
 import sys
 from pathlib import Path
@@ -22,7 +22,7 @@ def load_script(relative_path: str):
 
 def write(path: Path, content: str = "content") -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content)
+    path.write_text(content, encoding="utf-8")
 
 
 def test_check_collect_writes_template_shaped_check(tmp_path: Path):
@@ -58,7 +58,7 @@ def test_check_collect_writes_template_shaped_check(tmp_path: Path):
     module = load_script("modules/collect/scripts/check-collect.py")
     result = module.check(root)
     check_file = module.write_check_md(root, result)
-    content = check_file.read_text()
+    content = check_file.read_text(encoding="utf-8")
 
     assert "## 0. 检查信息" in content
     assert "## 5. 采集结论" in content
@@ -80,10 +80,10 @@ def test_check_refine_writes_template_shaped_check(tmp_path: Path):
     module = load_script("modules/refine/scripts/check-refine.py")
     result = module.check_refine(root)
     check_file = module.write_check(root, result)
-    content = check_file.read_text()
+    content = check_file.read_text(encoding="utf-8")
 
     assert "## 1. 信息分类检查" in content
-    assert "已区分需求事实" in content
+    assert "已区分事实" in content
     assert "本轮精炼是否可以进入关联阶段" in content
 
 
@@ -108,7 +108,7 @@ def test_check_relate_writes_template_shaped_check(tmp_path: Path):
     module = load_script("modules/relate/scripts/check-relate.py")
     result = module.check_relate(root)
     check_file = module.write_check(root, result)
-    content = check_file.read_text()
+    content = check_file.read_text(encoding="utf-8")
 
     assert "## 1. 断链检查" in content
     assert "每个核心规则有关联数据对象" in content
@@ -123,17 +123,17 @@ def test_setup_installs_agent_configs_and_claude_commands(tmp_path: Path):
 
     assert tmp_path / "AGENTS.md" in config_files
     assert tmp_path / "CLAUDE.md" in config_files
-    assert "<!-- PRD-HELPER:START -->" in (tmp_path / "AGENTS.md").read_text()
-    assert "<!-- PRD-HELPER:START -->" in (tmp_path / "CLAUDE.md").read_text()
+    assert "<!-- PRD-HELPER:START -->" in (tmp_path / "AGENTS.md").read_text(encoding="utf-8")
+    assert "<!-- PRD-HELPER:START -->" in (tmp_path / "CLAUDE.md").read_text(encoding="utf-8")
     assert tmp_path / ".claude" / "commands" / "prd-helper.md" in command_files
     assert tmp_path / ".claude" / "commands" / "prd-start.md" in command_files
     assert not (tmp_path / ".claude" / "commands" / "prd-init.md").exists()
     assert not (tmp_path / ".claude" / "commands" / "prd-setup.md").exists()
-    assert "setup-prd-helper.py" in (tmp_path / ".claude" / "commands" / "prd-helper.md").read_text()
-    assert "collect-control.py\" start" in (tmp_path / ".claude" / "commands" / "prd-start.md").read_text()
+    assert "setup-prd-helper.py" in (tmp_path / ".claude" / "commands" / "prd-helper.md").read_text(encoding="utf-8")
+    assert "collect-control.py\" start" in (tmp_path / ".claude" / "commands" / "prd-start.md").read_text(encoding="utf-8")
     assert "--project . --docs-root docs/prd-helper --agent claude-code" in (
         tmp_path / ".claude" / "commands" / "prd-start.md"
-    ).read_text()
+    ).read_text(encoding="utf-8")
     assert not (tmp_path / ".claude" / "settings.json").exists()
 
 
@@ -157,7 +157,7 @@ def test_setup_main_repairs_partial_claude_initialization(tmp_path: Path, monkey
     )
 
     assert module.main() == 0
-    assert (docs_root / "prd-helper-config.md").read_text() == "# existing config\n"
+    assert (docs_root / "prd-helper-config.md").read_text(encoding="utf-8") == "# existing config\n"
     assert (tmp_path / ".claude" / "commands" / "prd-helper.md").exists()
     assert (tmp_path / ".claude" / "commands" / "prd-start.md").exists()
     assert (tmp_path / ".claude" / "commands" / "prd-status.md").exists()
@@ -171,12 +171,12 @@ def test_collect_control_toggles_claude_hooks(tmp_path: Path):
 
     module.cmd_start(root, "claude-code", tmp_path, "docs/prd-helper")
     settings_file = tmp_path / ".claude" / "settings.json"
-    settings = json.loads(settings_file.read_text())
+    settings = json.loads(settings_file.read_text(encoding="utf-8"))
     assert "claude-capture-hook.py" in settings["hooks"]["UserPromptSubmit"][0]["hooks"][0]["command"]
     assert "claude-capture-hook.py" in settings["hooks"]["Stop"][0]["hooks"][0]["command"]
 
     module.cmd_stop(root, "claude-code", tmp_path)
-    assert "claude-capture-hook.py" not in settings_file.read_text()
+    assert "claude-capture-hook.py" not in settings_file.read_text(encoding="utf-8")
 
 
 def test_collect_start_repairs_hooks_when_already_capturing(tmp_path: Path):
@@ -202,7 +202,7 @@ def test_collect_start_repairs_hooks_when_already_capturing(tmp_path: Path):
     )
 
     module.cmd_start(root, "claude-code", tmp_path, "docs/prd-helper")
-    settings = settings_file.read_text()
+    settings = settings_file.read_text(encoding="utf-8")
     assert "/old/path/claude-capture-hook.py" not in settings
     assert settings.count("claude-capture-hook.py") == 2
 
@@ -241,10 +241,10 @@ def test_claude_capture_hook_records_turn_after_start(tmp_path: Path):
 
     captured = list((root / "active" / "sessions").glob("session-*.md"))
     assert len(captured) == 1
-    content = captured[0].read_text()
+    content = captured[0].read_text(encoding="utf-8")
     assert "机器人巡检点位管理功能" in content
     assert "已记录这个需求" in content
-    assert "active/sessions/" in (root / "source-index.md").read_text()
+    assert "active/sessions/" in (root / "source-index.md").read_text(encoding="utf-8")
 
 
 def test_scan_passive_indexes_new_files_and_updates_state(tmp_path: Path, monkeypatch):
@@ -267,8 +267,8 @@ def test_scan_passive_indexes_new_files_and_updates_state(tmp_path: Path, monkey
     monkeypatch.setattr(sys, "argv", ["scan-passive.py", "--root", str(root)])
     module.main()
 
-    index = (root / "source-index.md").read_text()
-    state = (root / "collect-state.md").read_text()
+    index = (root / "source-index.md").read_text(encoding="utf-8")
+    state = (root / "collect-state.md").read_text(encoding="utf-8")
     assert "passive/meeting.md" in index
     assert "| passive_source_count | 1 |" in state
     assert "| total_sources | 1 |" in state
@@ -286,11 +286,11 @@ def test_scan_passive_indexes_changed_file_once_per_hash(tmp_path: Path, monkeyp
     monkeypatch.setattr(sys, "argv", ["scan-passive.py", "--root", str(root)])
     module.main()
     module.main()
-    source.write_text("- 来源：会议纪要\n- 记录时间：2026-05-04\n")
+    source.write_text("- 来源：会议纪要\n- 记录时间：2026-05-04\n", encoding="utf-8")
     module.main()
 
-    index = (root / "source-index.md").read_text()
-    state = (root / "collect-state.md").read_text()
+    index = (root / "source-index.md").read_text(encoding="utf-8")
+    state = (root / "collect-state.md").read_text(encoding="utf-8")
     assert index.count("passive/meeting.md") == 2
     assert "| passive_source_count | 2 |" in state
     assert "| total_sources | 2 |" in state
@@ -328,7 +328,7 @@ def test_remove_prd_helper_cleans_commands_and_hooks(tmp_path: Path):
     assert not (commands / "prd-stop.md").exists()
     assert (commands / "unrelated.md").exists()
     assert hook_file == tmp_path / ".claude" / "settings.json"
-    assert "claude-capture-hook.py" not in (tmp_path / ".claude" / "settings.json").read_text()
+    assert "claude-capture-hook.py" not in (tmp_path / ".claude" / "settings.json").read_text(encoding="utf-8")
 
 
 def test_check_generated_template_paths_resolve_to_real_files():
@@ -378,8 +378,8 @@ def test_check_page_completeness_detects_missing_sections(tmp_path: Path):
 
 
 def test_claude_plugin_manifest_references_existing_commands():
-    plugin = json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text())
-    marketplace = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text())
+    plugin = json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))
+    marketplace = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text(encoding="utf-8"))
 
     assert plugin["name"] == "prd-helper"
     assert marketplace["plugins"][0]["source"] == "./"
@@ -391,7 +391,7 @@ def test_claude_plugin_manifest_references_existing_commands():
     for command_path in command_paths:
         path = ROOT / command_path.removeprefix("./")
         assert path.exists(), command_path
-        content = path.read_text()
+        content = path.read_text(encoding="utf-8")
         assert "allowed-tools: Bash" in content
         assert "find_prd_helper_root" in content
 
@@ -430,7 +430,7 @@ def test_module_scripts_do_not_contain_inline_bootstrap():
         "modules/relate/scripts/check-relate.py",
     ]
     for script_path in scripts:
-        content = (ROOT / script_path).read_text()
+        content = (ROOT / script_path).read_text(encoding="utf-8")
         assert bootstrap_pattern not in content, (
             f"{script_path} still contains inline bootstrap — use `from lib.bootstrap import *` instead"
         )
@@ -467,7 +467,7 @@ def test_session_writer_creates_file_with_frontmatter(tmp_path: Path):
         turns=[("What is X?", "X is Y")],
     )
     assert session_file.exists()
-    content = session_file.read_text()
+    content = session_file.read_text(encoding="utf-8")
     assert "source_id: test-001" in content
     assert "agent: claude-code" in content
     assert "## Turn 1" in content
@@ -488,7 +488,7 @@ def test_session_writer_appends_turn_to_existing(tmp_path: Path):
         turns=[("Q1", "A1")],
     )
     append_turn(session_file, turn_index=2, user_query="Q2", agent_answer="A2")
-    content = session_file.read_text()
+    content = session_file.read_text(encoding="utf-8")
     assert "## Turn 1" in content
     assert "## Turn 2" in content
     assert "Q2" in content
@@ -510,7 +510,7 @@ def test_check_writer_produces_valid_check_md(tmp_path: Path):
     check_file = w.write()
 
     assert check_file.exists()
-    content = check_file.read_text()
+    content = check_file.read_text(encoding="utf-8")
     assert "# 精炼检查" in content
     assert "## 0. 检查信息" in content
     assert "检查来源" in content
@@ -533,7 +533,7 @@ def test_check_writer_custom_conclusion_heading_and_prompt(tmp_path: Path):
         prompt="本轮关联是否可以进入生成阶段：",
         proceed_label="可以",
     )
-    content = w.write().read_text()
+    content = w.write().read_text(encoding="utf-8")
     assert "## 4. 关联结论" in content
     assert "本轮关联是否可以进入生成阶段：" in content
     assert "- [x] 可以" in content
@@ -635,7 +635,7 @@ def test_cmd_start_uses_default_state(tmp_path: Path):
 
 def test_cmd_start_source_uses_default_state_function():
     """/prd-start 源码应该引用 default_state() 而非手动构造字典。"""
-    source = (ROOT / "modules" / "collect" / "scripts" / "collect-control.py").read_text()
+    source = (ROOT / "modules" / "collect" / "scripts" / "collect-control.py").read_text(encoding="utf-8")
     assert "default_state()" in source, "cmd_start 应该使用 default_state() 构造基础状态"
     # 确认不再有手动构造空值 key 的代码（这些应由 default_state() 提供）
     assert '"paused_at":' not in source, "不应手动构造 paused_at，应由 default_state() 提供"
@@ -686,7 +686,7 @@ def test_discovery_write_session_uses_session_writer(tmp_path: Path):
     sessions_dir = collect_root / "active" / "sessions"
     files = list(sessions_dir.glob("session-*.md"))
     assert len(files) == 1
-    content = files[0].read_text()
+    content = files[0].read_text(encoding="utf-8")
     # 应该包含标准 frontmatter 字段
     assert "source_id:" in content
     assert "agent: claude" in content
@@ -697,7 +697,7 @@ def test_discovery_write_session_uses_session_writer(tmp_path: Path):
 
 def test_discovery_does_not_contain_build_session_content():
     """discovery.py 不应包含 build_session_content 函数。"""
-    source = (ROOT / "scripts" / "lib" / "discovery.py").read_text()
+    source = (ROOT / "scripts" / "lib" / "discovery.py").read_text(encoding="utf-8")
     assert "def build_session_content" not in source, (
         "build_session_content 应该被删除，改用 session_writer.create_session_file"
     )
@@ -705,7 +705,7 @@ def test_discovery_does_not_contain_build_session_content():
 
 def test_collect_control_uses_transition(tmp_path: Path):
     """collect-control.py 应该使用 transition() 验证状态转换。"""
-    source = (ROOT / "modules" / "collect" / "scripts" / "collect-control.py").read_text()
+    source = (ROOT / "modules" / "collect" / "scripts" / "collect-control.py").read_text(encoding="utf-8")
     assert "transition(" in source, "collect-control.py 应该调用 transition() 验证状态转换"
     assert "InvalidTransition" in source, "collect-control.py 应该捕获 InvalidTransition 异常"
 
@@ -721,3 +721,4 @@ def test_cmd_stop_rejects_invalid_transition(tmp_path: Path, capsys):
 
     captured = capsys.readouterr()
     assert "Cannot stop" in captured.out or "非法" in captured.out or "InvalidTransition" in captured.out
+

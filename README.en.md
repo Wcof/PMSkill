@@ -8,24 +8,39 @@
 
 PRD Helper turns product context scattered across meetings, chats, reviews, and legacy documents into traceable, checkable, reusable structured PRD assets.
 
+It follows one main chain: **Collect -> Refine -> Relate -> Generate**. Check is a horizontal quality gate, not a fifth stage.
+
 ## What Problem It Solves
 
 Many teams do not lack requirement material. The problem is that the material is scattered, source evidence is unclear, and versions drift. PRD Helper keeps the workflow disciplined: collect raw input first, refine it, relate it, then generate PRD documents instead of asking AI to guess from fragmented conversations.
 
-## Core Capabilities
+## Current Commands
 
-| Feature | Purpose | Problem Solved |
-|---|---|---|
-| `/prd-helper` project setup | Creates config, folders, and follow-up commands | The project is installed but not ready |
-| `/prd-start` active capture | Starts recording product discussions | Important context gets lost |
-| `/prd-stop` stop capture | Stops capture, cleans hooks, and writes summary output | Accidental or unclear capture scope |
-| `/prd-scan` batch scan | Imports historical Agent sessions | Existing context is disconnected |
-| `/prd-import` external import | Imports a third-party folder as passive material | Existing documents are hard to onboard |
-| Passive intake folder | Stores meeting notes, old PRDs, customer feedback | Non-chat materials are unmanaged |
-| `/prd-refine` `/prd-relate` `/prd-generate` stage commands | Refine, relate, and generate PRD documents | Direct PRD generation causes omissions |
-| Check scripts | Validates each stage | Outputs are not auditable |
-| `/prd-discuss` mode | Challenges vague terms and contradictions | Ambiguous language and weak decisions |
-| `/prd-remove` uninstall | Cleans commands, configs, and hooks | Installation leftovers pollute the project |
+The authoritative command set is cross-checked against `scripts/lib/constants.py`, `commands/*.md`, `SKILL.md`, and plugin manifests. README now documents these 11 commands:
+
+| Command | Stage/Type | Purpose | Main Outputs |
+|---|---|---|---|
+| `/prd-helper` | Setup entry | Initialize or repair project config, `docs/prd-helper/`, and project commands | Config, folders, Agent rules |
+| `/prd-start` | Collect | Start active capture for upcoming product discussion | `01-collect/active/`, `collect-state.md` |
+| `/prd-stop` | Collect | Stop active capture, clean hooks, and write summary/check output | `collect-summary.md`, `01-collect/check.md` |
+| `/prd-status` | Collect utility | Show capture state, session, write roots, and counts | Status summary |
+| `/prd-scan` | Collect utility | Scan historical Agent sessions into the capture pool | `01-collect/active/historical/`, `source-index.md` |
+| `/prd-import` | Collect utility | Import a third-party folder as passive material without rewriting raw content | `01-collect/passive/`, `source-index.md` |
+| `/prd-refine` | Refine | Extract facts, background, goals, decisions, constraints, conflicts, questions, and assumptions | `02-refine/` |
+| `/prd-relate` | Relate | Build upstream/downstream links across facts, pages, features, rules, data, and acceptance | `03-relate/` |
+| `/prd-generate` | Generate | Generate PRD docs and Agent context from refined and related outputs | `04-generate/` |
+| `/prd-discuss` | Auxiliary discussion | Ask one question at a time about contradictions, vague terms, and unresolved issues | Discussion summary, open questions |
+| `/prd-remove` | Uninstall | Clean project config, commands, and hooks while preserving generated docs by default | Cleanup result |
+
+Platform note: the Claude Code plugin manifest includes all 11 commands. `COMMAND_NAMES` contains the 10 generated follow-up commands; `/prd-helper` is the root Skill entry.
+
+## Engineering Constraints
+
+PRD Helper keeps Python as the executor and static prompts/templates as the constraint layer:
+
+- Command facts live in `scripts/lib/command_registry.py`; `COMMAND_NAMES`, setup scripts, and consistency tests derive from it.
+- Business rules stay in `SKILL.md`, `modules/*/guide.md`, and `commands/*.md`; Python does not act as the prompt source.
+- Output structures and checklists live in `modules/*/templates/`; scripts only fill state, counts, check results, and source details.
 
 ## Quick Start
 
@@ -47,20 +62,19 @@ Run this in your Agent session:
 
 Initialization creates the default docs root `docs/prd-helper/` and generates follow-up commands.
 
-### 3. Use Project Commands
+### 3. Follow the Four Stages
 
 ```text
-/prd-start   # Start active capture
-/prd-stop    # Stop capture and generate summary/check output
-/prd-status  # Show current capture state
-/prd-scan    # Scan historical Agent sessions into the capture pool
-/prd-import  # Import a third-party folder as passive material
-/prd-refine  # Refine collected materials into facts, decisions, constraints, questions, assumptions
-/prd-relate  # Build relations across facts, pages, rules, data, and acceptance criteria
-/prd-generate # Generate structured PRD docs and Agent context
-/prd-discuss  # Challenge contradictions and ambiguous concepts
-/prd-remove  # Uninstall PRD Helper and clean project config
+/prd-start    # Start active capture
+/prd-stop     # Stop active capture and write summary output
+/prd-scan     # Scan historical Agent sessions
+/prd-import   # Import a third-party folder as passive material
+/prd-refine   # Refine collected materials
+/prd-relate   # Build upstream/downstream relation chains
+/prd-generate # Generate PRD docs and Agent context
 ```
+
+Use `/prd-status` to inspect state, `/prd-discuss` to clarify ambiguity, and `/prd-remove` to uninstall.
 
 Active capture output goes to:
 
@@ -74,16 +88,18 @@ Passive materials go to:
 docs/prd-helper/01-collect/passive/
 ```
 
-## Four-module Workflow
+## Four-stage Workflow
 
-| Module | Directory | Output Goal |
-|---|---|---|
-| Collect | `modules/collect/` | Preserve raw materials, build indexes, lightly mark noise |
-| Refine | `modules/refine/` | Extract facts, decisions, constraints, questions, assumptions |
-| Relate | `modules/relate/` | Connect facts, pages, rules, data, and acceptance criteria |
-| Generate | `modules/generate/` | Produce PRD context for product, engineering, and QA |
+| Stage | Directory | Does | Does Not |
+|---|---|---|---|
+| Collect | `modules/collect/` | Preserve raw materials, build indexes, record hashes, maintain capture state | Rewrite facts early or generate rules |
+| Refine | `modules/refine/` | Separate facts, background, goals, decisions, constraints, conflicts, questions, assumptions | Turn assumptions into facts or jump to PRD |
+| Relate | `modules/relate/` | Build `fact -> page/feature -> rule -> data/acceptance` chains | Leave facts, rules, data, or acceptance disconnected |
+| Generate | `modules/generate/` | Produce PRD, acceptance, data docs, and Agent context | Add unsourced or unrelated business rules |
 
 ## Check Commands
+
+These are script-level quality gates, not slash commands:
 
 ```bash
 python3 modules/collect/scripts/check-collect.py --root docs/prd-helper/01-collect
@@ -98,6 +114,8 @@ python3 scripts/check-structure.py docs/prd-helper
 Only `/prd-helper` appears, not `/prd-start`: run `/prd-helper` once to initialize project commands. Claude Code may need a new session to refresh command discovery.
 
 No capture output: run `/prd-status` and confirm the state is `on`; then inspect `docs/prd-helper/01-collect/collect-state.md`.
+
+Not sure whether to use `/prd-scan` or `/prd-import`: use `/prd-scan` for historical Agent sessions; use `/prd-import` or `01-collect/passive/` for third-party folders, meeting notes, legacy PRDs, and customer feedback.
 
 Want to uninstall: run `/prd-remove`. It cleans project config, commands, and hooks while keeping existing `docs/prd-helper/` documents by default.
 

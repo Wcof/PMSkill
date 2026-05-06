@@ -28,6 +28,8 @@ from lib.time_util import now_iso, now_id
 from lib.source_index import ensure_index
 from lib.constants import DEFAULT_COLLECT_ROOT, DEFAULT_PRD_ROOT
 from lib.claude_hooks import install_claude_hooks, remove_claude_hooks
+from lib.template_path import module_template_path
+from lib.template_renderer import render_template
 
 
 def ensure_dirs(root: Path):
@@ -156,23 +158,23 @@ def cmd_stop(root: Path, agent: str, project: Path):
     write_collect_state(root, state)
     sync_claude_hooks(project, "", agent, False)
 
-    # Generate collect-summary.md
     summary_file = root / "collect-summary.md"
-    summary_lines = [
-        "# Collect Summary",
-        "",
-        f"- Session: {state.get('session_id', '')}",
-        f"- Agent: {state.get('agent', '')}",
-        f"- Started: {state.get('started_at', '')}",
-        f"- Ended: {state.get('ended_at', '')}",
-        f"- Total turns: {state.get('turn_count', '0')}",
-        f"- Active sources: {state.get('active_source_count', '0')}",
-        f"- Passive sources: {state.get('passive_source_count', '0')}",
-        f"- Anomalies: {state.get('anomaly_count', '0')}",
-        f"- Possible noise: {state.get('possible_noise_count', '0')}",
-        "",
-    ]
-    summary_file.write_text("\n".join(summary_lines))
+    summary_values = {
+        key: state.get(key, "0")
+        for key in (
+            "turn_count",
+            "active_source_count",
+            "passive_source_count",
+            "anomaly_count",
+            "possible_noise_count",
+        )
+    }
+    summary_values.update({
+        key: state.get(key, "")
+        for key in ("session_id", "agent", "started_at", "ended_at")
+    })
+    summary = render_template(module_template_path(__file__, "collect-summary-template.md"), summary_values)
+    summary_file.write_text(summary, encoding="utf-8")
 
     print(f"Session stopped: {state.get('session_id')}")
     print(f"Summary written to: {summary_file}")
