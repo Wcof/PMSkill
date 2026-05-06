@@ -119,6 +119,9 @@ npx skills@latest remove prd-helper --agent '*' --global -y
 | `/prd-start` | 开启 PRD 采集会话。创建 `collect-state.md`、`active/`、`passive/`、`source-index.md`，设置 `capture_mode: on`，并启用 Claude Code hooks 自动采集后续完整会话轮次。支持 session 续接：stop 后再 start 复用同一 session。 |
 | `/prd-stop` | 停止当前采集会话，设置 `capture_mode: off`，清理 Claude Code hooks，生成 `collect-summary.md` 和 `check.md`。提示可用 `/prd-refine` 开始精炼。 |
 | `/prd-status` | 从 `collect-state.md` 查看当前采集状态。 |
+| `/prd-refine` | 直接精炼采集材料（不强制要求先完成采集）。自动扫描 `01-collect/` 下的材料，执行精炼流程。 |
+| `/prd-relate` | 直接建立关联关系（不强制要求先完成精炼）。自动扫描 `02-refine/` 下的精炼结果，执行关联流程。 |
+| `/prd-generate` | 直接生成 PRD 文档（不强制要求先完成关联）。自动扫描精炼和关联结果，执行生成流程。 |
 | `/prd-grill` | 开启 Grill 战斗模式：扫描已采集材料找矛盾，持续压力测试产品方案，实时更新 CONTEXT.md，按需创建 ADR。需先 `/prd-start`。 |
 | `/prd-remove` | 从当前项目卸载 PRD Helper：先清理 Agent 配置块，再卸载 Skill。 |
 

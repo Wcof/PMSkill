@@ -11,6 +11,9 @@
     "./commands/prd-stop.md",
     "./commands/prd-status.md",
     "./commands/prd-scan.md",
+    "./commands/prd-refine.md",
+    "./commands/prd-relate.md",
+    "./commands/prd-generate.md",
     "./commands/prd-grill.md",
     "./commands/prd-remove.md"
   ],
