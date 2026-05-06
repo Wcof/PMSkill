@@ -23,7 +23,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(next(p / "scripts" for p in Path(__file__).resolve().parents if (p / "scripts" / "lib").exists())))  # noqa: E501
 
-from lib.state import read_collect_state, write_collect_state, default_state
+from lib.state import read_collect_state, write_collect_state, default_state, transition, InvalidTransition
 from lib.time_util import now_iso, now_id
 from lib.source_index import ensure_index
 from lib.constants import DEFAULT_COLLECT_ROOT, DEFAULT_PRD_ROOT
@@ -58,7 +58,10 @@ def cmd_start(root: Path, agent: str, project: Path, docs_root: str):
     ensure_dirs(root)
 
     state = read_collect_state(root)
-    if state.get("capture_mode") == "on":
+    current_mode = state.get("capture_mode", "off")
+
+    # 已经在采集中，只同步 hooks
+    if current_mode == "on":
         sync_claude_hooks(project, docs_root, agent, True)
         print(f"Already capturing (session: {state.get('session_id', 'unknown')})")
         if agent == "claude-code":
@@ -66,9 +69,16 @@ def cmd_start(root: Path, agent: str, project: Path, docs_root: str):
         print("Use '/prd-stop' to stop first.")
         return
 
+    # 验证状态转换
+    try:
+        transition(current_mode, "on")
+    except InvalidTransition as e:
+        print(f"Cannot start: {e}")
+        return
+
     # 复用已有 session（stop 后再 start）
     existing_session_id = state.get("session_id", "")
-    if existing_session_id and state.get("capture_mode") == "off":
+    if existing_session_id:
         state["capture_mode"] = "on"
         state["agent"] = agent
         state["resumed_at"] = now_iso()
@@ -129,8 +139,12 @@ def _run_scan(root: Path, project: Path, agent: str) -> int:
 def cmd_stop(root: Path, agent: str, project: Path):
     """Stop the current PRD Capture Session."""
     state = read_collect_state(root)
-    if state.get("capture_mode") not in ("on", "paused"):
-        print(f"Cannot stop: current mode is '{state.get('capture_mode', 'off')}'")
+    current_mode = state.get("capture_mode", "off")
+
+    try:
+        transition(current_mode, "off")
+    except InvalidTransition as e:
+        print(f"Cannot stop: {e}")
         return
 
     # Scan all AI tool sessions before stopping

@@ -682,3 +682,23 @@ def test_discovery_does_not_contain_build_session_content():
     assert "def build_session_content" not in source, (
         "build_session_content 应该被删除，改用 session_writer.create_session_file"
     )
+
+
+def test_collect_control_uses_transition(tmp_path: Path):
+    """collect-control.py 应该使用 transition() 验证状态转换。"""
+    source = (ROOT / "modules" / "collect" / "scripts" / "collect-control.py").read_text()
+    assert "transition(" in source, "collect-control.py 应该调用 transition() 验证状态转换"
+    assert "InvalidTransition" in source, "collect-control.py 应该捕获 InvalidTransition 异常"
+
+
+def test_cmd_stop_rejects_invalid_transition(tmp_path: Path, capsys):
+    """/prd-stop 在 capture_mode=off 时应该拒绝并提示。"""
+    module = load_script("modules/collect/scripts/collect-control.py")
+    root = tmp_path / "01-collect"
+    root.mkdir(parents=True, exist_ok=True)
+
+    write_collect_state(root, {"capture_mode": "off", "session_id": ""})
+    module.cmd_stop(root, "claude-code", tmp_path)
+
+    captured = capsys.readouterr()
+    assert "Cannot stop" in captured.out or "非法" in captured.out or "InvalidTransition" in captured.out
