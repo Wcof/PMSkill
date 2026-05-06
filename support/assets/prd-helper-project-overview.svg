@@ -1,132 +1,46 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1260" viewBox="0 0 1800 1260" role="img" aria-label="PRD Helper Skill Kit current project overview">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="628" viewBox="0 0 1200 628" role="img" aria-labelledby="title desc">
+  <title id="title">PRD Helper 项目导览</title>
+  <desc id="desc">一句话讲价值与快速使用方式的项目封面图</desc>
   <defs>
-    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
-      <path d="M2 2 L10 6 L2 10 Z" fill="#334155"/>
-    </marker>
-    <filter id="shadow" x="-15%" y="-15%" width="130%" height="130%">
-      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#0f172a" flood-opacity="0.10"/>
-    </filter>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#111827"/>
+      <stop offset="100%" stop-color="#0b1220"/>
+    </linearGradient>
     <style>
-      .title { font: 800 62px "PingFang SC", "Microsoft YaHei", Arial, sans-serif; fill: #0f172a; letter-spacing: 0; }
-      .subtitle { font: 500 25px "PingFang SC", "Microsoft YaHei", Arial, sans-serif; fill: #475569; letter-spacing: 0; }
-      .section { font: 800 30px "PingFang SC", "Microsoft YaHei", Arial, sans-serif; fill: #0f172a; letter-spacing: 0; }
-      .label { font: 800 23px "PingFang SC", "Microsoft YaHei", Arial, sans-serif; fill: #111827; letter-spacing: 0; }
-      .body { font: 500 19px "PingFang SC", "Microsoft YaHei", Arial, sans-serif; fill: #475569; letter-spacing: 0; }
-      .small { font: 600 17px "PingFang SC", "Microsoft YaHei", Arial, sans-serif; fill: #334155; letter-spacing: 0; }
-      .mono { font: 700 18px "SFMono-Regular", Consolas, monospace; fill: #334155; letter-spacing: 0; }
-      .monoLight { font: 800 17px "SFMono-Regular", Consolas, monospace; fill: #ffffff; letter-spacing: 0; }
-      .badge { font: 800 16px "PingFang SC", "Microsoft YaHei", Arial, sans-serif; fill: #ffffff; letter-spacing: 0; }
+      .title { font: 700 64px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; fill: #f8fafc; }
+      .subtitle { font: 500 28px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; fill: #cbd5e1; }
+      .label { font: 600 24px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; fill: #e2e8f0; }
+      .text { font: 500 20px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; fill: #cbd5e1; }
+      .hint { font: 500 18px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; fill: #94a3b8; }
+      .code { font: 600 22px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; fill: #93c5fd; }
     </style>
   </defs>
 
-  <rect width="1800" height="1260" fill="#f8fafc"/>
-  <rect x="76" y="58" width="1648" height="1144" rx="8" fill="#ffffff" stroke="#e2e8f0" stroke-width="2" filter="url(#shadow)"/>
+  <rect width="1200" height="628" fill="url(#bg)"/>
 
-  <text x="126" y="138" class="title">PRD Helper Skill Kit</text>
-  <text x="126" y="184" class="subtitle">一句话讲通：把零散产品上下文，变成可追溯、可审计、可继续执行的 PRD 上下文。</text>
+  <rect x="48" y="46" width="1104" height="536" rx="16" fill="url(#card)" stroke="#334155" stroke-width="1.5"/>
 
-  <g transform="translate(126 232)">
-    <rect x="0" y="0" width="390" height="82" rx="8" fill="#111827"/>
-    <text x="24" y="35" class="monoLight">npx skills@latest add</text>
-    <text x="24" y="63" class="monoLight">Wcof/PRDContextEngine</text>
+  <text x="88" y="132" class="title">PRD Helper</text>
+  <text x="88" y="182" class="subtitle">One Skill · Four Modules · Auditable PRD Flow</text>
 
-    <rect x="432" y="0" width="224" height="82" rx="8" fill="#eef2ff" stroke="#a5b4fc" stroke-width="2"/>
-    <text x="458" y="35" class="label">安装一个 Skill</text>
-    <text x="458" y="63" class="mono">prd-helper</text>
+  <text x="88" y="258" class="label">一句话价值</text>
+  <text x="88" y="296" class="text">把产品讨论、会议纪要与 Agent 会话，沉淀为可追溯、可复用的结构化 PRD 资产。</text>
 
-    <rect x="698" y="0" width="244" height="82" rx="8" fill="#ecfdf5" stroke="#86efac" stroke-width="2"/>
-    <text x="724" y="35" class="label">初始化项目</text>
-    <text x="724" y="63" class="mono">/prd-helper</text>
+  <text x="88" y="362" class="label">怎么用</text>
+  <text x="88" y="402" class="code">npx skills@latest add Wcof/PRDContextEngine</text>
+  <text x="88" y="438" class="code">/prd-helper → /prd-start → Collect → Refine → Relate → Generate</text>
 
-    <rect x="984" y="0" width="510" height="82" rx="8" fill="#fff7ed" stroke="#fdba74" stroke-width="2"/>
-    <text x="1010" y="35" class="label">生成项目命令</text>
-    <text x="1010" y="63" class="mono">/prd-start /prd-generate /prd-check /prd-remove</text>
-
-    <path d="M390 41 L432 41" stroke="#334155" stroke-width="4" marker-end="url(#arrow)"/>
-    <path d="M656 41 L698 41" stroke="#334155" stroke-width="4" marker-end="url(#arrow)"/>
-    <path d="M942 41 L984 41" stroke="#334155" stroke-width="4" marker-end="url(#arrow)"/>
+  <g transform="translate(740,228)">
+    <rect x="0" y="0" width="340" height="260" rx="14" fill="#0b1322" stroke="#334155"/>
+    <text x="24" y="46" class="label">四模块</text>
+    <text x="24" y="88" class="text">01 Collect 采集</text>
+    <text x="24" y="124" class="text">02 Refine 精炼</text>
+    <text x="24" y="160" class="text">03 Relate 关联</text>
+    <text x="24" y="196" class="text">04 Generate 生成</text>
+    <text x="24" y="234" class="hint">输出目录：docs/prd-helper/</text>
   </g>
-
-  <text x="126" y="382" class="section">输入与采集入口</text>
-  <g transform="translate(126 416)">
-    <rect x="0" y="0" width="354" height="150" rx="8" fill="#ecfeff" stroke="#67e8f9" stroke-width="2"/>
-    <text x="24" y="40" class="label">主动采集</text>
-    <text x="24" y="76" class="body">显式 /prd-start 后记录</text>
-    <text x="24" y="108" class="body">完整 User Query + Answer</text>
-
-    <rect x="400" y="0" width="354" height="150" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-width="2"/>
-    <text x="424" y="40" class="label">被动材料</text>
-    <text x="424" y="76" class="body">会议、反馈、旧 PRD、原型</text>
-    <text x="424" y="108" class="mono">01-collect/passive</text>
-
-    <rect x="800" y="0" width="354" height="150" rx="8" fill="#fefce8" stroke="#fde047" stroke-width="2"/>
-    <text x="824" y="40" class="label">Claude Code</text>
-    <text x="824" y="76" class="body">项目命令 + Hook</text>
-    <text x="824" y="108" class="body">pause/stop 清理 Hook</text>
-
-    <rect x="1200" y="0" width="354" height="150" rx="8" fill="#f0fdf4" stroke="#86efac" stroke-width="2"/>
-    <text x="1224" y="40" class="label">Codex</text>
-    <text x="1224" y="76" class="body">插件命令 + AGENTS.md</text>
-    <text x="1224" y="108" class="body">stop 扫描 JSONL 兜底</text>
-  </g>
-
-  <text x="126" y="632" class="section">四模块流水线</text>
-  <g transform="translate(126 666)">
-    <rect x="0" y="0" width="350" height="178" rx="8" fill="#f0fdfa" stroke="#5eead4" stroke-width="2"/>
-    <rect x="24" y="22" width="58" height="28" rx="6" fill="#0f766e"/>
-    <text x="39" y="42" class="badge">01</text>
-    <text x="102" y="44" class="label">Collect 采集</text>
-    <text x="24" y="86" class="body">保存原貌、元信息、索引</text>
-    <text x="24" y="116" class="body">轻量摘要和噪音提示</text>
-    <text x="24" y="146" class="mono">source-index / collect-state</text>
-
-    <rect x="396" y="0" width="350" height="178" rx="8" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
-    <rect x="420" y="22" width="58" height="28" rx="6" fill="#7c3aed"/>
-    <text x="435" y="42" class="badge">02</text>
-    <text x="498" y="44" class="label">Refine 精炼</text>
-    <text x="420" y="86" class="body">按用户故事 US 组织</text>
-    <text x="420" y="116" class="body">事实、决策、约束、问题</text>
-    <text x="420" y="146" class="mono">US-*/facts.md ...</text>
-
-    <rect x="792" y="0" width="350" height="178" rx="8" fill="#fff7ed" stroke="#fdba74" stroke-width="2"/>
-    <rect x="816" y="22" width="58" height="28" rx="6" fill="#ea580c"/>
-    <text x="831" y="42" class="badge">03</text>
-    <text x="894" y="44" class="label">Relate 关联</text>
-    <text x="816" y="86" class="body">实体关系网络</text>
-    <text x="816" y="116" class="body">主题、决策链路、概念层级</text>
-    <text x="816" y="146" class="mono">relations.md / themes.md</text>
-
-    <rect x="1188" y="0" width="350" height="178" rx="8" fill="#fff1f2" stroke="#fda4af" stroke-width="2"/>
-    <rect x="1212" y="22" width="58" height="28" rx="6" fill="#e11d48"/>
-    <text x="1227" y="42" class="badge">04</text>
-    <text x="1290" y="44" class="label">Generate 生成</text>
-    <text x="1212" y="86" class="body">Agent 维度 + 人类维度</text>
-    <text x="1212" y="116" class="body">支持全部、分级、部分、更新</text>
-    <text x="1212" y="146" class="mono">agent/ + human/</text>
-
-    <path d="M350 89 L396 89" stroke="#334155" stroke-width="4" marker-end="url(#arrow)"/>
-    <path d="M746 89 L792 89" stroke="#334155" stroke-width="4" marker-end="url(#arrow)"/>
-    <path d="M1142 89 L1188 89" stroke="#334155" stroke-width="4" marker-end="url(#arrow)"/>
-  </g>
-
-  <text x="126" y="914" class="section">生成产物与质量门禁</text>
-  <g transform="translate(126 948)">
-    <rect x="0" y="0" width="500" height="128" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
-    <text x="24" y="42" class="label">Agent 维度</text>
-    <text x="24" y="78" class="body">overview / pages / rules / data / acceptance</text>
-    <text x="24" y="106" class="body">agent-context / implementation</text>
-
-    <rect x="552" y="0" width="430" height="128" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
-    <text x="576" y="42" class="label">Human 维度</text>
-    <text x="576" y="78" class="body">system-prd.md</text>
-    <text x="576" y="106" class="body">page-prd/*.md</text>
-
-    <rect x="1034" y="0" width="504" height="128" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
-    <text x="1058" y="42" class="label">Check 门禁</text>
-    <text x="1058" y="78" class="body">collect → refine → relate → generate</text>
-    <text x="1058" y="106" class="mono">/prd-check → 05-check/final-check.md</text>
-  </g>
-
-  <rect x="126" y="1122" width="1538" height="2" fill="#e2e8f0"/>
-  <text x="126" y="1160" class="small">核心原则：单 Skill、四模块、显式采集、事实与推断分离、relations.md 网状关联、生成不脱离来源。</text>
 </svg>
