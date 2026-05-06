@@ -36,7 +36,7 @@ _COLLECT_DESCRIPTIONS = {
     "refine": "直接精炼采集材料（不强制要求先完成采集）",
     "relate": "直接建立关联关系（不强制要求先完成精炼）",
     "generate": "直接生成 PRD 文档（不强制要求先完成关联）",
-    "grill": "开启 PRD Grill 战斗模式 — 压力测试产品方案",
+    "discuss": "开启需求研讨模式 — 压力测试产品方案",
 }
 CLAUDE_COMMANDS = {
     "prd-helper": {"description": "初始化或修复 PRD Helper 项目配置", "script": "setup", "command": ""}
@@ -285,7 +285,7 @@ def main() -> int:
             "- `/prd-refine`：直接精炼采集材料（不强制要求先完成采集）",
             "- `/prd-relate`：直接建立关联关系（不强制要求先完成精炼）",
             "- `/prd-generate`：直接生成 PRD 文档（不强制要求先完成关联）",
-            "- `/prd-grill`：开启 Grill 战斗模式 — 压力测试产品方案",
+            "- `/prd-discuss`：开启需求研讨模式 — 压力测试产品方案",
             "- `/prd-remove`：从当前项目卸载 PRD Helper",
             "",
         ]

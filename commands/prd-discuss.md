@@ -1,9 +1,9 @@
 ---
-description: 开启 PRD Grill 战斗模式 — 压力测试你的产品方案
+description: 开启需求研讨模式 — 压力测试你的产品方案
 allowed-tools: Bash, Read
 ---
 
-# /prd-grill
+# /prd-discuss
 
 请使用用户当前语言响应。中文用户默认中文，英文用户默认英文。
 

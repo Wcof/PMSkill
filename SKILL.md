@@ -18,7 +18,7 @@ allowed-tools: Bash
 - 如果用户主要使用英文，默认使用英文，并在第一次出现关键模块时保留中文括注。
 - 如果用户中英混合，使用中英双语关键字段，正文跟随用户主要语言。
 - 如果无法判断用户偏好，在第一次响应时询问：`请选择语言 / Choose language: 中文 or English`。
-- `/prd-helper`、`/prd-start`、`/prd-stop`、`/prd-grill`、`/prd-status`、`/prd-remove` 的提示必须跟随上述语言策略。
+- `/prd-helper`、`/prd-start`、`/prd-stop`、`/prd-discuss`、`/prd-status`、`/prd-remove` 的提示必须跟随上述语言策略。
 
 在项目中使用前，先安装完整的 `prd-helper` Skill。
 
@@ -123,7 +123,7 @@ npx skills@latest remove prd-helper --agent '*' --global -y
 | `/prd-refine` | 直接精炼采集材料（不强制要求先完成采集）。自动扫描 `01-collect/` 下的材料，执行精炼流程。 |
 | `/prd-relate` | 直接建立关联关系（不强制要求先完成精炼）。自动扫描 `02-refine/` 下的精炼结果，执行关联流程。 |
 | `/prd-generate` | 直接生成 PRD 文档（不强制要求先完成关联）。自动扫描精炼和关联结果，执行生成流程。 |
-| `/prd-grill` | 开启 Grill 战斗模式：扫描已采集材料找矛盾，持续压力测试产品方案，实时更新 CONTEXT.md，按需创建 ADR。需先 `/prd-start`。 |
+| `/prd-discuss` | 开启需求研讨模式：扫描已采集材料找矛盾，持续压力测试产品方案，实时更新 CONTEXT.md，按需创建 ADR。需先 `/prd-start`。 |
 | `/prd-remove` | 从当前项目卸载 PRD Helper：先清理 Agent 配置块，再卸载 Skill。 |
 
 当 `capture_mode == on` 时，Claude Code 通过项目级 hooks 自动把每轮对话完整记录为 `User Query + Agent Answer`。手动补录或其他 Agent 可直接调用同一个写入脚本：

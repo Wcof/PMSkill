@@ -14,7 +14,7 @@ COMMAND_NAMES = (
     "prd-refine",
     "prd-relate",
     "prd-generate",
-    "prd-grill",
+    "prd-discuss",
     "prd-remove",
 )
 
