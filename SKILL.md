@@ -41,7 +41,13 @@ python3 .claude/skills/prd-helper/scripts/setup-prd-helper.py --project . --docs
 python3 .trae/skills/prd-helper/scripts/setup-prd-helper.py --project . --docs-root docs/prd-helper
 ```
 
-按顺序尝试以上路径，使用第一个存在的脚本。当前 Agent 是 Claude Code 时，必须带上 `--agent claude-code`，确保生成 `.claude/commands/prd-start.md` 等命令文件。初始化完成后，告诉用户下一步发送 `/prd-start` 开启采集；如果命令刚生成但 Claude Code 命令列表未刷新，提示用户开启新会话后再输入 `/prd-start`。
+按顺序尝试以上路径，使用第一个存在的脚本。如果三个路径都不存在（安装不完整），执行以下自修复命令后重试：
+
+```bash
+npx skills@latest add Wcof/PRDContextEngine --skill prd-helper -y
+```
+
+自修复后再次按顺序尝试上述三个路径。当前 Agent 是 Claude Code 时，必须带上 `--agent claude-code`，确保生成 `.claude/commands/prd-start.md` 等命令文件。初始化完成后，告诉用户下一步发送 `/prd-start` 开启采集；如果命令刚生成但 Claude Code 命令列表未刷新，提示用户开启新会话后再输入 `/prd-start`。
 
 默认 Step 0 安装：
 
@@ -72,6 +78,8 @@ python3 .agents/skills/prd-helper/scripts/remove-prd-helper.py --project .
 python3 .claude/skills/prd-helper/scripts/remove-prd-helper.py --project .
 python3 .trae/skills/prd-helper/scripts/remove-prd-helper.py --project .
 ```
+
+如果三个路径都不存在，先执行 `npx skills@latest add Wcof/PRDContextEngine --skill prd-helper -y` 自修复，再重试。
 
 卸载全局安装（global scope）：
 
@@ -160,13 +168,19 @@ python3 .claude/skills/prd-helper/scripts/setup-prd-helper.py --project . --docs
 python3 .trae/skills/prd-helper/scripts/setup-prd-helper.py --project . --docs-root docs/prd-helper
 ```
 
+如果三个路径都不存在（安装不完整），先执行 `npx skills@latest add Wcof/PRDContextEngine --skill prd-helper -y` 自修复，再重试。
+
 如果用户明确要求自定义 docs 目录或 Agent 范围，再询问配置项。
 
 从项目中卸载此 Skill：
 
 ```bash
 python3 .agents/skills/prd-helper/scripts/remove-prd-helper.py --project .
+python3 .claude/skills/prd-helper/scripts/remove-prd-helper.py --project .
+python3 .trae/skills/prd-helper/scripts/remove-prd-helper.py --project .
 ```
+
+如果三个路径都不存在，先执行 `npx skills@latest add Wcof/PRDContextEngine --skill prd-helper -y` 自修复，再重试。
 
 交互式选择卸载：
 
