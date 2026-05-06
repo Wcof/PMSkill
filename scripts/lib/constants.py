@@ -10,6 +10,7 @@ COMMAND_NAMES = (
     "prd-stop",
     "prd-status",
     "prd-scan",
+    "prd-import",
     "prd-refine",
     "prd-relate",
     "prd-generate",
