@@ -25,6 +25,7 @@ from lib.id_registry import (
     RELATION_CHAIN_RULES,
 )
 from lib.constants import DEFAULT_PRD_ROOT
+from lib.check_framework import CheckWriter
 
 
 def _read(path: Path) -> str:
@@ -76,7 +77,6 @@ def check_relate(root: Path) -> dict:
 def write_check(root: Path, result: dict) -> Path:
     relate_dir = root / "03-relate"
     relate_dir.mkdir(parents=True, exist_ok=True)
-    check_file = relate_dir / "check.md"
 
     missing_files = [fname for fname, exists in result["files"].items() if not exists]
     orphan_issues = []
@@ -87,58 +87,42 @@ def write_check(root: Path, result: dict) -> Path:
             orphan_issues.append(f"缺少 {label} 实体")
 
     chain_checks = [
-        (label, result[code])
+        (result[code], label)
         for code, label, _path in RELATION_CHAIN_RULES
     ]
     isolated_checks = [
-        ("没有孤立事实", not result["unmapped_facts"]),
-        ("没有孤立页面", bool(result["ids"]["pages"])),
-        ("没有孤立功能", bool(result["ids"]["features"])),
-        ("没有孤立规则", bool(result["ids"]["rules"])),
-        ("没有孤立数据对象", bool(result["ids"]["data"])),
-        ("没有孤立验收项", bool(result["ids"]["acceptance"])),
+        (not result["unmapped_facts"], "没有孤立事实"),
+        (bool(result["ids"]["pages"]), "没有孤立页面"),
+        (bool(result["ids"]["features"]), "没有孤立功能"),
+        (bool(result["ids"]["rules"]), "没有孤立规则"),
+        (bool(result["ids"]["data"]), "没有孤立数据对象"),
+        (bool(result["ids"]["acceptance"]), "没有孤立验收项"),
     ]
     impact_checks = [
-        ("待确认问题已关联影响范围", result["questions_mapped"]),
-        ("冲突点已关联影响范围", result["conflicts_mapped"]),
-        ("AI 推断项已关联影响范围", result["assumptions_mapped"]),
+        (result["questions_mapped"], "待确认问题已关联影响范围"),
+        (result["conflicts_mapped"], "冲突点已关联影响范围"),
+        (result["assumptions_mapped"], "AI 推断项已关联影响范围"),
     ]
-    all_ok = result["relate_exists"] and not missing_files and all(ok for _, ok in chain_checks + isolated_checks + impact_checks)
+    all_ok = result["relate_exists"] and not missing_files and all(ok for ok, _ in chain_checks + isolated_checks + impact_checks)
     pending = missing_files + orphan_issues
 
-    lines = [
-        "# 关联检查",
-        "",
-        "## 0. 检查信息",
-        "",
-        "- 检查来源：check-relate.py 自动生成",
-        f"- 检查状态：{'通过' if all_ok else '不通过'}",
-        f"- 待确认项：{'; '.join(pending) if pending else '无'}",
-        "",
-        "## 1. 断链检查",
-        "",
-    ]
-    for label, ok in chain_checks:
-        lines.append(f"- [{'x' if ok else ' '}] {label}")
-    lines.extend(["", "## 2. 孤立项检查", ""])
-    for label, ok in isolated_checks:
-        lines.append(f"- [{'x' if ok else ' '}] {label}")
-    lines.extend(["", "## 3. 待确认影响检查", ""])
-    for label, ok in impact_checks:
-        lines.append(f"- [{'x' if ok else ' '}] {label}")
-    lines.extend([
-        "",
-        "## 4. 关联结论",
-        "",
-        "本轮关联是否可以进入生成阶段：",
-        "",
-        f"- [{'x' if all_ok else ' '}] 可以",
-        f"- [{'x' if not all_ok else ' '}] 不可以",
-        f"- 原因：{'自动检查通过' if all_ok else '; '.join(pending) if pending else '存在未通过项'}",
-        "",
-    ])
-    check_file.write_text("\n".join(lines))
-    return check_file
+    w = CheckWriter(relate_dir, "关联检查")
+    w.add_meta("检查来源", "check-relate.py 自动生成")
+    w.add_meta("检查状态", "通过" if all_ok else "不通过")
+    w.add_meta("待确认项", "; ".join(pending) if pending else "无")
+
+    w.add_section("1. 断链检查", chain_checks)
+    w.add_section("2. 孤立项检查", isolated_checks)
+    w.add_section("3. 待确认影响检查", impact_checks)
+
+    w.add_conclusion(
+        can_proceed=all_ok,
+        reason="自动检查通过" if all_ok else "; ".join(pending) if pending else "存在未通过项",
+        heading="4. 关联结论",
+        prompt="本轮关联是否可以进入生成阶段：",
+        proceed_label="可以",
+    )
+    return w.write()
 
 
 def main() -> None:

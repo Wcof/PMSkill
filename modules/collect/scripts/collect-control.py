@@ -23,7 +23,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(next(p / "scripts" for p in Path(__file__).resolve().parents if (p / "scripts" / "lib").exists())))  # noqa: E501
 
-from lib.state import read_collect_state, write_collect_state
+from lib.state import read_collect_state, write_collect_state, default_state
 from lib.time_util import now_iso, now_id
 from lib.source_index import ensure_index
 from lib.constants import DEFAULT_COLLECT_ROOT, DEFAULT_PRD_ROOT
@@ -82,29 +82,19 @@ def cmd_start(root: Path, agent: str, project: Path, docs_root: str):
 
     session_id = f"prd-session-{now_id()}"
 
-    new_state = {
+    new_state = default_state()
+    new_state.update({
         "capture_mode": "on",
         "active_root": str(root / "active"),
         "passive_root": str(root / "passive"),
         "session_id": session_id,
         "agent": agent,
         "started_at": now_iso(),
-        "paused_at": "",
-        "resumed_at": "",
-        "ended_at": "",
         "capture_scope": "full_turn",
-        "turn_count": "0",
-        "last_collect_at": "",
-        "last_source_id": "",
-        "last_content_hash": "",
-        "last_write_file": "",
         "total_sources": state.get("total_sources", "0"),
-        "active_source_count": "0",
         "passive_source_count": state.get("passive_source_count", "0"),
-        "anomaly_count": "0",
-        "possible_noise_count": "0",
         "grill_mode": "off",
-    }
+    })
 
     write_collect_state(root, new_state)
     ensure_index(root)

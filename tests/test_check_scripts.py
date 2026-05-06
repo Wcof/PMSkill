@@ -502,6 +502,25 @@ def test_check_writer_produces_valid_check_md(tmp_path: Path):
     assert "- [x] 不可以" in content
 
 
+def test_check_writer_custom_conclusion_heading_and_prompt(tmp_path: Path):
+    """CheckWriter 应该支持自定义结论标题和提示文本。"""
+    from scripts.lib.check_framework import CheckWriter
+    w = CheckWriter(tmp_path, "关联检查")
+    w.add_section("1. 断链检查", [(True, "fact→page")])
+    w.add_conclusion(
+        can_proceed=True,
+        reason="自动检查通过",
+        heading="4. 关联结论",
+        prompt="本轮关联是否可以进入生成阶段：",
+        proceed_label="可以",
+    )
+    content = w.write().read_text()
+    assert "## 4. 关联结论" in content
+    assert "本轮关联是否可以进入生成阶段：" in content
+    assert "- [x] 可以" in content
+    assert "- [ ] 不可以" in content
+
+
 def test_valid_transitions_define_lifecycle():
     """VALID_TRANSITIONS 应该定义完整的采集生命周期。"""
     from scripts.lib.state import VALID_TRANSITIONS
@@ -572,6 +591,41 @@ def test_cmd_start_reuses_existing_session(tmp_path: Path):
     state = read_collect_state(root)
     assert state["session_id"] == "prd-session-existing-123", "应该复用已有 session_id"
     assert state["capture_mode"] == "on"
+
+
+def test_cmd_start_uses_default_state(tmp_path: Path):
+    """/prd-start 应该使用 default_state() 构造基础状态。"""
+    from scripts.lib.state import STATE_KEYS
+    module = load_script("modules/collect/scripts/collect-control.py")
+    root = tmp_path / "01-collect"
+    root.mkdir(parents=True, exist_ok=True)
+
+    module.cmd_start(root, "claude-code", tmp_path, "docs/prd-helper")
+
+    state = read_collect_state(root)
+    # 所有 STATE_KEYS 都应该存在
+    for key in STATE_KEYS:
+        assert key in state, f"cmd_start 缺少 STATE_KEY: {key}"
+    # 特定字段应该被正确覆盖
+    assert state["capture_mode"] == "on"
+    assert state["agent"] == "claude-code"
+    assert state["session_id"].startswith("prd-session-")
+    assert state["started_at"] != ""
+    assert state["grill_mode"] == "off"
+
+
+def test_cmd_start_source_uses_default_state_function():
+    """/prd-start 源码应该引用 default_state() 而非手动构造字典。"""
+    source = (ROOT / "modules" / "collect" / "scripts" / "collect-control.py").read_text()
+    assert "default_state()" in source, "cmd_start 应该使用 default_state() 构造基础状态"
+    # 确认不再有手动构造空值 key 的代码（这些应由 default_state() 提供）
+    assert '"paused_at":' not in source, "不应手动构造 paused_at，应由 default_state() 提供"
+    assert '"last_collect_at":' not in source, "不应手动构造 last_collect_at，应由 default_state() 提供"
+    assert '"last_source_id":' not in source, "不应手动构造 last_source_id，应由 default_state() 提供"
+    assert '"last_content_hash":' not in source, "不应手动构造 last_content_hash，应由 default_state() 提供"
+    assert '"last_write_file":' not in source, "不应手动构造 last_write_file，应由 default_state() 提供"
+    assert '"anomaly_count":' not in source, "不应手动构造 anomaly_count，应由 default_state() 提供"
+    assert '"possible_noise_count":' not in source, "不应手动构造 possible_noise_count，应由 default_state() 提供"
 
 
 def test_cmd_stop_outputs_refine_hint(tmp_path: Path, capsys):

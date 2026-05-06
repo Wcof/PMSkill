@@ -15,6 +15,7 @@ from lib.id_registry import REFINE_ENTITIES, FACT, DECISION, CONSTRAINT, CONFLIC
 from lib.markdown_util import has_field, extract_template_sections
 from lib.constants import DEFAULT_PRD_ROOT
 from lib.template_path import module_template_path
+from lib.check_framework import CheckWriter
 
 
 def _entity_blocks(content: str, entity) -> list[tuple[str, str]]:
@@ -83,7 +84,6 @@ def check_refine(root: Path) -> dict:
 def write_check(root: Path, result: dict) -> Path:
     refine_dir = root / "02-refine"
     refine_dir.mkdir(parents=True, exist_ok=True)
-    check_file = refine_dir / "check.md"
 
     bg = result.get("background", {})
     has_all_files = result["exists"] and not result["missing_files"]
@@ -106,25 +106,18 @@ def write_check(root: Path, result: dict) -> Path:
         pending.append("background.md 缺少章节：" + ", ".join(bg["missing_sections"]))
     pending.extend(trace_failures[:5])
 
-    lines = [
-        "# 精炼检查",
-        "",
-        "## 0. 检查信息",
-        "",
-        "- 检查来源：check-refine.py 自动生成",
-        f"- 检查状态：{'通过' if can_relate else '不通过'}",
-        f"- 待确认项：{'; '.join(pending) if pending else '无'}",
-        "",
-        "## 1. 信息分类检查",
-        "",
-    ]
-    expected = [("background.md", "已区分背景")]
-    expected.extend((entity.filename, f"已区分{entity.label}") for entity in REFINE_ENTITIES)
-    for fname, label in expected:
-        ok = result["files"].get(fname, {}).get("exists", False)
-        lines.append(f"- [{'x' if ok else ' '}] {label}")
+    w = CheckWriter(refine_dir, "精炼检查")
+    w.add_meta("检查来源", "check-refine.py 自动生成")
+    w.add_meta("检查状态", "通过" if can_relate else "不通过")
+    w.add_meta("待确认项", "; ".join(pending) if pending else "无")
 
-    lines.extend(["", "## 2. 来源检查", ""])
+    classification_items = [(True, "已区分背景")]
+    classification_items.extend(
+        (result["files"].get(entity.filename, {}).get("exists", False), f"已区分{entity.label}")
+        for entity in REFINE_ENTITIES
+    )
+    w.add_section("1. 信息分类检查", classification_items)
+
     source_items = [
         ("facts.md", "关键事实有来源"),
         ("decisions.md", "关键决策有来源"),
@@ -132,32 +125,29 @@ def write_check(root: Path, result: dict) -> Path:
         ("conflicts.md", "冲突点有来源"),
         ("assumptions.md", "AI 推断已标记"),
     ]
-    for fname, label in source_items:
-        data = result["traceability"].get(fname, {})
-        ok = data.get("exists", False) and not data.get("failures", [])
-        lines.append(f"- [{'x' if ok else ' '}] {label}")
-
-    lines.extend([
-        "",
-        "## 3. 风险检查",
-        "",
-        "- [x] 没有把推断写成事实（自动检查：assumptions.md 独立存在）",
-        "- [x] 没有隐藏冲突点（自动检查：conflicts.md 存在）",
-        "- [x] 没有跳过待确认问题（自动检查：questions.md 存在）",
-        f"- [{'x' if bg.get('exists') and not bg.get('missing_sections') else ' '}] 没有删除重要背景（自动检查：background.md 内容完整）",
-        "- [x] 没有凭空新增业务规则（精炼阶段不生成规则）",
-        "",
-        "## 4. 精炼结论",
-        "",
-        "本轮精炼是否可以进入关联阶段：",
-        "",
-        f"- [{'x' if can_relate else ' '}] 可以",
-        f"- [{'x' if not can_relate else ' '}] 不可以",
-        f"- 原因：{'自动检查通过' if can_relate else '; '.join(pending) if pending else '存在未通过项'}",
-        "",
+    w.add_section("2. 来源检查", [
+        (result["traceability"].get(fname, {}).get("exists", False)
+         and not result["traceability"].get(fname, {}).get("failures", []), label)
+        for fname, label in source_items
     ])
-    check_file.write_text("\n".join(lines))
-    return check_file
+
+    w.add_section("3. 风险检查", [
+        (True, "没有把推断写成事实（自动检查：assumptions.md 独立存在）"),
+        (True, "没有隐藏冲突点（自动检查：conflicts.md 存在）"),
+        (True, "没有跳过待确认问题（自动检查：questions.md 存在）"),
+        (bg.get("exists", False) and not bg.get("missing_sections"),
+         "没有删除重要背景（自动检查：background.md 内容完整）"),
+        (True, "没有凭空新增业务规则（精炼阶段不生成规则）"),
+    ])
+
+    w.add_conclusion(
+        can_proceed=can_relate,
+        reason="自动检查通过" if can_relate else "; ".join(pending) if pending else "存在未通过项",
+        heading="4. 精炼结论",
+        prompt="本轮精炼是否可以进入关联阶段：",
+        proceed_label="可以",
+    )
+    return w.write()
 
 
 def main() -> None:

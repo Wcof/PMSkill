@@ -22,6 +22,7 @@ from lib.id_registry import ALL_ENTITIES
 from lib.markdown_util import extract_template_sections
 from lib.constants import DEFAULT_PRD_ROOT
 from lib.template_path import module_template_path
+from lib.check_framework import CheckWriter
 
 
 def _safe_rglob(directory: Path, pattern: str = "*.md"):
@@ -262,7 +263,6 @@ def write_check_md(
     """Write 04-generate/check.md using the generate check template structure."""
     gen_dir = root_path / "04-generate"
     gen_dir.mkdir(parents=True, exist_ok=True)
-    check_file = gen_dir / "check.md"
 
     source_ok = (
         not unresolved
@@ -286,51 +286,44 @@ def write_check_md(
         else:
             pending.append("待确认问题未汇总到 05-check")
 
-    lines = [
-        "# 生成检查",
-        "",
-        "## 0. 检查信息",
-        "",
-        "- 检查来源：check-generated.py 自动生成",
-        f"- 检查状态：{'通过' if can_final else '不通过'}",
-        f"- 待确认项：{'; '.join(pending[:8]) if pending else '无'}",
-        "",
-        "## 1. 来源检查",
-        "",
-        f"- [{'x' if traceability else ' '}] 生成内容来自 02-refine",
-        f"- [{'x' if traceability else ' '}] 生成内容来自 03-relate",
-        f"- [{'x' if not unresolved else ' '}] 没有凭空新增规则",
-        f"- [{'x' if not any(r['status'] == 'FAIL' for r in traceability) else ' '}] AI 推断已标记",
-        f"- [{'x' if not (consolidation['checked'] and not consolidation['all_consolidated']) else ' '}] 待确认问题已保留",
-        "",
-        "## 2. 结构检查",
-        "",
-        "- [x] 结构完整性由 check-structure.py 独立负责",
-        f"- [{'x' if page_ok else ' '}] 页面说明完整",
-        f"- [{'x' if rule_ok else ' '}] 功能规则完整",
-        "- [x] 数据说明结构由 check-structure.py 独立负责",
-        "- [x] 验收标准结构由 check-structure.py 独立负责",
-        "- [x] Agent 上下文结构由 check-structure.py 独立负责",
-        "",
-        "## 3. 角色覆盖检查",
-        "",
-        f"- [{'x' if source_ok else ' '}] 产品经理可读",
-        f"- [{'x' if source_ok else ' '}] 前端可执行",
-        f"- [{'x' if source_ok else ' '}] 后端可理解",
-        f"- [{'x' if source_ok else ' '}] 测试可验收",
-        f"- [{'x' if source_ok else ' '}] Agent 可使用",
-        "",
-        "## 4. 生成结论",
-        "",
-        "本轮生成是否可以进入最终检查：",
-        "",
-        f"- [{'x' if can_final else ' '}] 可以",
-        f"- [{'x' if not can_final else ' '}] 不可以",
-        f"- 原因：{'自动检查通过' if can_final else '; '.join(pending[:8]) if pending else '存在未通过项'}",
-        "",
-    ]
-    check_file.write_text("\n".join(lines))
-    return check_file
+    w = CheckWriter(gen_dir, "生成检查")
+    w.add_meta("检查来源", "check-generated.py 自动生成")
+    w.add_meta("检查状态", "通过" if can_final else "不通过")
+    w.add_meta("待确认项", "; ".join(pending[:8]) if pending else "无")
+
+    w.add_section("1. 来源检查", [
+        (bool(traceability), "生成内容来自 02-refine"),
+        (bool(traceability), "生成内容来自 03-relate"),
+        (not unresolved, "没有凭空新增规则"),
+        (not any(r["status"] == "FAIL" for r in traceability), "AI 推断已标记"),
+        (not (consolidation["checked"] and not consolidation["all_consolidated"]), "待确认问题已保留"),
+    ])
+
+    w.add_section("2. 结构检查", [
+        (True, "结构完整性由 check-structure.py 独立负责"),
+        (page_ok, "页面说明完整"),
+        (rule_ok, "功能规则完整"),
+        (True, "数据说明结构由 check-structure.py 独立负责"),
+        (True, "验收标准结构由 check-structure.py 独立负责"),
+        (True, "Agent 上下文结构由 check-structure.py 独立负责"),
+    ])
+
+    w.add_section("3. 角色覆盖检查", [
+        (source_ok, "产品经理可读"),
+        (source_ok, "前端可执行"),
+        (source_ok, "后端可理解"),
+        (source_ok, "测试可验收"),
+        (source_ok, "Agent 可使用"),
+    ])
+
+    w.add_conclusion(
+        can_proceed=can_final,
+        reason="自动检查通过" if can_final else "; ".join(pending[:8]) if pending else "存在未通过项",
+        heading="4. 生成结论",
+        prompt="本轮生成是否可以进入最终检查：",
+        proceed_label="可以",
+    )
+    return w.write()
 
 
 def main():

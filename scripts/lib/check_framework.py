@@ -49,7 +49,7 @@ class CheckWriter:
         self._title = title
         self._meta: list[tuple[str, str]] = []
         self._sections: list[tuple[str, list[tuple[bool, str]]]] = []
-        self._conclusion: Optional[tuple[bool, str]] = None
+        self._conclusion: Optional[tuple[bool, str, str, str, str]] = None
 
     def add_meta(self, key: str, value: str) -> None:
         self._meta.append((key, value))
@@ -57,8 +57,15 @@ class CheckWriter:
     def add_section(self, heading: str, items: list[tuple[bool, str]]) -> None:
         self._sections.append((heading, items))
 
-    def add_conclusion(self, can_proceed: bool, reason: str) -> None:
-        self._conclusion = (can_proceed, reason)
+    def add_conclusion(
+        self,
+        can_proceed: bool,
+        reason: str,
+        heading: str = "结论",
+        prompt: str = "",
+        proceed_label: str = "可以进入下一阶段",
+    ) -> None:
+        self._conclusion = (can_proceed, reason, heading, prompt, proceed_label)
 
     def write(self) -> Path:
         self._output_dir.mkdir(parents=True, exist_ok=True)
@@ -84,10 +91,13 @@ class CheckWriter:
 
         # Conclusion
         if self._conclusion:
-            can_proceed, reason = self._conclusion
-            lines.append("## 结论")
+            can_proceed, reason, heading, prompt, proceed_label = self._conclusion
+            lines.append(f"## {heading}")
             lines.append("")
-            lines.append(f"- [{'x' if can_proceed else ' '}] 可以进入下一阶段")
+            if prompt:
+                lines.append(prompt)
+                lines.append("")
+            lines.append(f"- [{'x' if can_proceed else ' '}] {proceed_label}")
             lines.append(f"- [{'x' if not can_proceed else ' '}] 不可以")
             lines.append(f"- 原因：{reason}")
             lines.append("")
