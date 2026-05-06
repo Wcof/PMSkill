@@ -34,6 +34,7 @@ _COLLECT_DESCRIPTIONS = {
     "stop": "停止 PRD Helper 主动采集并生成摘要",
     "status": "查看 PRD Helper 采集状态",
     "scan": "扫描所有 AI 工具的项目 session 并批量采集",
+    "grill": "开启 PRD Grill 战斗模式 — 压力测试产品方案",
 }
 CLAUDE_COMMANDS = {
     "prd-helper": {"description": "初始化或修复 PRD Helper 项目配置", "script": "setup", "command": ""}
@@ -52,6 +53,7 @@ _REMOVE_SCRIPT = _SCRIPT_DIR / "remove-prd-helper.py"
 MODULE_DIRS = (
     "01-collect/active/sessions",
     "01-collect/passive",
+    "01-collect/grill",
     "02-refine",
     "03-relate",
     "04-generate/overview",
@@ -242,7 +244,12 @@ def install_claude_commands(project: Path, docs_root: str) -> list[Path]:
     written: list[Path] = []
     for name, meta in CLAUDE_COMMANDS.items():
         target = commands_dir / f"{name}.md"
-        target.write_text(claude_command_content(name, meta, docs_root), encoding="utf-8")
+        # 优先使用手写命令文件（如 prd-grill 的多步骤 prompt）
+        handwritten = _SKILL_ROOT / "commands" / f"{name}.md"
+        if handwritten.exists():
+            target.write_text(handwritten.read_text(encoding="utf-8"), encoding="utf-8")
+        else:
+            target.write_text(claude_command_content(name, meta, docs_root), encoding="utf-8")
         written.append(target)
     return written
 
@@ -274,6 +281,7 @@ def main() -> int:
             "- `/prd-resume`：恢复主动采集",
             "- `/prd-stop`：停止主动采集并生成采集摘要",
             "- `/prd-status`：查看采集状态",
+            "- `/prd-grill`：开启 Grill 战斗模式 — 压力测试产品方案",
             "- `/prd-remove`：从当前项目卸载 PRD Helper",
             "",
         ]

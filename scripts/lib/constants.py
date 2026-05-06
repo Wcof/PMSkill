@@ -12,6 +12,7 @@ COMMAND_NAMES = (
     "prd-stop",
     "prd-status",
     "prd-scan",
+    "prd-grill",
     "prd-remove",
 )
 

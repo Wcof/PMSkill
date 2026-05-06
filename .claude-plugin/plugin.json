@@ -13,6 +13,7 @@
     "./commands/prd-stop.md",
     "./commands/prd-status.md",
     "./commands/prd-scan.md",
+    "./commands/prd-grill.md",
     "./commands/prd-remove.md"
   ],
   "homepage": "https://github.com/Wcof/PRDContextEngine",
