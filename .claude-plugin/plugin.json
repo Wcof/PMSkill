@@ -1,0 +1,29 @@
+{
+  "name": "prd-helper",
+  "description": "PRD Helper commands for Claude Code",
+  "version": "0.1.0",
+  "author": {
+    "name": "PRD Helper"
+  },
+  "commands": [
+    "./commands/prd-helper.md",
+    "./commands/prd-start.md",
+    "./commands/prd-pause.md",
+    "./commands/prd-resume.md",
+    "./commands/prd-stop.md",
+    "./commands/prd-status.md",
+    "./commands/prd-scan.md",
+    "./commands/prd-remove.md"
+  ],
+  "homepage": "https://github.com/Wcof/PRDContextEngine",
+  "repository": "https://github.com/Wcof/PRDContextEngine",
+  "license": "MIT",
+  "keywords": [
+    "prd",
+    "product",
+    "requirements",
+    "capture",
+    "context",
+    "claude-code"
+  ]
+}

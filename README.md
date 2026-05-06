@@ -23,7 +23,7 @@ PRD Helper 不是四个分散的小工具，也不是直接把聊天记录丢给
 
 | 能力 | 当前实现 |
 |------|----------|
-| Skill 安装 | `npx skills@latest add Wcof/PRDContextEngine`，安装器只会发现一个 Skill：`prd-helper` |
+| 安装入口 | Claude Code 推荐 `claude plugin marketplace add Wcof/PRDContextEngine` + `claude plugin install prd-helper@prd-helper`；通用 Agent 使用 `npx skills@latest add Wcof/PRDContextEngine` |
 | 项目初始化 | `/prd-helper` 幂等初始化项目，创建目录、配置 Agent、生成后续命令 |
 | Claude Code 采集 | 生成 `.claude/commands/prd-*.md`，`/prd-start` 和 `/prd-resume` 写入 Hook，`/prd-pause` 和 `/prd-stop` 清理 Hook |
 | Codex 采集 | 安装 `~/.codex/plugins/prd-helper/` 插件，结合 `AGENTS.md` 指令和 JSONL 会话扫描兜底 |
@@ -36,7 +36,33 @@ PRD Helper 不是四个分散的小工具，也不是直接把聊天记录丢给
 
 ### Step 0：安装
 
-推荐直接安装到当前项目：
+Claude Code 用户如果希望安装后 `/` 菜单立刻出现 PRD Helper 入口，推荐使用 Claude Code Plugin 安装：
+
+```bash
+claude plugin marketplace add Wcof/PRDContextEngine --scope user
+claude plugin install prd-helper@prd-helper --scope project
+```
+
+安装完成后，Claude Code 的 `/` 菜单会出现插件命令。先运行：
+
+```text
+/prd-helper:prd-helper
+```
+
+这个插件入口会初始化当前项目，并生成项目级直出命令：
+
+```text
+/prd-helper
+/prd-start
+/prd-pause
+/prd-resume
+/prd-stop
+/prd-status
+/prd-scan
+/prd-remove
+```
+
+如果你使用的是 Codex、Trae、Cursor 等通用 Agent，或只想安装 Skill 本体，可以继续使用 `skills@latest`：
 
 ```bash
 npx skills@latest add Wcof/PRDContextEngine
@@ -50,9 +76,9 @@ npx skills@latest add Wcof/PRDContextEngine
 | `Space` | 勾选或取消 |
 | `Enter` | 确认 |
 
-安装时选择 `prd-helper`，再选择你要使用的编码 Agent，例如 Claude Code、Codex、Trae。这个仓库只提供一个完整 Skill，所以安装后只看到 `/prd-helper` 是正常的。
+安装时选择 `prd-helper`，再选择你要使用的编码 Agent，例如 Claude Code、Codex、Trae。这个仓库只提供一个完整 Skill。
 
-如果 Claude Code 的 `/` 菜单没有马上显示 `/prd-helper`，不要先判断安装失败。请在同一个项目目录完整输入 `/prd-helper` 并回车；Claude Code 的命令解析层通常已经能执行该 Skill，只是补全菜单可能没有刷新。
+注意：`npx skills@latest add ...` 只会安装 Skill 到 `.claude/skills/`，不会执行初始化脚本，也不会直接写入 `.claude/commands/`。如果你要求 Claude CLI 安装后马上有可见指令，请使用上面的 Claude Code Plugin 安装方式。
 
 ### Step 1：初始化项目
 

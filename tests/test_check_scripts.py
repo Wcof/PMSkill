@@ -313,3 +313,22 @@ def test_remove_prd_helper_cleans_commands_and_hooks(tmp_path: Path):
     assert (commands / "unrelated.md").exists()
     assert hook_file == tmp_path / ".claude" / "settings.json"
     assert "claude-capture-hook.py" not in (tmp_path / ".claude" / "settings.json").read_text()
+
+
+def test_claude_plugin_manifest_references_existing_commands():
+    plugin = json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text())
+    marketplace = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text())
+
+    assert plugin["name"] == "prd-helper"
+    assert marketplace["plugins"][0]["source"] == "./"
+
+    command_paths = plugin["commands"]
+    assert "./commands/prd-helper.md" in command_paths
+    assert "./commands/prd-start.md" in command_paths
+
+    for command_path in command_paths:
+        path = ROOT / command_path.removeprefix("./")
+        assert path.exists(), command_path
+        content = path.read_text()
+        assert "allowed-tools: Bash" in content
+        assert "find_prd_helper_root" in content
