@@ -104,6 +104,12 @@ def _extract_text(content: object, accepted_types: Optional[tuple[str, ...]] = N
     return "\n".join(parts)
 
 
+def _is_subpath(child: str, parent: str) -> bool:
+    """Check if child equals parent or is a descendant directory."""
+    parent = parent.rstrip("/")
+    return child == parent or child.startswith(parent + "/")
+
+
 def _iter_jsonl_files(directory: Path, pattern: str = "*.jsonl", recursive: bool = False) -> Iterator[tuple[Path, str]]:
     """Yield (path, stem) for JSONL files matching *pattern* in *directory*."""
     glob_fn = directory.rglob if recursive else directory.glob
@@ -119,10 +125,19 @@ def _iter_jsonl_files(directory: Path, pattern: str = "*.jsonl", recursive: bool
 _claude_home = Path("~/.claude").expanduser()
 
 
-def _claude_project_dir(project_cwd: str) -> Optional[Path]:
+def _claude_project_dirs(project_cwd: str) -> list[Path]:
+    """Find all Claude project dirs matching project_cwd and its sub-projects."""
     encoded = project_cwd.replace("/", "-").replace(" ", "-")
-    d = _claude_home / "projects" / encoded
-    return d if d.is_dir() else None
+    projects_dir = _claude_home / "projects"
+    if not projects_dir.is_dir():
+        return []
+    dirs = []
+    for d in sorted(projects_dir.iterdir()):
+        if not d.is_dir():
+            continue
+        if d.name == encoded or d.name.startswith(encoded + "-"):
+            dirs.append(d)
+    return dirs
 
 
 def _claude_turns(entries: list[dict]) -> list[tuple[str, str, str]]:
@@ -164,14 +179,15 @@ def _claude_turns(entries: list[dict]) -> list[tuple[str, str, str]]:
 
 
 def list_claude_sessions(project_cwd: str, **_: object) -> list[Session]:
-    sessions_dir = _claude_project_dir(project_cwd)
-    if not sessions_dir:
+    sessions_dirs = _claude_project_dirs(project_cwd)
+    if not sessions_dirs:
         return []
     results: list[Session] = []
-    for path, sid in _iter_jsonl_files(sessions_dir):
-        turns = _claude_turns(_read_jsonl(path))
-        if turns:
-            results.append(Session(id=sid, turns=turns, path=str(path)))
+    for sessions_dir in sessions_dirs:
+        for path, sid in _iter_jsonl_files(sessions_dir):
+            turns = _claude_turns(_read_jsonl(path))
+            if turns:
+                results.append(Session(id=sid, turns=turns, path=str(path)))
     return results
 
 
@@ -258,7 +274,7 @@ def list_codex_sessions(
             (e.get("payload", {}) for e in entries if e.get("type") == "session_meta"),
             {},
         )
-        if project_cwd and header.get("cwd", "") != project_cwd:
+        if project_cwd and not _is_subpath(header.get("cwd", ""), project_cwd):
             continue
 
         turns = _codex_turns(entries, since=since)
@@ -339,7 +355,7 @@ def list_cursor_sessions(project_cwd: str, **_: object) -> list[Session]:
         if not ws_dir.is_dir():
             continue
         folder = _read_workspace_folder(ws_dir)
-        if not folder or folder.rstrip("/") != project_cwd:
+        if not folder or not _is_subpath(folder.rstrip("/"), project_cwd):
             continue
         for cid in _cursor_composer_ids(ws_dir / "state.vscdb"):
             if cid in seen:
@@ -415,7 +431,7 @@ def list_trae_sessions(project_cwd: str, **_: object) -> list[Session]:
             if not ws_dir.is_dir():
                 continue
             folder = _read_workspace_folder(ws_dir)
-            if not folder or folder.rstrip("/") != project_cwd_norm:
+            if not folder or not _is_subpath(folder.rstrip("/"), project_cwd_norm):
                 continue
             for session in _trae_sessions(ws_dir / "state.vscdb"):
                 sid = session.get("sessionId", "")
