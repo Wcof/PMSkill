@@ -26,6 +26,7 @@ from .constants import (
     CODEX_SESSIONS_REL,
 )
 from .hash_util import content_hash
+from .session_writer import create_session_file
 from .source_index import append_index
 from .time_util import now_iso
 
@@ -495,47 +496,6 @@ def session_filename(tool: str, session_id: str) -> str:
     return f"{prefix}-{safe_id}.md"
 
 
-def build_session_content(
-    tool: str,
-    session_id: str,
-    turns: list[tuple[str, str, str]],
-) -> str:
-    """Build session file content in the standard format."""
-    ts = now_iso()
-    lines = [
-        "---",
-        f"source_id: scan-{tool}-{session_id}",
-        f"source_type: agent_conversation_turn",
-        f"source_channel: active",
-        f"source_time: {ts}",
-        f"captured_at: {ts}",
-        f"source_from: {tool}_conversation",
-        f"agent: {tool}",
-        f"session_id: {session_id}",
-        f"turn_count: {len(turns)}",
-        f"capture_scope: full_turn",
-        f"status: collected",
-        "---",
-        "",
-    ]
-    for i, (user_q, agent_a, _ts) in enumerate(turns, 1):
-        lines.extend([
-            f"## Turn {i}",
-            "",
-            "### User Query",
-            "",
-            user_q,
-            "",
-            "### Agent Answer",
-            "",
-            agent_a,
-            "",
-            "---",
-            "",
-        ])
-    return "\n".join(lines)
-
-
 def combined_hash(turns: list[tuple[str, str, str]]) -> str:
     """Compute content hash for a session's combined turns."""
     combined = "\n---\n".join(f"{u}\n---\n{a}" for u, a, _ in turns)
@@ -553,7 +513,8 @@ def write_session(
         return False
 
     filename = session_filename(tool, session.id)
-    session_file = collect_root / "active" / "sessions" / filename
+    sessions_dir = collect_root / "active" / "sessions"
+    session_file = sessions_dir / filename
     rel_path = str(session_file.relative_to(collect_root))
 
     if session_file.exists():
@@ -563,13 +524,19 @@ def write_session(
     if rel_path in indexed_paths:
         return False
 
-    session_file.write_text(
-        build_session_content(tool, session.id, session.turns),
-        encoding="utf-8",
+    source_id = f"scan-{tool}-{session.id}"
+    turns_2 = [(u, a) for u, a, _ in session.turns]
+    create_session_file(
+        sessions_dir=sessions_dir,
+        source_id=source_id,
+        agent=tool,
+        session_id=session.id,
+        turns=turns_2,
+        filename=filename,
     )
 
     append_index(collect_root, {
-        "source_id": f"scan-{tool}-{session.id}",
+        "source_id": source_id,
         "source_time": now_iso(),
         "source_type": "agent_conversation_turn",
         "source_channel": "active",

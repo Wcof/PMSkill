@@ -20,6 +20,7 @@ def create_session_file(
     session_id: str,
     turns: list[tuple[str, str]],
     extra_fields: Optional[dict[str, str]] = None,
+    filename: Optional[str] = None,
 ) -> Path:
     """创建新的会话文件，包含 frontmatter 和所有轮次。
 
@@ -30,12 +31,13 @@ def create_session_file(
         session_id: 会话 ID
         turns: [(user_query, agent_answer), ...] 轮次列表
         extra_fields: 额外的 frontmatter 字段（如 noise_hint、content_hash）
+        filename: 自定义文件名，默认 session-{session_id}.md
 
     Returns:
         创建的会话文件路径
     """
     sessions_dir.mkdir(parents=True, exist_ok=True)
-    session_file = sessions_dir / f"session-{session_id}.md"
+    session_file = sessions_dir / (filename or f"session-{session_id}.md")
 
     ts = now_iso()
     lines = [

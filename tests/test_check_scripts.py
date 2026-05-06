@@ -649,3 +649,36 @@ def test_cmd_stop_outputs_refine_hint(tmp_path: Path, capsys):
     # 验证输出包含精炼提示
     captured = capsys.readouterr()
     assert "/prd-refine" in captured.out, "应该提示可以用 /prd-refine"
+
+
+def test_discovery_write_session_uses_session_writer(tmp_path: Path):
+    """discovery.write_session 应该使用 session_writer 而非自行构建内容。"""
+    from scripts.lib.discovery import write_session, Session
+
+    collect_root = tmp_path / "01-collect"
+    (collect_root / "active" / "sessions").mkdir(parents=True)
+
+    session = Session(
+        id="test-session-001",
+        turns=[("What is X?", "X is Y", "2026-01-01T00:00:00Z")],
+    )
+    write_session("claude", session, collect_root, set())
+
+    sessions_dir = collect_root / "active" / "sessions"
+    files = list(sessions_dir.glob("session-*.md"))
+    assert len(files) == 1
+    content = files[0].read_text()
+    # 应该包含标准 frontmatter 字段
+    assert "source_id:" in content
+    assert "agent: claude" in content
+    assert "## Turn 1" in content
+    assert "### User Query" in content
+    assert "What is X?" in content
+
+
+def test_discovery_does_not_contain_build_session_content():
+    """discovery.py 不应包含 build_session_content 函数。"""
+    source = (ROOT / "scripts" / "lib" / "discovery.py").read_text()
+    assert "def build_session_content" not in source, (
+        "build_session_content 应该被删除，改用 session_writer.create_session_file"
+    )
