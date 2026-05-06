@@ -153,7 +153,7 @@ status: collected
         "source_time": now_iso(),
         "source_type": "agent_conversation_turn",
         "source_channel": "active",
-        "path": str(session_file.relative_to(root)),
+        "path": session_file.relative_to(root).as_posix(),
         "content_hash": c_hash,
         "metadata_status": "complete",
         "noise_hint": noise_hint,

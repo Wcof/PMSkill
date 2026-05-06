@@ -3,7 +3,14 @@ from pathlib import Path
 from scripts.lib.hash_util import content_hash, file_hash
 from scripts.lib.id_registry import ALL_ENTITIES, ENTITY_BY_PREFIX, entity_pattern
 from scripts.lib.metadata import metadata_status_for_text
-from scripts.lib.source_index import append_index, ensure_index, indexed_paths_from_content, read_indexed_paths
+from scripts.lib.source_index import (
+    append_index,
+    append_index_entries,
+    ensure_index,
+    indexed_hashes_by_path_from_content,
+    indexed_paths_from_content,
+    read_indexed_paths,
+)
 from scripts.lib.state import read_collect_state, write_collect_state
 
 
@@ -85,6 +92,44 @@ def test_source_index_uses_shared_markdown_table_parser():
 """
 
     assert indexed_paths_from_content(content) == {"passive/meeting.md"}
+
+
+def test_source_index_batch_append_reads_existing_ids_once(tmp_path: Path):
+    ensure_index(tmp_path)
+    added = append_index_entries(
+        tmp_path,
+        [
+            {
+                "source_id": "turn-001",
+                "source_time": "2026-05-02T10:00:00+08:00",
+                "source_type": "agent_conversation_turn",
+                "source_channel": "active",
+                "path": "active/sessions/session-test.md",
+                "content_hash": "sha256:abc",
+                "metadata_status": "complete",
+                "noise_hint": "none",
+                "status": "collected",
+            },
+            {
+                "source_id": "turn-001",
+                "source_time": "2026-05-02T10:00:00+08:00",
+                "source_type": "agent_conversation_turn",
+                "source_channel": "active",
+                "path": "active/sessions/session-test.md",
+                "content_hash": "sha256:abc",
+                "metadata_status": "complete",
+                "noise_hint": "none",
+                "status": "collected",
+            },
+        ],
+    )
+
+    content = (tmp_path / "source-index.md").read_text()
+    assert added == 1
+    assert content.count("turn-001") == 1
+    assert indexed_hashes_by_path_from_content(content) == {
+        "active/sessions/session-test.md": {"sha256:abc"}
+    }
 
 
 def test_hash_util_is_consistent(tmp_path: Path):

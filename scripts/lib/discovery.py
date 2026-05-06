@@ -515,7 +515,7 @@ def write_session(
     filename = session_filename(tool, session.id)
     sessions_dir = collect_root / "active" / "sessions"
     session_file = sessions_dir / filename
-    rel_path = str(session_file.relative_to(collect_root))
+    rel_path = session_file.relative_to(collect_root).as_posix()
 
     if session_file.exists():
         return False

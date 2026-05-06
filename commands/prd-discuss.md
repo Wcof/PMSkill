@@ -1,5 +1,5 @@
 ---
-description: 开启需求研讨模式 — 压力测试你的产品方案
+description: 开启需求研讨模式 — 追问矛盾、模糊术语和未决问题
 allowed-tools: Bash, Read
 ---
 
@@ -31,7 +31,7 @@ echo "Skill root: $skill_root"
 
 读取 `$skill_root/modules/grill/guide.md` 了解完整行为规则。
 
-## Step 1: 确保 grill 目录存在
+## Step 1: 确保研讨目录存在
 
 ```bash
 mkdir -p docs/prd-helper/01-collect/grill
@@ -57,11 +57,11 @@ mkdir -p docs/prd-helper/01-collect/grill
 > 1. ...
 > 2. ...
 >
-> 你想基于这些来 battle，还是有新命题要讨论？"
+> 你想先讨论哪一个？如果你有新的命题，也可以直接给我。"
 
 等待用户选择。
 
-## Step 4: 进入持续 Battle 模式
+## Step 4: 进入持续研讨模式
 
 更新 `collect-state.md`，设置 `grill_mode: on`。
 
@@ -72,6 +72,7 @@ mkdir -p docs/prd-helper/01-collect/grill
 - 逐个问题追问，等用户回答后再继续
 - 每个问题附带你的推荐答案
 - 如果问题可以通过读代码/文档回答，先探索再提问
+- 每个回答都要说明应该沉淀到 facts、decisions、conflicts、questions、assumptions 或 CONTEXT.md 中的哪一类
 
 ### 挑战术语表
 
@@ -97,12 +98,12 @@ mkdir -p docs/prd-helper/01-collect/grill
 
 同时满足"难以逆转 + 没有上下文令人惊讶 + 真实权衡结果"时才提议创建 ADR。格式见 `modules/grill/templates/ADR-FORMAT.md`。
 
-## Step 5: 结束 Grill
+## Step 5: 结束需求研讨
 
-当用户表示 battle 结束（或触发 `/prd-pause` / `/prd-stop`）时：
+当用户表示研讨结束（或触发 `/prd-stop`）时：
 
 1. 更新 `collect-state.md`，设置 `grill_mode: off`
-2. 生成 `docs/prd-helper/01-collect/grill/battle-summary.md`，包含：
+2. 生成 `docs/prd-helper/01-collect/grill/discussion-summary.md`，包含：
    - 已解决的问题列表
    - 未解决的开放问题
    - 术语变更记录

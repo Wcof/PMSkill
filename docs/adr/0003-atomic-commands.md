@@ -27,17 +27,17 @@ Accepted (updated 2026-05-06)
 - `/prd-refine` — 直接精炼（不强制前置步骤），由初始化脚本生成
 - `/prd-relate` — 直接关联（不强制前置步骤），由初始化脚本生成
 - `/prd-generate` — 直接生成（不强制前置步骤），由初始化脚本生成
-- `/prd-discuss` — 需求研讨模式（原 /prd-grill），由初始化脚本生成
+- `/prd-discuss` — 需求研讨模式，由初始化脚本生成
 - `/prd-remove` — 卸载，由初始化脚本生成
 
 移除 `/prd-init` 和所有 `/prd-helper <action>` 兼容入口。
 
 ### 2026-05-06 变更
 
-1. **删除 `/prd-pause` 和 `/prd-resume`**：功能合并到 start/stop，减少认知负担
+1. **删除暂停和恢复命令**：功能合并到 start/stop，减少认知负担
 2. **新增独立模块指令**：`/prd-refine`、`/prd-relate`、`/prd-generate` 可单独使用，不强制前置步骤
 3. **新增 `/prd-import`**：支持导入第三方文件夹数据作为被动材料
-4. **重命名 `/prd-grill` → `/prd-discuss`**：更直观的命名
+4. **统一研讨命令为 `/prd-discuss`**：更直观地表达需求研讨模式
 5. **Session 续接**：stop 后再 start 时复用同一 session
 6. **Check 脚本报告模式**：无数据时不阻断，有数据时检查错误
 

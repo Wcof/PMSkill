@@ -274,6 +274,28 @@ def test_scan_passive_indexes_new_files_and_updates_state(tmp_path: Path, monkey
     assert "| total_sources | 1 |" in state
 
 
+def test_scan_passive_indexes_changed_file_once_per_hash(tmp_path: Path, monkeypatch):
+    module = load_script("modules/collect/scripts/scan-passive.py")
+    root = tmp_path / "docs" / "prd-helper" / "01-collect"
+    passive = root / "passive"
+    passive.mkdir(parents=True)
+    source = passive / "meeting.md"
+    write(source, "- 来源：会议纪要\n- 记录时间：2026-05-03\n")
+    write_collect_state(root, {"capture_mode": "off", "passive_source_count": "0", "total_sources": "0"})
+
+    monkeypatch.setattr(sys, "argv", ["scan-passive.py", "--root", str(root)])
+    module.main()
+    module.main()
+    source.write_text("- 来源：会议纪要\n- 记录时间：2026-05-04\n")
+    module.main()
+
+    index = (root / "source-index.md").read_text()
+    state = (root / "collect-state.md").read_text()
+    assert index.count("passive/meeting.md") == 2
+    assert "| passive_source_count | 2 |" in state
+    assert "| total_sources | 2 |" in state
+
+
 def test_remove_prd_helper_cleans_commands_and_hooks(tmp_path: Path):
     module = load_script("scripts/remove-prd-helper.py")
     commands = tmp_path / ".claude" / "commands"

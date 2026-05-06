@@ -19,7 +19,7 @@ sys.path.insert(0, str(next(p / "scripts" for p in Path(__file__).resolve().pare
 from lib.state import read_collect_state, write_collect_state
 from lib.time_util import TZ, now_iso
 from lib.hash_util import file_hash
-from lib.source_index import ensure_index, read_indexed_paths, append_index
+from lib.source_index import ensure_index, read_indexed_hashes_by_path, append_index_entries
 from lib.constants import DEFAULT_COLLECT_ROOT
 from lib.metadata import metadata_status_for_text
 
@@ -51,31 +51,33 @@ def main():
 
     state = read_collect_state(root)
     ensure_index(root)
-    indexed = read_indexed_paths(root)
+    indexed_hashes = read_indexed_hashes_by_path(root)
 
-    new_count = 0
+    entries = []
     passive_count = int(state.get("passive_source_count", "0"))
 
-    for fpath in sorted(passive_dir.iterdir()):
+    for fpath in sorted(passive_dir.rglob("*")):
         if fpath.is_dir():
             continue
 
-        rel_path = str(fpath.relative_to(root))
-
-        # Skip already indexed
-        if rel_path in indexed:
-            continue
+        rel_path = fpath.relative_to(root).as_posix()
 
         ext = fpath.suffix.lower()
         source_type = SUPPORTED_EXTENSIONS.get(ext, "unknown")
         c_hash = file_hash(fpath)
-        source_id = f"passive-{fpath.stem}-{datetime.now(TZ).strftime('%Y%m%d')}"
+
+        # Skip unchanged files, but capture a new index row if a passive file changed.
+        if c_hash in indexed_hashes.get(rel_path, set()):
+            continue
+
+        safe_stem = fpath.stem.replace("/", "-").replace("\\", "-")
+        source_id = f"passive-{safe_stem}-{datetime.now(TZ).strftime('%Y%m%d')}-{c_hash.removeprefix('sha256:')}"
 
         # Check metadata status from bilingual front matter or markdown fields.
         metadata_status = "missing"
         if ext in (".md", ".txt"):
             try:
-                content = fpath.read_text()
+                content = fpath.read_text(encoding="utf-8")
                 metadata_status = metadata_status_for_text(content)
             except Exception:
                 pass
@@ -92,10 +94,15 @@ def main():
             "status": "collected",
         }
 
-        append_index(root, entry)
-        new_count += 1
-        passive_count += 1
-        print(f"Indexed: {rel_path} ({source_type}, metadata: {metadata_status})")
+        entries.append(entry)
+
+    new_count = append_index_entries(root, entries)
+    passive_count += new_count
+    for entry in entries[:new_count]:
+        print(
+            f"Indexed: {entry['path']} "
+            f"({entry['source_type']}, metadata: {entry['metadata_status']})"
+        )
 
     # Update state
     if new_count > 0:
