@@ -1,21 +1,20 @@
 # PRD Helper Skill - Claude Code 安装说明
 
-## Step 0：推荐安装方式（Claude Code Plugin）
+## Step 0：推荐安装方式（skills@latest）
 
-如果希望安装后 Claude Code 的 `/` 菜单直接出现 PRD Helper 入口，使用 Claude Code Plugin：
+推荐使用 `skills@latest` 安装到 Claude Code：
 
 ```bash
-claude plugin marketplace add Wcof/PRDContextEngine --scope user
-claude plugin install prd-helper@prd-helper --scope project
+npx skills@latest add Wcof/PRDContextEngine --agent claude-code --skill prd-helper -y
 ```
 
-安装完成后，在 Claude Code 中运行插件入口：
+安装完成后，Claude Code 会加载 `/prd-helper` 这个 Skill 指令。先运行：
 
 ```text
-/prd-helper:prd-helper
+/prd-helper
 ```
 
-它会初始化当前项目，并生成项目级直出命令：
+`/prd-helper` 会初始化当前项目，并生成项目级直出命令：
 
 ```text
 /prd-helper
@@ -28,12 +27,19 @@ claude plugin install prd-helper@prd-helper --scope project
 /prd-remove
 ```
 
-## Skill 安装（通用 Agent）
+## Claude Code Plugin 安装（可选）
 
-`skills@latest` 只安装 Skill 本体，不会自动执行初始化，也不会直接写入 `.claude/commands/`：
+如果你希望安装后 `/` 菜单立刻出现插件命令，也可以使用 Claude Code Plugin：
 
 ```bash
-npx skills@latest add Wcof/PRDContextEngine --agent claude-code --skill prd-helper -y
+claude plugin marketplace add Wcof/PRDContextEngine --scope user
+claude plugin install prd-helper@prd-helper --scope project
+```
+
+然后运行插件入口：
+
+```text
+/prd-helper:prd-helper
 ```
 
 也可以运行 skills.sh 交互安装器（installer）：
@@ -51,7 +57,7 @@ npx skills@latest add Wcof/PRDContextEngine
 - 使用 `Enter` 确认
 - 不需要输入数字
 
-安装完成后，如果 Claude Code 能显示 Skill 入口，可以运行：
+安装完成后运行：
 
 ```text
 /prd-helper
@@ -59,10 +65,10 @@ npx skills@latest add Wcof/PRDContextEngine
 
 运行 `/prd-helper` 会自动初始化或修复当前项目：创建 `docs/prd-helper/`、写入 `CLAUDE.md` 配置块，生成 `.claude/commands/prd-helper.md`、`.claude/commands/prd-start.md`、`.claude/commands/prd-status.md` 等真实斜杠命令文件。即使 `docs/prd-helper/` 已存在，也要允许 `/prd-helper` 再次执行，用来补齐缺失的命令文件。采集 hooks 不在初始化时常驻；它们由 `/prd-start` 和 `/prd-resume` 启用，由 `/prd-pause` 和 `/prd-stop` 清理。
 
-如果 Claude Code 的 `/` 菜单没有显示 `/prd-helper`，这是 `skills@latest` 与 Claude CLI 命令体系的边界，不是安装脚本已经执行。请改用上面的 Plugin 安装方式，或手动执行：
+如果 Claude Code 的 `/` 菜单没有显示 `/prd-helper`，先确认安装时选择了 Claude Code，或直接使用推荐的非交互命令：
 
 ```bash
-python3 .claude/skills/prd-helper/scripts/setup-prd-helper.py --project . --docs-root docs/prd-helper --agent claude-code
+npx skills@latest add Wcof/PRDContextEngine --agent claude-code --skill prd-helper -y
 ```
 
 ## 卸载

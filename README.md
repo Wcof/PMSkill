@@ -36,7 +36,32 @@ PRD Helper 不是四个分散的小工具，也不是直接把聊天记录丢给
 
 ### Step 0：安装
 
-Claude Code 用户如果希望安装后 `/` 菜单立刻出现 PRD Helper 入口，推荐使用 Claude Code Plugin 安装：
+Claude Code 用户推荐先用 `skills@latest` 安装 Skill：
+
+```bash
+npx skills@latest add Wcof/PRDContextEngine --agent claude-code --skill prd-helper -y
+```
+
+安装完成后，Claude Code 会加载 `/prd-helper` 这个 Skill 指令。先运行：
+
+```text
+/prd-helper
+```
+
+`/prd-helper` 会初始化当前项目，并生成项目级直出命令：
+
+```text
+/prd-helper
+/prd-start
+/prd-pause
+/prd-resume
+/prd-stop
+/prd-status
+/prd-scan
+/prd-remove
+```
+
+如果你希望安装后 `/` 菜单立刻出现插件命令，也可以使用 Claude Code Plugin 安装：
 
 ```bash
 claude plugin marketplace add Wcof/PRDContextEngine --scope user
@@ -62,7 +87,7 @@ claude plugin install prd-helper@prd-helper --scope project
 /prd-remove
 ```
 
-如果你使用的是 Codex、Trae、Cursor 等通用 Agent，或只想安装 Skill 本体，可以继续使用 `skills@latest`：
+如果你使用的是 Codex、Trae、Cursor 等通用 Agent，可以使用交互式安装：
 
 ```bash
 npx skills@latest add Wcof/PRDContextEngine
@@ -78,7 +103,7 @@ npx skills@latest add Wcof/PRDContextEngine
 
 安装时选择 `prd-helper`，再选择你要使用的编码 Agent，例如 Claude Code、Codex、Trae。这个仓库只提供一个完整 Skill。
 
-注意：`npx skills@latest add ...` 只会安装 Skill 到 `.claude/skills/`，不会执行初始化脚本，也不会直接写入 `.claude/commands/`。如果你要求 Claude CLI 安装后马上有可见指令，请使用上面的 Claude Code Plugin 安装方式。
+注意：`npx skills@latest add ...` 只会安装 Skill 到 `.claude/skills/`，不会在安装阶段直接写入 `.claude/commands/`。后续项目级命令由第一次 `/prd-helper` 初始化生成。
 
 ### Step 1：初始化项目
 
