@@ -34,6 +34,8 @@ PRD Helper 只有四个业务阶段：
 
 当用户触发 `/prd-helper` 时，直接执行已安装 Skill 目录中的初始化脚本。初始化脚本是幂等修复入口：已存在的 docs 产物会保留，缺失的 Agent 配置和命令文件会补齐。
 
+`.agents/` 目录是由 `npx skills@latest add` 安装生成的副本，不应手动编辑。根目录的 `modules/`、`scripts/`、`checks/` 是唯一开发源。
+
 按顺序尝试以下路径，使用第一个存在的脚本：
 
 ```bash
@@ -105,6 +107,10 @@ After generating, run generate check and output `04-generate/check.md`.
 Read `checks/guide.md` and use templates in `checks/templates/`.
 
 Final check output goes to `docs/prd-helper/05-check/`, including `context-delta.md`.
+
+## Note: `.agents/` is a generated copy
+
+The `.agents/skills/prd-helper/` directory is installed by `npx skills@latest add Wcof/PRDContextEngine --skill prd-helper -y`. It is listed in `.gitignore` and should not be edited directly. All development happens in the root-level `modules/`, `scripts/`, `checks/`, and `tests/` directories.
 
 ## Remove
 

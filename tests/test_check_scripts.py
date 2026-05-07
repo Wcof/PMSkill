@@ -703,6 +703,24 @@ def test_discovery_does_not_contain_build_session_content():
     )
 
 
+def test_discovery_adapter_modules_importable_independently():
+    """每个适配器模块应该可以独立导入。"""
+    import importlib
+
+    for mod_name in ("discovery_shared", "discovery_claude", "discovery_codex", "discovery_cursor", "discovery_trae"):
+        mod = importlib.import_module(f"scripts.lib.{mod_name}")
+        assert mod is not None
+
+
+def test_discovery_re_exports_codex_functions():
+    """discovery.py 应该 re-export Codex 相关函数以保持向后兼容。"""
+    from scripts.lib import discovery
+    assert hasattr(discovery, "find_codex_home")
+    assert hasattr(discovery, "_codex_turns")
+    assert hasattr(discovery, "_read_jsonl")
+    assert hasattr(discovery, "_iter_jsonl_files")
+
+
 def test_collect_control_uses_transition(tmp_path: Path):
     """collect-control.py 应该使用 transition() 验证状态转换。"""
     source = (ROOT / "modules" / "collect" / "scripts" / "collect-control.py").read_text(encoding="utf-8")

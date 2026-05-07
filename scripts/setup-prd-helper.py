@@ -13,9 +13,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.command_registry import ALL_COMMANDS, GENERATED_COMMANDS, command_markdown_list
 from lib.source_index import INDEX_HEADER
 from lib.state import write_collect_state
-from lib.template_renderer import render_template
-
-
 AGENTS = ("codex", "claude-code", "trae", "trae-cn")
 PRD_BLOCK_START = "<!-- PRD-HELPER:START -->"
 PRD_BLOCK_END = "<!-- PRD-HELPER:END -->"
@@ -256,14 +253,12 @@ def main() -> int:
     for relative in MODULE_DIRS:
         (docs_root / relative).mkdir(parents=True, exist_ok=True)
 
-    config = render_template(
-        skill_root() / "modules" / "collect" / "templates" / "prd-helper-config-template.md",
-        {
-            "docs_root": args.docs_root,
-            "enabled_agents": ", ".join(agents),
-            "capture_policy": args.capture_policy,
-            "command_list": command_markdown_list(GENERATED_COMMANDS),
-        },
+    config = (
+        f"# PRD Helper Config\n\n"
+        f"- docs_root: {args.docs_root}\n"
+        f"- enabled_agents: {', '.join(agents)}\n"
+        f"- capture_policy: {args.capture_policy}\n"
+        f"- commands:\n{command_markdown_list(GENERATED_COMMANDS)}\n"
     )
     write_if_missing(docs_root / "prd-helper-config.md", config, args.force)
 
@@ -281,11 +276,11 @@ def main() -> int:
         )
     write_if_missing(collect_dir / "source-index.md", INDEX_HEADER, False)
 
-    collect_readme = render_template(
-        skill_root() / "modules" / "collect" / "templates" / "collect-readme-template.md",
-        {},
+    write_if_missing(
+        collect_dir / "README.md",
+        "# PRD Helper - 采集（Collect）\n\n保存原始产品上下文，包括 Agent 会话、被动材料、元信息和状态。\n",
+        False,
     )
-    write_if_missing(collect_dir / "README.md", collect_readme, False)
 
     prd_readme_template = skill_root() / "modules" / "collect" / "templates" / "prd-helper-readme-template.md"
     if prd_readme_template.exists():

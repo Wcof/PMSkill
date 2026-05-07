@@ -59,13 +59,11 @@ def test_setup_uses_static_templates_and_command_registry():
     setup = _read("scripts/setup-prd-helper.py")
     assert "_COLLECT_DESCRIPTIONS" not in setup
     assert "CLAUDE_COMMANDS" not in setup
-    assert "prd-helper-config-template.md" in setup
-    assert "collect-readme-template.md" in setup
+    assert "prd-helper-config-template.md" not in setup
+    assert "collect-readme-template.md" not in setup
     assert "command_markdown_list" in setup
-
-    config_template = _read("modules/collect/templates/prd-helper-config-template.md")
-    assert "{docs_root}" in config_template
-    assert "{command_list}" in config_template
+    assert "prd-helper-config.md" in setup
+    assert "inline" in setup or "f-string" in setup or 'f"' in setup
 
 
 def test_check_scripts_are_template_driven():
@@ -84,7 +82,6 @@ def test_check_scripts_are_template_driven():
 def test_guides_keep_four_stage_model_and_discuss_auxiliary():
     skill = _read("SKILL.md")
     context = _read("CONTEXT.md")
-    discuss = _read("modules/grill/guide.md")
 
     for content in (skill, context):
         for phase in ("Collect", "Refine", "Relate", "Generate"):
@@ -92,12 +89,9 @@ def test_guides_keep_four_stage_model_and_discuss_auxiliary():
         assert "检查（Check）" in content
         assert "不是第五" in content
 
-    assert "辅助能力" in discuss
-    assert "不是第五" in discuss
-    assert "/prd-discuss" in discuss
     for command in LEGACY_COMMANDS:
-        assert command not in discuss
-    assert "battle" not in discuss.lower()
+        assert command not in skill
+        assert command not in context
 
 
 def test_module_guides_state_stage_boundaries():

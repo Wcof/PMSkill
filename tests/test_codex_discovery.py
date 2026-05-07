@@ -3,12 +3,14 @@
 import json
 from pathlib import Path
 
-from scripts.lib.discovery import (
+from scripts.lib.discovery_codex import (
     _codex_turns,
-    _iter_jsonl_files,
-    _read_jsonl,
     find_codex_home,
     list_codex_sessions,
+)
+from scripts.lib.discovery_shared import (
+    iter_jsonl_files,
+    read_jsonl,
 )
 
 
@@ -84,7 +86,7 @@ def test_read_jsonl(tmp_path: Path):
     jsonl = tmp_path / "test.jsonl"
     entries = _make_session_entries()
     _write_jsonl(jsonl, entries)
-    result = _read_jsonl(jsonl)
+    result = read_jsonl(jsonl)
     assert len(result) == 5
     assert result[0]["type"] == "session_meta"
 
@@ -174,7 +176,7 @@ def test_iter_jsonl_files(tmp_path: Path):
     jsonl = sessions_dir / f"rollout-2026-05-01T10-00-00-{uuid}.jsonl"
     _write_jsonl(jsonl, [{"type": "session_meta", "payload": {}}])
 
-    results = list(_iter_jsonl_files(tmp_path / "sessions", "rollout-*.jsonl", recursive=True))
+    results = list(iter_jsonl_files(tmp_path / "sessions", "rollout-*.jsonl", recursive=True))
     assert len(results) == 1
     assert results[0][0] == jsonl
     assert results[0][1] == f"rollout-2026-05-01T10-00-00-{uuid}"
@@ -188,6 +190,6 @@ def test_iter_jsonl_files_nested(tmp_path: Path):
     jsonl = sessions_dir / f"rollout-2026-05-02T12-00-00-{uuid}.jsonl"
     _write_jsonl(jsonl, [{"type": "session_meta", "payload": {}}])
 
-    results = list(_iter_jsonl_files(tmp_path / "sessions", "rollout-*.jsonl", recursive=True))
+    results = list(iter_jsonl_files(tmp_path / "sessions", "rollout-*.jsonl", recursive=True))
     assert len(results) == 1
     assert uuid in results[0][1]
