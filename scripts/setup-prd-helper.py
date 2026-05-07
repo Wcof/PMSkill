@@ -231,7 +231,7 @@ def install_claude_commands(project: Path, docs_root: str) -> list[Path]:
     written: list[Path] = []
     for command in ALL_COMMANDS:
         target = commands_dir / f"{command.name}.md"
-        # 优先使用手写命令文件（如 prd-grill 的多步骤 prompt）
+        # 优先使用手写命令文件（如 prd-discuss 的多步骤 prompt）
         handwritten = _SKILL_ROOT / "commands" / f"{command.name}.md"
         if handwritten.exists():
             target.write_text(handwritten.read_text(encoding="utf-8"), encoding="utf-8")

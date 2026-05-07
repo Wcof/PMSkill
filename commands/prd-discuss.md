@@ -5,107 +5,135 @@ allowed-tools: Bash, Read
 
 # /prd-discuss
 
-请使用用户当前语言响应。中文用户默认中文，英文用户默认英文。
+需求研讨是 PRD Helper 的辅助能力，不是第五业务阶段。它的作用是**在采集之后、精炼之前**（或在任一点发现矛盾时），通过对原始材料和产品上下文进行结构化追问，澄清模糊点、统一术语、记录决策，让后续精炼产出更扎实。
 
-## Step 0: 定位 Skill 并检查前置条件
+讨论结论必须回流到两个地方：
+- **`02-refine/` 实体** — facts、decisions、conflicts、questions、assumptions
+- **`CONTEXT.md`** — 术语澄清和关系定义
 
-```bash
-set -euo pipefail
+## 前置条件
 
-find_prd_helper_root() {
-  for dir in ".claude/skills/prd-helper" ".agents/skills/prd-helper" "."; do
-    [ -f "$dir/modules/grill/guide.md" ] && { printf '%s\n' "$dir"; return 0; }
-  done
-  return 1
-}
+### 1. 检查采集状态
 
-skill_root="$(find_prd_helper_root)" || {
-  echo "未找到 PRD Helper 安装目录。请先运行：npx skills@latest add Wcof/PRDContextEngine --agent claude-code --skill prd-helper -y"
-  exit 1
-}
+读取 `collect-state.md`，检查 `capture_mode` 是否为 `on`。如果不是，提示用户先执行 `/prd-start`。研讨不要求活跃 session 存在，但要求至少有一些采集材料。
 
-echo "Skill root: $skill_root"
-```
-
-读取 `collect-state.md`，检查 `capture_mode` 是否为 `on`。如果不是，提示用户先执行 `/prd-start`。
-
-读取 `$skill_root/modules/grill/guide.md` 了解完整行为规则。
-
-## Step 1: 确保研讨目录存在
+### 2. 确保研讨目录存在
 
 ```bash
 mkdir -p docs/prd-helper/01-collect/grill
 ```
 
-## Step 2: 扫描已采集材料
+## 研讨方法
 
-读取以下目录的所有文件：
-- `docs/prd-helper/01-collect/active/`
-- `docs/prd-helper/01-collect/passive/`
+以下规则定义了研讨的"厚度"——不是步骤清单，而是你应该执行的实践。按判断力使用它们，不必线性执行。
 
-梳理发现的：
-- 矛盾点（同一概念在不同来源中说法不同）
-- 模糊术语（定义不清、用法不一致）
-- 未解决的冲突（需求之间互相矛盾）
-- 遗漏项（明显缺失的关键信息）
+### 术语挑战
 
-## Step 3: 呈现发现并询问方向
+当用户使用的术语与项目 `CONTEXT.md` 冲突时，立即指出：
 
-向用户汇报扫描结果，然后询问：
+> "术语表把 X 定义为 A，但你刚才说的是 B——是哪个？"
 
-> "我发现了以下矛盾/模糊点：
-> 1. ...
-> 2. ...
->
-> 你想先讨论哪一个？如果你有新的命题，也可以直接给我。"
-
-等待用户选择。
-
-## Step 4: 进入持续研讨模式
-
-更新 `collect-state.md`，设置 `grill_mode: on`。
-
-然后进入持续质询循环，遵循以下规则（来自 `modules/grill/guide.md`）：
-
-### 核心行为
-
-- 逐个问题追问，等用户回答后再继续
-- 每个问题附带你的推荐答案
-- 如果问题可以通过读代码/文档回答，先探索再提问
-- 每个回答都要说明应该沉淀到 facts、decisions、conflicts、questions、assumptions 或 CONTEXT.md 中的哪一类
-
-### 挑战术语表
-
-当用户使用的术语与项目 `CONTEXT.md` 冲突时，立即指出。
+不要假设用户记得术语表。每次冲突都是深化术语表的机会。
 
 ### 模糊语言精炼
 
-当用户使用模糊或重载的术语时，提出精确的规范术语。
+当用户使用模糊或重载的术语时，提出精确的规范术语：
+
+> "你说的是'账户'——你指的是客户还是用户？这是两个不同的东西。"
+
+将精炼结果立即写入 `CONTEXT.md`（见下方格式）。
 
 ### 具体场景压力测试
 
-构造探测边界情况的场景，迫使用户精确说明概念之间的边界。
+当讨论概念关系时，构建探测边界情况的场景，迫使用户精确说明概念之间的边界。
 
-### 交叉引用
+> "如果一个订单包含已发货和未发货的商品，'取消订单'应该取消全部还是只取消未发货部分？"
 
-当用户陈述某件事如何工作时，检查代码/文档是否一致。发现矛盾时指出。
+### 交叉引用代码
 
-### 实时更新 CONTEXT.md
+当用户陈述某件事如何工作时，检查代码是否一致。发现矛盾时指出：
 
-术语澄清后，立即更新项目根目录的 `CONTEXT.md`。格式见 `modules/grill/templates/CONTEXT-FORMAT.md`。
+> "代码里整个订单取消的，但你刚才说部分取消是可能的——哪个是对的？"
 
-### 谨慎提供 ADR
+### 逐个追问
 
-同时满足"难以逆转 + 没有上下文令人惊讶 + 真实权衡结果"时才提议创建 ADR。格式见 `modules/grill/templates/ADR-FORMAT.md`。
+一次问一个问题。等待用户回答后再继续。每个问题附带你的推荐答案。
 
-## Step 5: 结束需求研讨
+如果问题可以通过读代码或文档回答，先探索再提问。
 
-当用户表示研讨结束（或触发 `/prd-stop`）时：
+## 输出规范
 
-1. 更新 `collect-state.md`，设置 `grill_mode: off`
-2. 生成 `docs/prd-helper/01-collect/grill/discussion-summary.md`，包含：
+### CONTEXT.md 更新
+
+术语澄清后立即写入 `CONTEXT.md`，不要批量处理。格式：
+
+```md
+## Language
+
+**{术语}**:
+{一句话定义。定义它是什么，而不是它做什么。}
+_Avoid_: {同义词、易混淆词}
+
+## Relationships
+
+- **{术语A}** {动词} **{术语B}** — {简要说明}
+```
+
+规则：
+- **只包含该项目的领域特有概念**。通用编程概念（超时、错误类型、工具函数）不在此列。
+- **明确列出 Avoid 别名**。同一概念有多个说法时，选一个最好的，列出别名避免再使用。
+- **用粗体标出术语名**，表达基数关系。
+- **标志冲突历史**：如果一个词使用模糊，在 `Flagged ambiguities` 中标明解决结果。
+
+### ADR 创建
+
+仅在**同时满足**以下三条时才提议创建 ADR：
+
+1. **难以逆转** — 改主意的成本很高
+2. **没有上下文会让人惊讶** — 未来读者会问"为什么这样？"
+3. **真实权衡结果** — 有多个可选方案，你因特定原因选择了一个
+
+不满足任意一条就跳过。ADR 格式：
+
+```md
+# {标题}
+
+{1-3 句：上下文是什么，决定了什么，为什么。}
+```
+
+可选（大多数不需要）：Status frontmatter、Considered Options、Consequences。
+
+ADR 放在 `docs/adr/`，编号递增：`NNNN-slug.md`。懒惰创建——首次需要时才建目录。
+
+### 讨论结论到精炼实体的映射
+
+每个讨论产出的结论，按类型写入 `02-refine/`：
+
+| 结论类型 | 写入位置 | 说明 |
+|----------|----------|------|
+| 来源中有明确依据的事实 | `02-refine/facts.md` | 标注来源 |
+| 用户或团队做的决定 | `02-refine/decisions.md` | 说明决策人和时间 |
+| 未解决的矛盾 | `02-refine/conflicts.md` | 标注矛盾双方 |
+| 需要进一步确认的问题 | `02-refine/questions.md` | 标注待确认方 |
+| Agent 的不确定判断 | `02-refine/assumptions.md` | 说明依据和不确定原因 |
+
+### 术语变更记录
+
+每次 `CONTEXT.md` 变更，记录到 `01-collect/grill/term-changes.md`：
+
+```md
+- {术语}：{旧描述} → {新描述}（{时间}，{原因}）
+```
+
+## 退出研讨
+
+当用户表示研讨结束时：
+
+1. 确认所有 `CONTEXT.md` 更新已写入
+2. 确认所有讨论结论已映射到 `02-refine/` 实体
+3. 更新 `collect-state.md`，设 `grill_mode: off`
+4. 生成 `01-collect/grill/discussion-summary.md`，包含：
    - 已解决的问题列表
    - 未解决的开放问题
    - 术语变更记录
    - 创建的 ADR 列表
-3. 更新 `docs/prd-helper/01-collect/grill/open-questions.md`（仅未解决问题）
