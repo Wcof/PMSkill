@@ -18,6 +18,11 @@ from lib.template_path import module_template_path
 from lib.check_framework import CheckWriter
 
 
+TRACE_ENTITY_NAMES = ("fact", "decision", "constraint", "conflict", "assumption")
+TRACE_ANCHOR_FIELDS = ("source_id", "path", "locator")
+QUOTE_FIELDS = ("quote", "paraphrase", "引用", "转述")
+
+
 def _entity_blocks(content: str, entity) -> list[tuple[str, str]]:
     import re
 
@@ -28,6 +33,17 @@ def _entity_blocks(content: str, entity) -> list[tuple[str, str]]:
         end = headings[i + 1].start() if i + 1 < len(headings) else len(content)
         blocks.append((heading.group(1), content[start:end]))
     return blocks
+
+
+def _has_any_field(block: str, fields: tuple[str, ...]) -> bool:
+    return any(has_field(block, field) for field in fields)
+
+
+def _has_strong_trace(block: str) -> bool:
+    return (
+        all(has_field(block, field) for field in TRACE_ANCHOR_FIELDS)
+        and _has_any_field(block, QUOTE_FIELDS)
+    )
 
 
 def _check_background(refine_dir: Path) -> dict:
@@ -48,6 +64,7 @@ def check_refine(root: Path) -> dict:
         "exists": refine_dir.exists(),
         "files": {},
         "traceability": {},
+        "trace_quality": {},
         "missing_files": [],
         "background": _check_background(refine_dir) if refine_dir.exists() else {"exists": False, "missing_sections": []},
     }
@@ -69,13 +86,27 @@ def check_refine(root: Path) -> dict:
             file_result["items"].append({"id": item_id, "missing": missing})
         result["files"][entity.filename] = file_result
 
-    for entity in (get_entity(n) for n in ("fact", "decision", "constraint", "conflict", "assumption")):
+    for entity in (get_entity(n) for n in TRACE_ENTITY_NAMES):
         data = result["files"].get(entity.filename, {})
         items = data.get("items", [])
         result["traceability"][entity.filename] = {
             "exists": bool(data.get("exists")),
             "count": len(items),
             "failures": [item for item in items if item["missing"]],
+        }
+        strong = []
+        weak = []
+        content = (refine_dir / entity.filename).read_text(encoding="utf-8") if data.get("exists") else ""
+        blocks = _entity_blocks(content, entity) if content else []
+        for item_id, block in blocks:
+            if _has_strong_trace(block):
+                strong.append(item_id)
+            else:
+                weak.append(item_id)
+        result["trace_quality"][entity.filename] = {
+            "exists": bool(data.get("exists")),
+            "strong": strong,
+            "weak": weak,
         }
 
     return result
@@ -94,7 +125,12 @@ def write_check(root: Path, result: dict) -> Path:
         for fname, data in result["traceability"].items()
         for item in data["failures"]
     ]
-    trace_ok = result["exists"] and not trace_failures
+    weak_trace_failures = [
+        f"{fname}:{item_id} Weak Trace 缺少 source_id/path/quote-or-paraphrase/locator"
+        for fname, data in result.get("trace_quality", {}).items()
+        for item_id in data.get("weak", [])
+    ]
+    trace_ok = result["exists"] and not trace_failures and not weak_trace_failures
     can_relate = classification_ok and trace_ok
 
     pending = []
@@ -105,6 +141,7 @@ def write_check(root: Path, result: dict) -> Path:
     if bg.get("missing_sections"):
         pending.append("background.md 缺少章节：" + ", ".join(bg["missing_sections"]))
     pending.extend(trace_failures[:5])
+    pending.extend(weak_trace_failures[:5])
 
     w = CheckWriter(refine_dir, template_path=module_template_path(__file__, "02-refine-check-template.md"))
     w.add_meta("检查来源", "check-refine.py 自动生成")
@@ -129,13 +166,17 @@ def write_check(root: Path, result: dict) -> Path:
         ("conflicts.md", "冲突点有来源"),
         ("assumptions.md", "AI 推断已标记"),
     ]
-    w.add_template_section("2. 来源检查", {
+    source_checks = {
         label: (
             result["traceability"].get(fname, {}).get("exists", False)
             and not result["traceability"].get(fname, {}).get("failures", [])
+            and not result.get("trace_quality", {}).get(fname, {}).get("weak", [])
         )
         for fname, label in source_items
-    })
+    }
+    source_checks["Strong Trace 具备 source_id + path + quote/paraphrase + locator"] = not weak_trace_failures
+    source_checks["Weak Trace 未进入确定性要求"] = not weak_trace_failures
+    w.add_template_section("2. 来源检查", source_checks)
 
     w.add_template_section("3. 风险检查", {
         "没有把推断写成事实": True,

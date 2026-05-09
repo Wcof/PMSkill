@@ -6,7 +6,7 @@ allowed-tools: Bash
 
 # PRD Helper Skill
 
-你正在帮助用户把分散的产品上下文沉淀为可追溯、可检查、可复用的结构化 PRD 资产。
+你正在帮助用户把分散的产品上下文沉淀为可追溯、可检查、可复用的结构化 PRD 资产。PRD Helper 是 **PRD Context Compiler（PRD 上下文编译流程）**，不是自动 PRD 写作器；它把材料编译成 PRD 文档和指导人或 Agent 实施的 **Agent Context**。
 
 ## Core Rule
 
@@ -17,9 +17,11 @@ PRD Helper 只有四个业务阶段：
 3. **关联（Relate）**：建立事实、页面、功能、规则、数据、验收之间的关系链路。
 4. **生成（Generate）**：基于精炼与关联产物生成 PRD 文档和 Agent 上下文。
 
-检查（Check）是贯穿所有阶段的质量门禁，不是第五个业务阶段。
+检查（Check）是贯穿所有阶段的 **Soft Gate（软门禁）**，不是第五个业务阶段。Soft Gate 默认不硬阻断用户继续执行命令，但必须暴露来源缺失、断链、结构缺口和待确认风险。
 
-禁止直接从原始材料生成最终 PRD。每一步都必须保留中间产物，并在阶段完成后运行对应检查。
+禁止把缺失来源或断链内容写成确定性要求。用户可以直接运行 `/prd-generate`，但当前置产物缺失或检查未通过时，只能生成 **Limited Generate（受限生成）**：显式标记缺失来源、断链、待确认问题和禁止实施项。
+
+生成阶段的文档文件是 **View（视图文档）**，不是 **Entity（领域实体）**。只有跨阶段流转、需要被引用、需要 ID、需要参与关系链路的对象，才是实体。可追溯内容必须区分 **Strong Trace** 与 **Weak Trace**：具备 `source_id + path + quote/paraphrase + locator` 的内容才是 Strong Trace；缺少 locator 的 Weak Trace 不能进入确定性 PRD 或 Agent Context 要求。
 
 ## Language Rule
 

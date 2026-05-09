@@ -8,6 +8,10 @@ PRD Helper 把分散的产品上下文沉淀为可追溯、可检查、可复用
 单一 Agent Skill，负责组织采集、精炼、关联、生成四阶段工作流。
 _Avoid_: skill collection, 多个业务 skill
 
+**PRD Context Compiler（PRD 上下文编译流程）**:
+把原始产品上下文经过采集、精炼、关联、检查后，编译成可追溯的 PRD 文档和指导人或 Agent 实施的工程上下文。Agent 负责语义转换，脚本负责结构、链路、来源和风险门禁。
+_Avoid_: 自动 PRD 写作器、无来源生成器
+
 **Collect（采集）**:
 保存原始材料、元信息、索引、状态和轻量摘要的阶段。
 _Avoid_: 清洗、总结成 PRD、事实提取
@@ -24,9 +28,13 @@ _Avoid_: 画图而不检查断链、孤立项
 基于精炼与关联结果输出 PRD 文档和 Agent 上下文的阶段。
 _Avoid_: 从原始材料直接生成、凭空补业务规则
 
-**检查（Check）**:
-贯穿各阶段的质量门禁，不是第五个业务阶段。
-_Avoid_: 第五模块、独立业务阶段
+**Limited Generate（受限生成）**:
+`/prd-generate` 永远可以执行；但当前置产物缺失或 Check 未通过时，生成结果不是完整确定性 PRD。受限生成必须显式标记缺失来源、断链、待确认问题和禁止实施项，不能把未来源化或未关联内容写成确定性要求。
+_Avoid_: 静默补齐、伪装成完整 PRD、把风险项写成实施项
+
+**检查（Check） / Soft Gate（软门禁）**:
+贯穿各阶段的软门禁，不是第五个业务阶段。Check 默认不阻断用户继续执行命令，但必须暴露来源缺失、断链、结构缺口和待确认风险；未通过内容只能进入风险或待确认区，不能写成确定性 PRD 或 Agent Context 要求。
+_Avoid_: 第五模块、独立业务阶段、硬阻断
 
 **Active Capture（主动采集）**:
 `/prd-start` 后记录完整 `User Query + Agent Answer` 的采集方式。
@@ -39,6 +47,18 @@ _Avoid_: 被 Agent 改写后的材料
 **Source Index（材料索引）**:
 `source-index.md`，记录来源、路径、hash、通道、元信息状态和采集状态。
 _Avoid_: 摘要表、事实表
+
+**Traceability（可追溯性）**:
+最低标准不是只有来源文件，而是有可定位来源锚点。来源锚点至少包括 `source_id + path + quote/paraphrase + locator`；`locator` 可以是行号、段落标题、turn 编号、时间戳或消息序号。
+_Avoid_: 只写“来源：会议”或“来源：meeting.md”
+
+**Strong Trace（强追溯）**:
+具备完整来源锚点，复核者可以回到原始材料定位上下文。强追溯内容才可以进入确定性 PRD 或 Agent Context 要求。
+_Avoid_: 只有来源文件、没有定位信息
+
+**Weak Trace（弱追溯）**:
+只有来源文件或笼统来源说明，缺少可定位 `locator`。弱追溯内容只能进入风险或待确认区，不能写成确定性要求。
+_Avoid_: 当成已确认事实或实施项
 
 **Collect State（采集状态）**:
 `collect-state.md`，记录采集 session、capture mode、计数、最近写入和研讨状态。
@@ -66,7 +86,16 @@ _Avoid_: 只列实体、不连关系
 
 **Agent Context（Agent 上下文）**:
 生成阶段输出给前端、后端、测试、产品复核和执行 Agent 使用的任务上下文。
-_Avoid_: 新的事实来源
+它是指导人或 Agent 实施的工程上下文，不只是 PRD 附属物。
+_Avoid_: 新的事实来源、普通摘要
+
+**View（视图文档）**:
+生成阶段的文档文件是对已有事实、关系、规则、数据、验收和风险的视图，不是新的事实来源，也不是新的领域实体。
+_Avoid_: 把 overview/page-prd/rule-prd/agent-context 文件类型当成业务实体
+
+**Entity（领域实体）**:
+只有跨阶段流转、需要被引用、需要 ID、需要参与关系链路的对象，才是领域实体。
+_Avoid_: 因为某类文档有文件或模板就把它升级成实体
 
 **PRD Discuss（需求研讨）**:
 `/prd-discuss`，用于追问矛盾、模糊术语和未决问题的辅助模式。
@@ -79,11 +108,13 @@ _Avoid_: `/prd-helper start`, `/prd-setup`, 包装命令
 ## Relationships
 
 - **PRD Helper Skill** 包含四个业务阶段：**Collect**、**Refine**、**Relate**、**Generate**。
-- **Check** 验证每个阶段产物，但不改变四阶段模型。
+- **Check** 验证每个阶段产物并输出软门禁风险，但不改变四阶段模型，也不默认阻断用户继续执行。
 - **Collect** 产生 **Source Index** 和 **Collect State**，并保存 **Active Capture** 与 **Passive Source**。
-- **Refine** 读取采集材料，产生 **Fact**、**Assumption**、**Conflict**、**Question** 等结构化上下文。
+- **Refine** 读取采集材料，产生 **Fact**、**Assumption**、**Conflict**、**Question** 等结构化上下文，并区分 **Strong Trace** 与 **Weak Trace**。
 - **Relate** 把 **Fact** 连接到页面/功能、规则、数据和验收，形成 **Relation Chain**。
-- **Generate** 读取精炼与关联产物，输出 PRD 文档和 **Agent Context**。
+- **Generate** 读取精炼与关联产物，输出 PRD 文档和 **Agent Context**；当前置产物缺失或 Check 未通过时，只能进入 **Limited Generate**。
+- **Agent Context** 是给人或 Agent 执行实施的指导性文件，必须保留来源、断链和待确认风险，不能把缺失来源或断链内容写成确定性要求。
+- **Generate** 产物中的文档文件是 **View**，不是新的 **Entity**；只有跨阶段流转、需要 ID 和关系链路的对象才是实体。
 - **PRD Discuss** 辅助发现和澄清问题，结论必须回流到 **Refine** 产物或本文档。
 
 ## Example Dialogue

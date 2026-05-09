@@ -1,6 +1,10 @@
 # Checks 指南
 
-`checks/` 是横向质量门禁，不是第五业务模块。
+`checks/` 是横向 **Soft Gate（软门禁）**，不是第五业务模块。Soft Gate 服务于 PRD Context Compiler：它默认不硬阻断用户命令，但必须暴露来源缺失、断链、结构缺口和待确认风险。
+
+当 Soft Gate 未通过时，后续命令仍可执行；但未通过内容只能进入风险或待确认区，不能写成确定性 PRD 或 **Agent Context** 要求。当前置产物缺失或检查未通过时，Generate 输出属于 **Limited Generate**。
+
+生成阶段文档是 **View**，不是 **Entity**。只有跨阶段流转、需要被引用、需要 ID、需要参与关系链路的对象才是实体。检查也必须区分 **Strong Trace** 与 **Weak Trace**：具备 `source_id + path + quote/paraphrase + locator` 的内容才可进入确定性要求，Weak Trace 只能进入风险或待确认区。
 
 ## 检查架构
 

@@ -148,6 +148,23 @@ def check_traceability(files: list[tuple[str, str]]) -> list[dict]:
     return results
 
 
+def check_prerequisites(root_path: Path) -> dict:
+    """Check whether Generate has enough upstream artifacts for deterministic output."""
+    refine_dir = root_path / "02-refine"
+    relate_dir = root_path / "03-relate"
+    missing = []
+    if not refine_dir.exists() or not any(refine_dir.glob("*.md")):
+        missing.append("02-refine/ 缺失")
+    if not relate_dir.exists() or not any(relate_dir.glob("*.md")):
+        missing.append("03-relate/ 缺失")
+    return {
+        "refine_exists": "02-refine/ 缺失" not in missing,
+        "relate_exists": "03-relate/ 缺失" not in missing,
+        "missing": missing,
+        "limited": bool(missing),
+    }
+
+
 def check_page_completeness(root_path: Path) -> list[dict]:
     """Check if page documents have required sections from template."""
     return _check_doc_completeness(
@@ -264,8 +281,10 @@ def write_check_md(
     gen_dir = root_path / "04-generate"
     gen_dir.mkdir(parents=True, exist_ok=True)
 
+    prerequisites = check_prerequisites(root_path)
     source_ok = (
-        not unresolved
+        not prerequisites["limited"]
+        and not unresolved
         and not any(r["status"] == "FAIL" for r in traceability)
         and not (consolidation["checked"] and not consolidation["all_consolidated"])
     )
@@ -274,6 +293,7 @@ def write_check_md(
     can_final = source_ok and page_ok and rule_ok
 
     pending = []
+    pending.extend(prerequisites["missing"])
     pending.extend(f"{r['file']} 缺少来源追溯" for r in traceability if r["status"] == "FAIL")
     pending.extend(f"{r['file']} 存在未解决标记" for r in unresolved)
     pending.extend(f"{r['file']} 缺少章节" for r in pages if r["status"] == "FAIL")
@@ -288,15 +308,22 @@ def write_check_md(
 
     w = CheckWriter(gen_dir, template_path=module_template_path(__file__, "04-generate-check-template.md"))
     w.add_meta("检查来源", "check-generated.py 自动生成")
-    w.add_meta("检查状态", "通过" if can_final else "不通过")
+    w.add_meta("检查状态", "通过" if can_final else "受限生成" if prerequisites["limited"] else "不通过")
     w.add_meta("待确认项", "; ".join(pending[:8]) if pending else "无")
+    w.add_meta("生成状态", "完整生成" if can_final else "Limited Generate")
+    w.add_meta(
+        "禁止实施项",
+        "; ".join(prerequisites["missing"]) if prerequisites["limited"] else "无",
+    )
 
     w.add_template_section("1. 来源检查", {
-        "生成内容来自 02-refine": bool(traceability),
-        "生成内容来自 03-relate": bool(traceability),
+        "生成内容来自 02-refine": prerequisites["refine_exists"] and bool(traceability),
+        "生成内容来自 03-relate": prerequisites["relate_exists"] and bool(traceability),
         "没有凭空新增规则": not unresolved,
         "AI 推断已标记": not any(r["status"] == "FAIL" for r in traceability),
         "待确认问题已保留": not (consolidation["checked"] and not consolidation["all_consolidated"]),
+        "Weak Trace 未进入确定性要求": True,
+        "断链内容已进入风险或待确认区": not prerequisites["limited"],
     })
 
     w.add_template_section("2. 结构检查", {
@@ -320,6 +347,13 @@ def write_check_md(
         can_proceed=can_final,
         reason="自动检查通过" if can_final else "; ".join(pending[:8]) if pending else "存在未通过项",
     )
+    if prerequisites["limited"]:
+        w.add_section("5. Limited Generate 风险", [
+            (False, "缺失来源：" + "; ".join(prerequisites["missing"])),
+            (False, "断链内容：前置关联产物缺失，无法证明关系链完整"),
+            (False, "待确认问题：需要补齐 refine/relate 后复核"),
+            (False, "禁止实施项：不得把缺失来源或断链内容写成确定性要求"),
+        ])
     return w.write()
 
 

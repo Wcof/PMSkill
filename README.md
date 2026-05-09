@@ -6,13 +6,17 @@
 
 ## 一句话价值
 
-PRD Helper 把分散在会议、聊天、评审和旧文档里的产品上下文，沉淀成可追溯、可检查、可复用的结构化 PRD 资产。
+PRD Helper 是一个 **PRD Context Compiler（PRD 上下文编译流程）**：把分散在会议、聊天、评审和旧文档里的产品上下文，沉淀成可追溯、可检查、可复用的结构化 PRD 资产和 **Agent Context** 工程指导文件。
 
-它坚持一条主链路：**采集（Collect）→ 精炼（Refine）→ 关联（Relate）→ 生成（Generate）**。检查（Check）是横向质量门禁，不是第五阶段。
+它坚持一条主链路：**采集（Collect）→ 精炼（Refine）→ 关联（Relate）→ 生成（Generate）**。检查（Check）是横向 **Soft Gate（软门禁）**，不是第五阶段；Soft Gate 不默认阻断用户命令，但会暴露来源缺失、断链和待确认风险。
 
 ## 它解决什么问题
 
-很多团队不是没有需求资料，而是资料散、来源乱、版本多，最后 PRD 变成“谁记得就听谁的”。PRD Helper 的目标是让 Agent 和团队先保存原始材料，再精炼信息、建立关系，最后生成 PRD，避免直接让 AI 从碎片聊天里凭感觉写文档。
+很多团队不是没有需求资料，而是资料散、来源乱、版本多，最后 PRD 变成“谁记得就听谁的”。PRD Helper 的目标是让 Agent 和团队先保存原始材料，再精炼信息、建立关系，最后生成 PRD 和指导人或 Agent 实施的 Agent Context，避免直接让 AI 从碎片聊天里凭感觉写文档。
+
+如果用户跳过前置阶段或检查未通过，`/prd-generate` 仍可执行，但结果属于 **Limited Generate（受限生成）**：缺失来源、断链、待确认问题和禁止实施项必须显式标记，不能伪装成完整确定性 PRD。
+
+生成阶段的文档文件是 **View**，不是 **Entity**。只有跨阶段流转、需要被引用、需要 ID、需要参与关系链路的对象，才是领域实体。来源追溯也分级：具备 `source_id + path + quote/paraphrase + locator` 的内容是 **Strong Trace**；缺少 locator 的内容是 **Weak Trace**，不能进入确定性要求。
 
 ## 当前指令清单
 

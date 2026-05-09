@@ -6,13 +6,17 @@
 
 ## One-line Value
 
-PRD Helper turns product context scattered across meetings, chats, reviews, and legacy documents into traceable, checkable, reusable structured PRD assets.
+PRD Helper is a **PRD Context Compiler**: it turns product context scattered across meetings, chats, reviews, and legacy documents into traceable, checkable, reusable structured PRD assets and **Agent Context** engineering guidance.
 
-It follows one main chain: **Collect -> Refine -> Relate -> Generate**. Check is a horizontal quality gate, not a fifth stage.
+It follows one main chain: **Collect -> Refine -> Relate -> Generate**. Check is a horizontal **Soft Gate**, not a fifth stage. A Soft Gate does not hard-block user commands by default; it exposes missing sources, broken relation chains, and pending-confirmation risks.
 
 ## What Problem It Solves
 
-Many teams do not lack requirement material. The problem is that the material is scattered, source evidence is unclear, and versions drift. PRD Helper keeps the workflow disciplined: collect raw input first, refine it, relate it, then generate PRD documents instead of asking AI to guess from fragmented conversations.
+Many teams do not lack requirement material. The problem is that the material is scattered, source evidence is unclear, and versions drift. PRD Helper keeps the workflow disciplined: collect raw input first, refine it, relate it, then generate PRD documents and Agent Context that guide humans or Agents through implementation instead of asking AI to guess from fragmented conversations.
+
+If the user skips prerequisite stages or checks do not pass, `/prd-generate` still runs, but the result is **Limited Generate**: missing sources, broken relation chains, pending questions, and prohibited implementation items must be explicit and cannot be presented as a complete deterministic PRD.
+
+Generated documents are **Views**, not an **Entity** type. Only objects that flow across stages, need references, need IDs, and participate in relation chains are domain entities. Traceability is also graded: content with `source_id + path + quote/paraphrase + locator` is **Strong Trace**; content without a locator is **Weak Trace** and cannot become a deterministic requirement.
 
 ## Current Commands
 

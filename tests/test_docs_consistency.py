@@ -94,6 +94,37 @@ def test_guides_keep_four_stage_model_and_discuss_auxiliary():
         assert command not in context
 
 
+def test_docs_use_prd_context_compiler_boundaries():
+    docs = {
+        "CONTEXT.md": _read("CONTEXT.md"),
+        "README.md": _read("README.md"),
+        "README.en.md": _read("README.en.md"),
+        "SKILL.md": _read("SKILL.md"),
+        "modules/generate/guide.md": _read("modules/generate/guide.md"),
+        "checks/guide.md": _read("checks/guide.md"),
+    }
+
+    required_terms = (
+        "PRD Context Compiler",
+        "Soft Gate",
+        "Limited Generate",
+        "Agent Context",
+        "View",
+        "Entity",
+        "Strong Trace",
+        "Weak Trace",
+    )
+
+    for path, content in docs.items():
+        for term in required_terms:
+            assert term in content, f"{path} missing {term}"
+
+    context = docs["CONTEXT.md"]
+    assert "自动 PRD 写作器" in context
+    assert "生成阶段的文档文件是对已有事实" in context
+    assert "只有跨阶段流转、需要被引用、需要 ID、需要参与关系链路" in context
+
+
 def test_module_guides_state_stage_boundaries():
     collect = _read("modules/collect/guide.md")
     refine = _read("modules/refine/guide.md")
@@ -116,3 +147,17 @@ def test_module_guides_state_stage_boundaries():
     assert "不得新增未来源化、未关联的业务规则" in generate
     assert "Agent 上下文边界" in generate
     assert "product-review-context.md" in generate
+
+
+def test_agent_context_guidance_preserves_limited_generate_risk_boundaries():
+    generate = _read("modules/generate/guide.md")
+    template = _read("modules/generate/templates/04-generate-check-template.md")
+
+    for content in (generate, template):
+        assert "Agent Context" in content
+        assert "禁止实施项" in content
+        assert "Weak Trace" in content
+        assert "断链" in content
+        assert "不能写成确定性要求" in content or "不得把缺失来源或断链内容写成确定性要求" in content
+
+    assert "Implementation Context" not in generate

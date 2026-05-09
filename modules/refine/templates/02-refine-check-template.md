@@ -24,6 +24,8 @@
 - [ ] 关键约束有来源
 - [ ] 冲突点有来源
 - [ ] AI 推断已标记
+- [ ] Strong Trace 具备 source_id + path + quote/paraphrase + locator
+- [ ] Weak Trace 未进入确定性要求
 
 ## 3. 风险检查
 

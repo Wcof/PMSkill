@@ -25,6 +25,17 @@ def write(path: Path, content: str = "content") -> None:
     path.write_text(content, encoding="utf-8")
 
 
+COMPLETE_BACKGROUND = "\n".join([
+    "## 1. 背景摘要",
+    "## 2. 业务现状",
+    "## 3. 当前痛点",
+    "## 4. 相关角色",
+    "## 5. 来源说明",
+    "## 6. 待确认问题",
+    "",
+])
+
+
 def test_check_collect_writes_template_shaped_check(tmp_path: Path):
     root = tmp_path / "01-collect"
     write(root / "active" / "sessions" / "session-test.md", "---\nsource_id: turn-001\n---\n## Turn 1\n\n### User Query\n\nUser Query\n\n### Agent Answer\n\nAgent Answer\n")
@@ -68,7 +79,7 @@ def test_check_collect_writes_template_shaped_check(tmp_path: Path):
 def test_check_refine_writes_template_shaped_check(tmp_path: Path):
     root = tmp_path / "prd-helper"
     refine = root / "02-refine"
-    write(refine / "background.md", "## 背景\n")
+    write(refine / "background.md", COMPLETE_BACKGROUND)
     write(refine / "facts.md", "## fact_001\n- 来源材料：访谈\n- 来源位置：L1\n- 状态：confirmed\n")
     write(refine / "decisions.md", "## decision_001\n- 来源材料：评审\n- 来源位置：L2\n- 状态：confirmed\n")
     write(refine / "constraints.md", "## constraint_001\n- 来源材料：评审\n- 来源位置：L3\n- 状态：confirmed\n")
@@ -85,6 +96,56 @@ def test_check_refine_writes_template_shaped_check(tmp_path: Path):
     assert "## 1. 信息分类检查" in content
     assert "已区分事实" in content
     assert "本轮精炼是否可以进入关联阶段" in content
+
+
+def test_check_refine_marks_weak_trace_as_not_deterministic(tmp_path: Path):
+    root = tmp_path / "prd-helper"
+    refine = root / "02-refine"
+    write(refine / "background.md", COMPLETE_BACKGROUND)
+    write(refine / "facts.md", "## fact_001\n- 来源材料：访谈\n- 来源位置：会议讨论\n- 状态：confirmed\n")
+    write(refine / "decisions.md", "## decision_001\n- 来源材料：评审\n- 来源位置：L2\n- 状态：confirmed\n")
+    write(refine / "constraints.md", "## constraint_001\n- 来源材料：评审\n- 来源位置：L3\n- 状态：confirmed\n")
+    write(refine / "goals.md", "## goal_001\n- 来源材料：访谈\n- 状态：confirmed\n")
+    write(refine / "conflicts.md", "## conflict_001\n- 涉及来源：客户反馈\n- 当前状态：open\n")
+    write(refine / "questions.md", "## question_001\n- 来源材料：访谈\n- 状态：open\n")
+    write(refine / "assumptions.md", "## assumption_001\n- 来源材料：访谈\n")
+
+    module = load_script("modules/refine/scripts/check-refine.py")
+    result = module.check_refine(root)
+    check_file = module.write_check(root, result)
+    content = check_file.read_text(encoding="utf-8")
+
+    assert result["trace_quality"]["facts.md"]["weak"] == ["fact_001"]
+    assert "Weak Trace" in content
+    assert "检查状态：不通过" in content
+
+
+def test_check_refine_accepts_strong_trace_anchor(tmp_path: Path):
+    root = tmp_path / "prd-helper"
+    refine = root / "02-refine"
+    write(refine / "background.md", COMPLETE_BACKGROUND)
+    strong_anchor = "\n".join([
+        "- source_id：turn-001",
+        "- path：active/sessions/session-test.md",
+        "- quote：用户要求巡检点位管理",
+        "- locator：Turn 1",
+    ])
+    write(refine / "facts.md", f"## fact_001\n{strong_anchor}\n- 来源材料：访谈\n- 来源位置：Turn 1\n- 状态：confirmed\n")
+    write(refine / "decisions.md", f"## decision_001\n{strong_anchor}\n- 来源材料：评审\n- 来源位置：Turn 1\n- 状态：confirmed\n")
+    write(refine / "constraints.md", f"## constraint_001\n{strong_anchor}\n- 来源材料：评审\n- 来源位置：Turn 1\n- 状态：confirmed\n")
+    write(refine / "goals.md", "## goal_001\n- 来源材料：访谈\n- 状态：confirmed\n")
+    write(refine / "conflicts.md", f"## conflict_001\n{strong_anchor}\n- 涉及来源：客户反馈\n- 当前状态：open\n")
+    write(refine / "questions.md", "## question_001\n- 来源材料：访谈\n- 状态：open\n")
+    write(refine / "assumptions.md", f"## assumption_001\n{strong_anchor}\n- 来源材料：访谈\n")
+
+    module = load_script("modules/refine/scripts/check-refine.py")
+    result = module.check_refine(root)
+    check_file = module.write_check(root, result)
+    content = check_file.read_text(encoding="utf-8")
+
+    assert result["trace_quality"]["facts.md"]["strong"] == ["fact_001"]
+    assert "Weak Trace 缺少" not in content
+    assert "检查状态：通过" in content
 
 
 def test_check_relate_writes_template_shaped_check(tmp_path: Path):
@@ -357,6 +418,30 @@ def test_check_generated_template_paths_resolve_to_real_files():
     # 正确路径
     correct_path = script_file.parent.parent / "templates" / "04-generate-page-prd-template.md"
     assert correct_path.exists(), f"Correct path should exist: {correct_path}"
+
+
+def test_check_generated_marks_limited_generate_when_prerequisites_missing(tmp_path: Path):
+    module = load_script("modules/generate/scripts/check-generated.py")
+    root = tmp_path / "prd-helper"
+    write(
+        root / "04-generate" / "agent-context" / "frontend-context.md",
+        "## Agent Context\n\n- fact_001\n- 来源说明：缺少 refine 和 relate 前置产物\n",
+    )
+
+    files = module._read_generated_files(root)
+    unresolved = module.check_unresolved_content(files)
+    consolidation = module.check_pending_questions_consolidation(root, files)
+    traceability = module.check_traceability(files)
+    pages = module.check_page_completeness(root)
+    rules = module.check_rule_completeness(root)
+    check_file = module.write_check_md(root, unresolved, consolidation, traceability, pages, rules)
+    content = check_file.read_text(encoding="utf-8")
+
+    assert "Limited Generate" in content
+    assert "02-refine/ 缺失" in content
+    assert "03-relate/ 缺失" in content
+    assert "禁止实施项" in content
+    assert "检查状态：受限生成" in content
 
 
 def test_check_page_completeness_detects_missing_sections(tmp_path: Path):
@@ -739,4 +824,3 @@ def test_cmd_stop_rejects_invalid_transition(tmp_path: Path, capsys):
 
     captured = capsys.readouterr()
     assert "Cannot stop" in captured.out or "非法" in captured.out or "InvalidTransition" in captured.out
-

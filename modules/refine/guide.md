@@ -17,6 +17,8 @@
 7. 不允许跳过待确认问题。
 8. 不允许删除重要背景。
 9. 不允许凭空新增业务规则。
+10. 必须区分 **Strong Trace** 与 **Weak Trace**：确定性内容必须有 `source_id + path + quote/paraphrase + locator`。
+11. **Weak Trace** 只能进入风险或待确认区，不能进入确定性 PRD 或 Agent Context 要求。
 
 ## 产物边界
 
@@ -83,13 +85,24 @@
 | `assumptions.md` | 每个 assumption 有推断内容、来源材料、推断依据、不能确定原因、影响范围、是否进入生成文档和状态 |
 | `check.md` | 使用 `02-refine-check-template.md`，并能引用 `check-refine.py` 的检查结果 |
 
+确定性条目还必须包含可定位来源锚点：
+
+```markdown
+- source_id：
+- path：
+- quote / paraphrase：
+- locator：
+```
+
+缺少 locator、quote/paraphrase、source_id 或 path 的内容属于 Weak Trace。
+
 ## 检查
 
 使用 `templates/02-refine-check-template.md` 生成 `check.md`。
 
 检查要点：
 - 信息分类检查（事实、背景、目标、决策、约束、冲突、问题、推断）
-- 来源检查（关键事实/决策/约束/冲突有来源，推断已标记）
+- 来源检查（关键事实/决策/约束/冲突有来源，推断已标记，并区分 Strong Trace / Weak Trace）
 - 风险检查（无推断伪装事实、无隐藏冲突、无跳过问题、无删除背景、无凭空规则）
 
 精炼通过只代表材料已经被正确分类和来源化，不代表关系完整，也不代表可以直接生成 PRD。
