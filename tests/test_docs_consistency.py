@@ -55,6 +55,21 @@ def test_codex_plugin_command_templates_match_current_command_set():
     assert command_files == CURRENT_COMMANDS
 
 
+def test_repo_root_is_installable_as_codex_plugin():
+    plugin_path = ROOT / ".codex-plugin" / "plugin.json"
+    assert plugin_path.exists()
+
+    command_files = {
+        f"/{path.stem}"
+        for path in (ROOT / "commands").glob("prd-*.md")
+    }
+    assert command_files == CURRENT_COMMANDS
+
+    plugin = __import__("json").loads(plugin_path.read_text(encoding="utf-8"))
+    assert plugin["name"] == "prd-helper"
+    assert plugin["interface"]["displayName"] == "PRD Helper"
+
+
 def test_setup_uses_static_templates_and_command_registry():
     setup = _read("scripts/setup-prd-helper.py")
     assert "_COLLECT_DESCRIPTIONS" not in setup

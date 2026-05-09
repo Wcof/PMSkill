@@ -1,0 +1,35 @@
+{
+  "name": "prd-helper",
+  "version": "0.1.0",
+  "description": "PRD Helper - 产品上下文采集与 PRD 生成工具",
+  "author": {
+    "name": "PRD Helper"
+  },
+  "homepage": "https://github.com/Wcof/PRDContextEngine",
+  "repository": "https://github.com/Wcof/PRDContextEngine",
+  "license": "MIT",
+  "keywords": [
+    "prd",
+    "product",
+    "requirements",
+    "capture",
+    "context"
+  ],
+  "interface": {
+    "displayName": "PRD Helper",
+    "shortDescription": "产品上下文采集与 PRD 生成",
+    "longDescription": "通过主动采集和被动采集，将原始产品上下文转化为结构化、可追溯的 PRD 文档。支持采集、精炼、关联、生成四阶段流程。",
+    "developerName": "PRD Helper",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "开启 PRD 采集",
+      "查看采集状态",
+      "生成 PRD 文档"
+    ],
+    "brandColor": "#2563EB"
+  }
+}
