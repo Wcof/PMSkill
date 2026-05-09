@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import shutil
 import sys
 from pathlib import Path
@@ -108,32 +109,175 @@ def adapter_block(agent: str) -> str:
 def install_codex_plugin(skill_root: Path, docs_root: str) -> Path:
     """Install PRD Helper as a Codex plugin to ~/.codex/plugins/prd-helper/."""
     from lib.discovery import find_codex_home
-    from lib.constants import CODEX_PLUGIN_DIR
+    from lib.constants import (
+        CODEX_LOCAL_MARKETPLACE_NAME,
+        CODEX_LOCAL_MARKETPLACE_REL,
+        CODEX_LOCAL_PLUGIN_REF,
+        CODEX_PLUGIN_DIR,
+    )
 
     codex_home = find_codex_home()
     plugin_dest = codex_home / CODEX_PLUGIN_DIR
+    marketplace_root = codex_home / CODEX_LOCAL_MARKETPLACE_REL
+    marketplace_plugin_dest = marketplace_root / "plugins" / "prd-helper"
 
     plugin_src = skill_root / "support" / "adapters" / "codex" / "plugin"
     if not plugin_src.exists():
         print(f"Codex plugin source not found: {plugin_src}")
         return plugin_dest
 
-    # Remove existing plugin if present
-    if plugin_dest.exists():
-        shutil.rmtree(plugin_dest)
+    for target in (plugin_dest, marketplace_plugin_dest):
+        if target.exists():
+            shutil.rmtree(target)
+        shutil.copytree(plugin_src, target)
 
-    # Copy plugin structure
-    shutil.copytree(plugin_src, plugin_dest)
+    skills_src = skill_root / ".agents" / "skills"
+    for target in (plugin_dest, marketplace_plugin_dest):
+        if skills_src.exists():
+            shutil.copytree(skills_src, target / "skills")
+        else:
+            shutil.copytree(
+                skill_root,
+                target / "skills" / "prd-helper",
+                ignore=shutil.ignore_patterns(".git", "__pycache__", ".pytest_cache"),
+            )
 
-    # Replace template variables in command files
-    for md_file in (plugin_dest / "commands").glob("*.md"):
-        content = md_file.read_text(encoding="utf-8")
-        content = content.replace("{skill_root}", str(skill_root))
-        content = content.replace("{docs_root}", docs_root)
-        md_file.write_text(content, encoding="utf-8")
+    for target in (plugin_dest, marketplace_plugin_dest):
+        for md_file in (target / "commands").glob("*.md"):
+            content = md_file.read_text(encoding="utf-8")
+            content = content.replace("{skill_root}", str(skill_root))
+            content = content.replace("{docs_root}", docs_root)
+            md_file.write_text(content, encoding="utf-8")
+
+    write_codex_marketplace(marketplace_root)
+    enable_codex_plugin(codex_home, marketplace_root, CODEX_LOCAL_MARKETPLACE_NAME, CODEX_LOCAL_PLUGIN_REF)
 
     print(f"Codex plugin installed: {plugin_dest}")
+    print(f"Codex marketplace registered: {marketplace_root}")
     return plugin_dest
+
+
+def install_codex_project_commands(project: Path, skill_root: Path, docs_root: str) -> list[Path]:
+    commands_src = skill_root / "support" / "adapters" / "codex" / "plugin" / "commands"
+    commands_dir = project / ".codex" / "commands"
+    commands_dir.mkdir(parents=True, exist_ok=True)
+    written: list[Path] = []
+    for command in ALL_COMMANDS:
+        source = commands_src / f"{command.name}.md"
+        if not source.exists():
+            continue
+        target = commands_dir / source.name
+        content = source.read_text(encoding="utf-8")
+        content = content.replace("{skill_root}", str(skill_root))
+        content = content.replace("{docs_root}", docs_root)
+        target.write_text(content, encoding="utf-8")
+        written.append(target)
+    return written
+
+
+def install_codex_project_config(project: Path) -> Path:
+    from lib.discovery import find_codex_home
+    from lib.constants import CODEX_LOCAL_MARKETPLACE_NAME, CODEX_LOCAL_MARKETPLACE_REL, CODEX_LOCAL_PLUGIN_REF
+
+    codex_home = find_codex_home()
+    config_path = project / ".codex" / "config.toml"
+    content = config_path.read_text(encoding="utf-8") if config_path.exists() else ""
+    marketplace_root = codex_home / CODEX_LOCAL_MARKETPLACE_REL
+    content = _replace_toml_table(
+        content,
+        f"[marketplaces.{CODEX_LOCAL_MARKETPLACE_NAME}]",
+        [
+            'source_type = "local"',
+            f'source = "{marketplace_root}"',
+        ],
+    )
+    content = _replace_toml_table(
+        content,
+        f'[plugins."{CODEX_LOCAL_PLUGIN_REF}"]',
+        ['enabled = true'],
+    )
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text(content, encoding="utf-8")
+    return config_path
+
+
+def write_codex_marketplace(marketplace_root: Path) -> Path:
+    marketplace_path = marketplace_root / ".agents" / "plugins" / "marketplace.json"
+    marketplace_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "name": "prd-helper-local",
+        "interface": {
+            "displayName": "PRD Helper Local",
+        },
+        "plugins": [
+            {
+                "name": "prd-helper",
+                "source": {
+                    "source": "local",
+                    "path": "./plugins/prd-helper",
+                },
+                "policy": {
+                    "installation": "AVAILABLE",
+                    "authentication": "ON_INSTALL",
+                },
+                "category": "Productivity",
+            }
+        ],
+    }
+    marketplace_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return marketplace_path
+
+
+def _replace_toml_table(content: str, table_header: str, body: list[str]) -> str:
+    lines = content.splitlines()
+    output: list[str] = []
+    index = 0
+    replaced = False
+    while index < len(lines):
+        line = lines[index]
+        if line.strip() == table_header:
+            if output and output[-1] != "":
+                output.append("")
+            output.extend([table_header, *body])
+            replaced = True
+            index += 1
+            while index < len(lines) and not lines[index].startswith("["):
+                index += 1
+            continue
+        output.append(line)
+        index += 1
+
+    if not replaced:
+        if output and output[-1] != "":
+            output.append("")
+        output.extend([table_header, *body])
+    return "\n".join(output).rstrip() + "\n"
+
+
+def enable_codex_plugin(
+    codex_home: Path,
+    marketplace_root: Path,
+    marketplace_name: str,
+    plugin_ref: str,
+) -> Path:
+    config_path = codex_home / "config.toml"
+    content = config_path.read_text(encoding="utf-8") if config_path.exists() else ""
+    content = _replace_toml_table(
+        content,
+        f"[marketplaces.{marketplace_name}]",
+        [
+            'source_type = "local"',
+            f'source = "{marketplace_root}"',
+        ],
+    )
+    content = _replace_toml_table(
+        content,
+        f'[plugins."{plugin_ref}"]',
+        ['enabled = true'],
+    )
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text(content, encoding="utf-8")
+    return config_path
 
 
 def install_agent_configs(project: Path, agents: list[str]) -> list[Path]:
@@ -292,8 +436,12 @@ def main() -> int:
         command_files = install_claude_commands(project, args.docs_root)
 
     codex_plugin_dir: Path | None = None
+    codex_command_files: list[Path] = []
+    codex_project_config: Path | None = None
     if "codex" in agents:
         codex_plugin_dir = install_codex_plugin(_SKILL_ROOT, args.docs_root)
+        codex_command_files = install_codex_project_commands(project, _SKILL_ROOT, args.docs_root)
+        codex_project_config = install_codex_project_config(project)
 
     print(f"PRD Helper 初始化完成（setup complete）：{docs_root}")
     if config_files:
@@ -306,6 +454,12 @@ def main() -> int:
             print(f"- {path}")
     if codex_plugin_dir:
         print(f"已安装 Codex 插件：{codex_plugin_dir}")
+    if codex_project_config:
+        print(f"已写入 Codex 项目配置：{codex_project_config}")
+    if codex_command_files:
+        print("已写入 Codex 项目级斜杠命令：")
+        for path in codex_command_files:
+            print(f"- {path}")
     print("下一步：准备采集产品上下文时，在 Agent 中发送 /prd-start；Hook 会在 start 时启用，在 stop 时清理。")
     return 0
 

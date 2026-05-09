@@ -1,5 +1,6 @@
 ﻿import importlib.util
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -364,6 +365,10 @@ def test_remove_prd_helper_cleans_commands_and_hooks(tmp_path: Path):
     write(commands / "prd-start.md", "start")
     write(commands / "prd-stop.md", "stop")
     write(commands / "unrelated.md", "keep")
+    codex_commands = tmp_path / ".codex" / "commands"
+    write(codex_commands / "prd-helper.md", "helper")
+    write(codex_commands / "prd-start.md", "start")
+    write(codex_commands / "unrelated.md", "keep")
     write(
         tmp_path / ".claude" / "settings.json",
         """
@@ -381,15 +386,49 @@ def test_remove_prd_helper_cleans_commands_and_hooks(tmp_path: Path):
         + "\n",
     )
 
-    module.remove_generated_commands(tmp_path, ["claude-code"])
+    module.remove_generated_commands(tmp_path, ["claude-code", "codex"])
     hook_file = module.remove_claude_hooks(tmp_path)
 
     assert not (commands / "prd-start.md").exists()
     assert not (commands / "prd-helper.md").exists()
     assert not (commands / "prd-stop.md").exists()
     assert (commands / "unrelated.md").exists()
+    assert not (codex_commands / "prd-start.md").exists()
+    assert not (codex_commands / "prd-helper.md").exists()
+    assert (codex_commands / "unrelated.md").exists()
     assert hook_file == tmp_path / ".claude" / "settings.json"
     assert "claude-capture-hook.py" not in (tmp_path / ".claude" / "settings.json").read_text(encoding="utf-8")
+
+
+def test_remove_codex_config_entries_removes_only_prd_helper_tables(tmp_path: Path):
+    module = load_script("scripts/remove-prd-helper.py")
+    config = tmp_path / "config.toml"
+    config.write_text(
+        "\n".join(
+            [
+                'model = "gpt-5.5"',
+                "",
+                "[marketplaces.prd-helper-local]",
+                'source_type = "local"',
+                'source = "/tmp/prd-helper"',
+                "",
+                '[plugins."prd-helper@prd-helper-local"]',
+                "enabled = true",
+                "",
+                '[plugins."github@openai-curated"]',
+                "enabled = true",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    module.remove_codex_config_entries(config)
+
+    content = config.read_text(encoding="utf-8")
+    assert "prd-helper-local" not in content
+    assert "prd-helper@prd-helper-local" not in content
+    assert '[plugins."github@openai-curated"]' in content
 
 
 def test_check_generated_template_paths_resolve_to_real_files():
@@ -516,6 +555,154 @@ def test_claude_plugin_manifest_references_existing_commands():
         content = path.read_text(encoding="utf-8")
         assert "allowed-tools: Bash" in content
         assert len(content.strip()) > 50, f"{command_path} appears empty"
+
+
+def test_codex_plugin_manifest_references_existing_commands_and_skills():
+    plugin = json.loads((ROOT / "support" / "adapters" / "codex" / "plugin" / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
+
+    assert plugin["name"] == "prd-helper"
+    assert plugin["skills"] == "./skills/"
+
+    command_paths = plugin["commands"]
+    assert "./commands/prd-helper.md" in command_paths
+    assert "./commands/prd-start.md" in command_paths
+
+    for command_path in command_paths:
+        path = ROOT / "support" / "adapters" / "codex" / "plugin" / command_path.removeprefix("./")
+        assert path.exists(), command_path
+        assert len(path.read_text(encoding="utf-8").strip()) > 50, f"{command_path} appears empty"
+
+
+def test_setup_installs_codex_plugin_with_commands_and_skills(tmp_path: Path, monkeypatch):
+    monkeypatch.setenv("CODEX_HOME", str(tmp_path / "codex-home"))
+    module = load_script("scripts/setup-prd-helper.py")
+
+    plugin_dir = module.install_codex_plugin(ROOT, "docs/prd-helper")
+    codex_home = tmp_path / "codex-home"
+    marketplace_plugin_dir = codex_home / "local-marketplaces" / "prd-helper" / "plugins" / "prd-helper"
+
+    assert (plugin_dir / ".codex-plugin" / "plugin.json").exists()
+    assert (plugin_dir / "commands" / "prd-helper.md").exists()
+    assert (plugin_dir / "commands" / "prd-start.md").exists()
+    assert (plugin_dir / "skills" / "prd-helper" / "SKILL.md").exists()
+    assert (marketplace_plugin_dir / ".codex-plugin" / "plugin.json").exists()
+    assert (marketplace_plugin_dir / "commands" / "prd-helper.md").exists()
+    assert (marketplace_plugin_dir / "skills" / "prd-helper" / "SKILL.md").exists()
+
+    plugin = json.loads((plugin_dir / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
+    assert plugin["skills"] == "./skills/"
+    assert "./commands/prd-helper.md" in plugin["commands"]
+
+    marketplace = json.loads(
+        (codex_home / "local-marketplaces" / "prd-helper" / ".agents" / "plugins" / "marketplace.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert marketplace["name"] == "prd-helper-local"
+    assert marketplace["plugins"][0]["source"]["path"] == "./plugins/prd-helper"
+
+    config = (codex_home / "config.toml").read_text(encoding="utf-8")
+    assert "[marketplaces.prd-helper-local]" in config
+    assert 'source_type = "local"' in config
+    assert f'source = "{codex_home / "local-marketplaces" / "prd-helper"}"' in config
+    assert '[plugins."prd-helper@prd-helper-local"]' in config
+    assert "enabled = true" in config
+
+
+def test_setup_installs_codex_project_commands_and_config(tmp_path: Path, monkeypatch):
+    monkeypatch.setenv("CODEX_HOME", str(tmp_path / "codex-home"))
+    module = load_script("scripts/setup-prd-helper.py")
+
+    command_files = module.install_codex_project_commands(tmp_path, ROOT, "docs/prd-helper")
+    project_config = module.install_codex_project_config(tmp_path)
+
+    assert tmp_path / ".codex" / "commands" / "prd-helper.md" in command_files
+    assert tmp_path / ".codex" / "commands" / "prd-start.md" in command_files
+    assert not (tmp_path / ".codex" / "commands" / "prd-init.md").exists()
+    assert "{skill_root}" not in (tmp_path / ".codex" / "commands" / "prd-helper.md").read_text(encoding="utf-8")
+    assert "{docs_root}" not in (tmp_path / ".codex" / "commands" / "prd-start.md").read_text(encoding="utf-8")
+
+    config = project_config.read_text(encoding="utf-8")
+    assert "[marketplaces.prd-helper-local]" in config
+    assert '[plugins."prd-helper@prd-helper-local"]' in config
+
+
+def test_setup_main_installs_codex_project_commands(tmp_path: Path, monkeypatch):
+    monkeypatch.setenv("CODEX_HOME", str(tmp_path / "codex-home"))
+    module = load_script("scripts/setup-prd-helper.py")
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "setup-prd-helper.py",
+            "--project",
+            str(tmp_path),
+            "--docs-root",
+            "docs/prd-helper",
+            "--agent",
+            "codex",
+        ],
+    )
+
+    assert module.main() == 0
+    assert (tmp_path / ".codex" / "commands" / "prd-helper.md").exists()
+    assert (tmp_path / ".codex" / "commands" / "prd-start.md").exists()
+    assert (tmp_path / ".codex" / "config.toml").exists()
+    assert not (tmp_path / ".claude" / "commands" / "prd-start.md").exists()
+
+
+def test_enable_codex_plugin_updates_existing_config_without_duplicate_tables(tmp_path: Path):
+    module = load_script("scripts/setup-prd-helper.py")
+    codex_home = tmp_path / "codex-home"
+    config = codex_home / "config.toml"
+    config.parent.mkdir(parents=True)
+    config.write_text(
+        "\n".join(
+            [
+                'model = "gpt-5.5"',
+                "",
+                "[marketplaces.prd-helper-local]",
+                'source_type = "local"',
+                'source = "/old/path"',
+                "",
+                '[plugins."prd-helper@prd-helper-local"]',
+                "enabled = false",
+                "",
+                "[plugins.\"github@openai-curated\"]",
+                "enabled = true",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    module.enable_codex_plugin(
+        codex_home,
+        codex_home / "local-marketplaces" / "prd-helper",
+        "prd-helper-local",
+        "prd-helper@prd-helper-local",
+    )
+
+    content = config.read_text(encoding="utf-8")
+    assert content.count("[marketplaces.prd-helper-local]") == 1
+    assert content.count('[plugins."prd-helper@prd-helper-local"]') == 1
+    assert 'source = "/old/path"' not in content
+    assert "enabled = false" not in content
+    assert "[plugins.\"github@openai-curated\"]" in content
+
+
+def test_codex_plugin_install_can_copy_current_skill_when_no_nested_agents_dir(tmp_path: Path, monkeypatch):
+    monkeypatch.setenv("CODEX_HOME", str(tmp_path / "codex-home"))
+    module = load_script("scripts/setup-prd-helper.py")
+    skill_root = tmp_path / "installed-skill"
+    shutil.copytree(ROOT / "support", skill_root / "support")
+    write(skill_root / "SKILL.md", "---\nname: prd-helper\n---\n# PRD Helper\n")
+    write(skill_root / "scripts" / "setup-prd-helper.py", "# setup\n")
+
+    plugin_dir = module.install_codex_plugin(skill_root, "docs/prd-helper")
+
+    assert (plugin_dir / "skills" / "prd-helper" / "SKILL.md").exists()
+    assert not (plugin_dir / "skills" / "prd-helper" / ".agents").exists()
 
 
 def test_bootstrap_file_does_not_exist():

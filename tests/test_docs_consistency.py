@@ -67,7 +67,26 @@ def test_repo_root_is_installable_as_codex_plugin():
 
     plugin = __import__("json").loads(plugin_path.read_text(encoding="utf-8"))
     assert plugin["name"] == "prd-helper"
+    assert plugin["skills"] == "./.agents/skills/"
     assert plugin["interface"]["displayName"] == "PRD Helper"
+
+    command_paths = set(plugin["commands"])
+    assert command_paths == {f"./commands/{command.name}.md" for command in ALL_COMMANDS}
+
+    for command_path in command_paths:
+        assert (ROOT / command_path.removeprefix("./")).exists(), command_path
+
+
+def test_skill_activation_includes_codex_setup_before_claude_setup():
+    skill = _read("SKILL.md")
+
+    codex_command = "setup-prd-helper.py --project . --docs-root docs/prd-helper --agent codex"
+    claude_command = "setup-prd-helper.py --project . --docs-root docs/prd-helper --agent claude-code"
+
+    assert codex_command in skill
+    assert claude_command in skill
+    assert skill.index(codex_command) < skill.index(claude_command)
+    assert "不要在 Codex 会话里生成 `.claude/commands` 后就告诉用户 `/prd-*` 已可用" in skill
 
 
 def test_setup_uses_static_templates_and_command_registry():

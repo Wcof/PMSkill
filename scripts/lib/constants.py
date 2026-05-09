@@ -15,6 +15,9 @@ CODEX_DEFAULT_HOME = "~/.codex"
 CODEX_SESSIONS_REL = "sessions"
 CODEX_INDEX_REL = "session_index.jsonl"
 CODEX_PLUGIN_DIR = "plugins/prd-helper"
+CODEX_LOCAL_MARKETPLACE_NAME = "prd-helper-local"
+CODEX_LOCAL_MARKETPLACE_REL = "local-marketplaces/prd-helper"
+CODEX_LOCAL_PLUGIN_REF = f"prd-helper@{CODEX_LOCAL_MARKETPLACE_NAME}"
 
 REQUIRED_GENERATED_SUBDIRS = (
     "overview",

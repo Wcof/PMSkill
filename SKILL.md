@@ -38,9 +38,12 @@ PRD Helper 只有四个业务阶段：
 
 `.agents/` 目录是由 `npx skills@latest add` 安装生成的副本，不应手动编辑。根目录的 `modules/`、`scripts/`、`checks/` 是唯一开发源。
 
+在 Codex 中触发时必须使用 `--agent codex`；在 Claude Code 中触发时使用 `--agent claude-code`。不要在 Codex 会话里生成 `.claude/commands` 后就告诉用户 `/prd-*` 已可用。
+
 按顺序尝试以下路径，使用第一个存在的脚本：
 
 ```bash
+python3 .agents/skills/prd-helper/scripts/setup-prd-helper.py --project . --docs-root docs/prd-helper --agent codex
 python3 .agents/skills/prd-helper/scripts/setup-prd-helper.py --project . --docs-root docs/prd-helper --agent claude-code
 python3 .claude/skills/prd-helper/scripts/setup-prd-helper.py --project . --docs-root docs/prd-helper --agent claude-code
 python3 .trae/skills/prd-helper/scripts/setup-prd-helper.py --project . --docs-root docs/prd-helper

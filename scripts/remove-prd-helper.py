@@ -22,16 +22,57 @@ CLAUDE_COMMANDS = tuple(f"{name}.md" for name in COMMAND_NAMES) + LEGACY_CLAUDE_
 def remove_codex_plugin() -> None:
     """Remove PRD Helper Codex plugin from ~/.codex/plugins/prd-helper/."""
     from lib.discovery import find_codex_home
-    from lib.constants import CODEX_PLUGIN_DIR
+    from lib.constants import CODEX_LOCAL_MARKETPLACE_REL, CODEX_PLUGIN_DIR
 
     codex_home = find_codex_home()
     plugin_dir = codex_home / CODEX_PLUGIN_DIR
+    marketplace_dir = codex_home / CODEX_LOCAL_MARKETPLACE_REL
 
     if plugin_dir.exists():
         shutil.rmtree(plugin_dir)
         print(f"已删除 Codex 插件：{plugin_dir}")
     else:
         print("Codex 插件目录不存在，跳过清理。")
+    if marketplace_dir.exists():
+        shutil.rmtree(marketplace_dir)
+        print(f"已删除 Codex marketplace：{marketplace_dir}")
+
+
+def _remove_toml_tables(content: str, table_headers: set[str]) -> str:
+    lines = content.splitlines()
+    output: list[str] = []
+    index = 0
+    while index < len(lines):
+        if lines[index].strip() in table_headers:
+            index += 1
+            while index < len(lines) and not lines[index].startswith("["):
+                index += 1
+            if output and output[-1] == "":
+                output.pop()
+            continue
+        output.append(lines[index])
+        index += 1
+    return "\n".join(output).rstrip() + ("\n" if output else "")
+
+
+def remove_codex_config_entries(config_path: Path) -> None:
+    if not config_path.exists():
+        return
+    from lib.constants import CODEX_LOCAL_MARKETPLACE_NAME, CODEX_LOCAL_PLUGIN_REF
+
+    content = config_path.read_text(encoding="utf-8")
+    updated = _remove_toml_tables(
+        content,
+        {
+            f"[marketplaces.{CODEX_LOCAL_MARKETPLACE_NAME}]",
+            f'[plugins."{CODEX_LOCAL_PLUGIN_REF}"]',
+        },
+    )
+    if updated.strip():
+        config_path.write_text(updated, encoding="utf-8")
+    else:
+        config_path.unlink()
+    print(f"已清理 Codex 配置：{config_path}")
 
 
 def script_dir() -> Path:
@@ -45,14 +86,20 @@ def run(cmd: list[str], cwd: Path) -> int:
 
 
 def remove_generated_commands(project: Path, agents: list[str]) -> None:
-    if "claude-code" not in agents:
-        return
-    commands_dir = project / ".claude" / "commands"
-    for name in CLAUDE_COMMANDS:
-        path = commands_dir / name
-        if path.exists():
-            path.unlink()
-            print(f"已删除 Claude Code 命令：{path}")
+    if "claude-code" in agents:
+        commands_dir = project / ".claude" / "commands"
+        for name in CLAUDE_COMMANDS:
+            path = commands_dir / name
+            if path.exists():
+                path.unlink()
+                print(f"已删除 Claude Code 命令：{path}")
+    if "codex" in agents:
+        commands_dir = project / ".codex" / "commands"
+        for name in CLAUDE_COMMANDS:
+            path = commands_dir / name
+            if path.exists():
+                path.unlink()
+                print(f"已删除 Codex 命令：{path}")
 
 
 def parse_args() -> argparse.Namespace:
@@ -97,6 +144,10 @@ def main() -> int:
 
     if "codex" in agents:
         remove_codex_plugin()
+        from lib.discovery import find_codex_home
+
+        remove_codex_config_entries(find_codex_home() / "config.toml")
+        remove_codex_config_entries(project / ".codex" / "config.toml")
 
     remove_cmd = [
         "npx",

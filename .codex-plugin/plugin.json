@@ -15,6 +15,20 @@
     "capture",
     "context"
   ],
+  "skills": "./.agents/skills/",
+  "commands": [
+    "./commands/prd-helper.md",
+    "./commands/prd-start.md",
+    "./commands/prd-stop.md",
+    "./commands/prd-status.md",
+    "./commands/prd-scan.md",
+    "./commands/prd-import.md",
+    "./commands/prd-refine.md",
+    "./commands/prd-relate.md",
+    "./commands/prd-generate.md",
+    "./commands/prd-discuss.md",
+    "./commands/prd-remove.md"
+  ],
   "interface": {
     "displayName": "PRD Helper",
     "shortDescription": "产品上下文采集与 PRD 生成",

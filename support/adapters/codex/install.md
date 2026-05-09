@@ -31,6 +31,15 @@ npx skills@latest add Wcof/PRDContextEngine
 
 首次运行 `/prd-helper` 会自动初始化项目：创建 `docs/prd-helper/`，并写入 `AGENTS.md` 配置块。
 
+Codex 目标必须使用 `--agent codex` 初始化。脚本会自动完成三件事：
+
+1. 安装兼容目录：`~/.codex/plugins/prd-helper`
+2. 注入本地 marketplace：`~/.codex/local-marketplaces/prd-helper`
+3. 写入并启用 `~/.codex/config.toml` 中的 `prd-helper@prd-helper-local`
+4. 写入当前项目的 `.codex/commands/prd-*.md` 和 `.codex/config.toml`
+
+如果初始化后 `/` 菜单仍未出现 `/prd-*`，重启 Codex App 或新开会话刷新插件列表。
+
 ## 卸载
 
 在 Codex 对话中发送：

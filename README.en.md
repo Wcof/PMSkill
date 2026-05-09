@@ -125,7 +125,7 @@ python3 scripts/check-structure.py docs/prd-helper
 
 ## FAQ
 
-Only `/prd-helper` appears, not `/prd-start`: run `/prd-helper` once to initialize project commands. Claude Code may need a new session to refresh command discovery.
+Only `/prd-helper` appears, not `/prd-start`: run `/prd-helper` once to initialize project commands. Claude Code may need a new session to refresh command discovery. In Codex App, make sure initialization ran with `--agent codex`; the script writes `.codex/commands/prd-*.md` and `.codex/config.toml` in the current project, and also injects `~/.codex/local-marketplaces/prd-helper` plus `~/.codex/config.toml`. Codex App may need a restart or new session to refresh plugins.
 
 No capture output: run `/prd-status` and confirm the state is `on`; then inspect `docs/prd-helper/01-collect/collect-state.md`.
 
