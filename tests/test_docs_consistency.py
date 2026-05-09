@@ -161,3 +161,14 @@ def test_agent_context_guidance_preserves_limited_generate_risk_boundaries():
         assert "不能写成确定性要求" in content or "不得把缺失来源或断链内容写成确定性要求" in content
 
     assert "Implementation Context" not in generate
+
+
+def test_prd_generate_commands_invoke_generate_runner():
+    command_paths = [
+        "commands/prd-generate.md",
+        "support/adapters/codex/plugin/commands/prd-generate.md",
+    ]
+    for path in command_paths:
+        content = _read(path)
+        assert "modules/generate/scripts/generate.py" in content
+        assert "check-generated.py\" docs/prd-helper || true" not in content

@@ -444,6 +444,43 @@ def test_check_generated_marks_limited_generate_when_prerequisites_missing(tmp_p
     assert "检查状态：受限生成" in content
 
 
+def test_check_generated_reports_manifest_missing_views(tmp_path: Path):
+    module = load_script("modules/generate/scripts/check-generated.py")
+    root = tmp_path / "prd-helper"
+    write(root / "02-refine" / "facts.md", "## fact_001\n")
+    write(root / "03-relate" / "page-map.md", "## page_001\n- 来源事实：fact_001\n")
+    write(root / "03-relate" / "rule-map.md", "## rule_001\n- 来源事实：fact_001\n")
+    write(root / "04-generate" / "overview" / "project-overview.md", "## 来源说明\nfact_001\n")
+
+    files = module._read_generated_files(root)
+    report = module.build_quality_report(root, files)
+    check_file = module.write_check_md(root, report)
+    content = check_file.read_text(encoding="utf-8")
+
+    assert "04-generate/pages/page_001.md 缺失" in content
+    assert "04-generate/rules/rule_001.md 缺失" in content
+    assert "04-generate/agent-context/frontend-context.md 缺失" in content
+    assert "检查状态：不通过" in content
+
+
+def test_generate_quality_report_exposes_actionable_safety_sections(tmp_path: Path):
+    module = load_script("modules/generate/scripts/check-generated.py")
+    root = tmp_path / "prd-helper"
+    write(root / "04-generate" / "agent-context" / "frontend-context.md", "# Agent Context\n\n- Weak Trace 风险\n")
+
+    report = module.build_quality_report(root)
+
+    assert "coverage" in report
+    assert "traceability" in report
+    assert "relation_chain" in report
+    assert "agent_context_safety" in report
+    assert "limited_generate" in report
+    assert report["limited_generate"]["status"] == "limited"
+    assert "02-refine/ 缺失" in report["limited_generate"]["risks"]
+    assert report["agent_context_safety"]["prohibited_items"]
+    assert not report["agent_context_safety"]["safe_for_execution"]
+
+
 def test_check_page_completeness_detects_missing_sections(tmp_path: Path):
     """check_page_completeness 应该能检测到页面缺少模板要求的章节。"""
     module = load_script("modules/generate/scripts/check-generated.py")

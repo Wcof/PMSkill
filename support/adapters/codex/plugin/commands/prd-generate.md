@@ -27,16 +27,16 @@ skill_root="$(find_prd_helper_root)" || {
 # 确保目录结构存在
 python3 "$skill_root/scripts/setup-prd-helper.py" --project . --docs-root docs/prd-helper
 
-# 运行生成检查（报告模式，不阻断）
-python3 "$skill_root/modules/generate/scripts/check-generated.py" docs/prd-helper || true
+# 执行生成 runner：manifest -> scaffold/generate -> check
+python3 "$skill_root/modules/generate/scripts/generate.py" docs/prd-helper
 ```
 
 扫描 `docs/prd-helper/02-refine/` 和 `docs/prd-helper/03-relate/` 下的结果，执行生成流程：
 
 1. 读取 `modules/generate/guide.md` 了解生成规则
-2. 扫描精炼和关联结果
-3. 生成项目说明、页面说明、规则说明、数据说明、验收标准和 Agent 上下文
+2. 生成 Generate Manifest，确定所有应输出的 View
+3. 一次性生成或补齐项目说明、页面说明、规则说明、数据说明、验收标准和 Agent 上下文
 4. 输出到 `docs/prd-helper/04-generate/`
-5. 运行 `check-generated.py` 验证
+5. 运行 `check-generated.py` 验证并写入 `check.md`
 
 如果精炼或关联结果为空，提示用户先用 `/prd-refine` 或 `/prd-relate` 处理。

@@ -83,6 +83,44 @@ Agent Context 必须继承 View 边界：它可以组织事实、关系、验收
 - 禁止实施项必须进入 PRD 和 Agent Context 的风险区。
 - 受限生成结果仍是 View，不是 Entity，也不是完整确定性 PRD。
 
+## Generate Manifest
+
+Generate Manifest 是生成阶段的全量 View 清单。它从 `02-refine/` 和 `03-relate/` 推导出一次 `/prd-generate` 应该产出的所有 View，包括：
+
+- `overview/project-overview.md`
+- `pages/{page_id}.md`
+- `rules/{rule_id}.md`
+- `data/{data_id}.md`
+- `acceptance/{acceptance_id}.md`
+- `agent-context/frontend-context.md`
+- `agent-context/backend-context.md`
+- `agent-context/test-context.md`
+- `agent-context/product-review-context.md`
+- `check.md`
+
+判断“是否一次性生成完所有 PRD”必须以 Generate Manifest 为准，而不是只检查已经存在的文件。
+
+## Generate Runner
+
+`/prd-generate` 通过 Generate Runner 执行 `manifest -> scaffold/generate -> check`：
+
+1. 构建 Generate Manifest。
+2. 创建缺失的 View 路径。
+3. 保留已有用户内容，不默认覆盖。
+4. 写出 `04-generate/check.md`。
+5. 输出 created/existing/skipped/limited/failed 摘要。
+
+## Quality Report
+
+`04-generate/check.md` 是结构化 Quality Report 的 View。质量判断至少包含：
+
+- Manifest 覆盖率：应有 View、已有 View、缺失 View、非预期 View。
+- 模板完整性：各 View 是否满足对应章节结构。
+- Traceability：生成内容是否保留来源或关系锚点。
+- Relation Chain：断链内容是否进入风险或待确认区。
+- Agent Context Safety：Weak Trace、断链和缺失来源是否被禁止写成确定性要求。
+- Limited Generate：前置缺失和禁止实施项是否显式暴露。
+
 ## 逐文件验收条件
 
 | 文件/目录 | 验收条件 |
