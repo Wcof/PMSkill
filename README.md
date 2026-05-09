@@ -101,6 +101,16 @@ docs/prd-helper/01-collect/passive/
 | Relate 关联 | `modules/relate/` | 建立 `fact -> page/feature -> rule -> data/acceptance` 链路 | 不让事实、规则、数据、验收断链 |
 | Generate 生成 | `modules/generate/` | 生成 PRD、验收、数据说明和 Agent 上下文 | 不新增未来源化、未关联的业务规则 |
 
+### Generate 如何保证一次性生成完整
+
+Generate 现在采用 manifest-driven 流程，不再只依赖 Agent 按提示词手动补文件：
+
+1. **Generate Manifest** 从 `02-refine/` 和 `03-relate/` 推导应输出的完整 View 清单，包括 overview、pages、rules、data、acceptance、4 份 Agent Context 和 `check.md`。
+2. **Generate Runner** 执行 `manifest -> scaffold/generate -> check`，创建缺失 View，保留已有用户内容，并输出 created/existing/skipped/limited/failed 摘要。
+3. **Quality Report** 驱动 `04-generate/check.md`，检查覆盖率、模板完整性、Traceability、Relation Chain、Agent Context Safety 和 Limited Generate 风险。
+
+因此，“是否生成完所有 PRD”以 Generate Manifest 为准，而不是只检查当前目录里已经存在的文件。
+
 ## 检查命令
 
 这些是脚本级质量门禁，不是斜杠指令：

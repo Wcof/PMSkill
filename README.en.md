@@ -101,6 +101,16 @@ docs/prd-helper/01-collect/passive/
 | Relate | `modules/relate/` | Build `fact -> page/feature -> rule -> data/acceptance` chains | Leave facts, rules, data, or acceptance disconnected |
 | Generate | `modules/generate/` | Produce PRD, acceptance, data docs, and Agent context | Add unsourced or unrelated business rules |
 
+### How Generate Produces the Complete Set
+
+Generate now uses a manifest-driven flow instead of relying only on an Agent following prompt text:
+
+1. **Generate Manifest** derives the complete expected View set from `02-refine/` and `03-relate/`, including overview, pages, rules, data, acceptance, four Agent Context files, and `check.md`.
+2. **Generate Runner** executes `manifest -> scaffold/generate -> check`, creates missing Views, preserves existing user-authored content, and reports created/existing/skipped/limited/failed outputs.
+3. **Quality Report** powers `04-generate/check.md` and checks coverage, template completeness, Traceability, Relation Chain, Agent Context Safety, and Limited Generate risk.
+
+This means “all PRDs were generated” is judged against the Generate Manifest, not only by inspecting files that already happen to exist.
+
 ## Check Commands
 
 These are script-level quality gates, not slash commands:
