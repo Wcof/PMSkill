@@ -151,9 +151,12 @@ def install_codex_plugin(skill_root: Path, docs_root: str) -> Path:
 
     write_codex_marketplace(marketplace_root)
     enable_codex_plugin(codex_home, marketplace_root, CODEX_LOCAL_MARKETPLACE_NAME, CODEX_LOCAL_PLUGIN_REF)
+    removed_cache_paths = invalidate_codex_plugin_cache(codex_home)
 
     print(f"Codex plugin installed: {plugin_dest}")
     print(f"Codex marketplace registered: {marketplace_root}")
+    for path in removed_cache_paths:
+        print(f"Codex 插件缓存已失效：{path}")
     return plugin_dest
 
 
@@ -226,6 +229,35 @@ def write_codex_marketplace(marketplace_root: Path) -> Path:
     }
     marketplace_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return marketplace_path
+
+
+def invalidate_codex_plugin_cache(codex_home: Path) -> list[Path]:
+    from lib.constants import (
+        CODEX_TMP_MARKETPLACES_REL,
+        CODEX_TMP_PLUGIN_CACHE_REL,
+        CODEX_TMP_PLUGIN_SHA_REL,
+        CODEX_TMP_REMOTE_SYNC_REL,
+    )
+
+    removed: list[Path] = []
+    for relative in (
+        CODEX_TMP_PLUGIN_CACHE_REL,
+        CODEX_TMP_MARKETPLACES_REL,
+        CODEX_TMP_REMOTE_SYNC_REL,
+    ):
+        target = codex_home / relative
+        if target.exists():
+            if target.is_dir():
+                shutil.rmtree(target)
+            else:
+                target.unlink()
+            removed.append(target)
+
+    sha_file = codex_home / CODEX_TMP_PLUGIN_SHA_REL
+    if sha_file.exists():
+        sha_file.unlink()
+        removed.append(sha_file)
+    return removed
 
 
 def _replace_toml_table(content: str, table_header: str, body: list[str]) -> str:

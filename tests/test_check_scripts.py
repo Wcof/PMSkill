@@ -187,6 +187,8 @@ def test_setup_installs_agent_configs_and_claude_commands(tmp_path: Path):
     assert tmp_path / "CLAUDE.md" in config_files
     assert "<!-- PRD-HELPER:START -->" in (tmp_path / "AGENTS.md").read_text(encoding="utf-8")
     assert "<!-- PRD-HELPER:START -->" in (tmp_path / "CLAUDE.md").read_text(encoding="utf-8")
+    assert ".codex/commands/<command>.md" in (tmp_path / "AGENTS.md").read_text(encoding="utf-8")
+    assert "/prd-start" in (tmp_path / "AGENTS.md").read_text(encoding="utf-8")
     assert tmp_path / ".claude" / "commands" / "prd-helper.md" in command_files
     assert tmp_path / ".claude" / "commands" / "prd-start.md" in command_files
     assert not (tmp_path / ".claude" / "commands" / "prd-init.md").exists()
@@ -576,9 +578,13 @@ def test_codex_plugin_manifest_references_existing_commands_and_skills():
 def test_setup_installs_codex_plugin_with_commands_and_skills(tmp_path: Path, monkeypatch):
     monkeypatch.setenv("CODEX_HOME", str(tmp_path / "codex-home"))
     module = load_script("scripts/setup-prd-helper.py")
+    codex_home = tmp_path / "codex-home"
+    write(codex_home / ".tmp" / "plugins" / "stale.txt", "stale")
+    write(codex_home / ".tmp" / "marketplaces" / "stale.txt", "stale")
+    write(codex_home / ".tmp" / "app-server-remote-plugin-sync-v1", "stale")
+    write(codex_home / ".tmp" / "plugins.sha", "old")
 
     plugin_dir = module.install_codex_plugin(ROOT, "docs/prd-helper")
-    codex_home = tmp_path / "codex-home"
     marketplace_plugin_dir = codex_home / "local-marketplaces" / "prd-helper" / "plugins" / "prd-helper"
 
     assert (plugin_dir / ".codex-plugin" / "plugin.json").exists()
@@ -607,6 +613,32 @@ def test_setup_installs_codex_plugin_with_commands_and_skills(tmp_path: Path, mo
     assert f'source = "{codex_home / "local-marketplaces" / "prd-helper"}"' in config
     assert '[plugins."prd-helper@prd-helper-local"]' in config
     assert "enabled = true" in config
+    assert not (codex_home / ".tmp" / "plugins").exists()
+    assert not (codex_home / ".tmp" / "marketplaces").exists()
+    assert not (codex_home / ".tmp" / "app-server-remote-plugin-sync-v1").exists()
+    assert not (codex_home / ".tmp" / "plugins.sha").exists()
+
+
+def test_invalidate_codex_plugin_cache_removes_tmp_caches(tmp_path: Path, monkeypatch):
+    monkeypatch.setenv("CODEX_HOME", str(tmp_path / "codex-home"))
+    module = load_script("scripts/setup-prd-helper.py")
+    codex_home = tmp_path / "codex-home"
+    targets = [
+        codex_home / ".tmp" / "plugins" / "cache.txt",
+        codex_home / ".tmp" / "marketplaces" / "cache.txt",
+        codex_home / ".tmp" / "plugins.sha",
+    ]
+    for path in targets:
+        write(path, "stale")
+    remote_sync_file = codex_home / ".tmp" / "app-server-remote-plugin-sync-v1"
+    write(remote_sync_file, "stale")
+
+    removed = module.invalidate_codex_plugin_cache(codex_home)
+
+    assert len(removed) == 4
+    for path in targets:
+        assert not path.exists()
+    assert not remote_sync_file.exists()
 
 
 def test_setup_installs_codex_project_commands_and_config(tmp_path: Path, monkeypatch):

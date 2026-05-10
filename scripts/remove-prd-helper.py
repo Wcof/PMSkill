@@ -11,12 +11,40 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.claude_hooks import remove_claude_hooks
-from lib.constants import COMMAND_NAMES
+from lib.constants import (
+    CODEX_TMP_MARKETPLACES_REL,
+    CODEX_TMP_PLUGIN_CACHE_REL,
+    CODEX_TMP_PLUGIN_SHA_REL,
+    CODEX_TMP_REMOTE_SYNC_REL,
+    COMMAND_NAMES,
+)
 
 
 AGENTS = ("codex", "claude-code", "trae", "trae-cn")
 LEGACY_CLAUDE_COMMANDS = ("prd-helper.md", "prd-init.md", "prd-setup.md")
 CLAUDE_COMMANDS = tuple(f"{name}.md" for name in COMMAND_NAMES) + LEGACY_CLAUDE_COMMANDS
+
+
+def invalidate_codex_plugin_cache(codex_home: Path) -> list[Path]:
+    removed: list[Path] = []
+    for relative in (
+        CODEX_TMP_PLUGIN_CACHE_REL,
+        CODEX_TMP_MARKETPLACES_REL,
+        CODEX_TMP_REMOTE_SYNC_REL,
+    ):
+        target = codex_home / relative
+        if target.exists():
+            if target.is_dir():
+                shutil.rmtree(target)
+            else:
+                target.unlink()
+            removed.append(target)
+
+    sha_file = codex_home / CODEX_TMP_PLUGIN_SHA_REL
+    if sha_file.exists():
+        sha_file.unlink()
+        removed.append(sha_file)
+    return removed
 
 
 def remove_codex_plugin() -> None:
@@ -36,6 +64,8 @@ def remove_codex_plugin() -> None:
     if marketplace_dir.exists():
         shutil.rmtree(marketplace_dir)
         print(f"已删除 Codex marketplace：{marketplace_dir}")
+    for path in invalidate_codex_plugin_cache(codex_home):
+        print(f"已失效 Codex 插件缓存：{path}")
 
 
 def _remove_toml_tables(content: str, table_headers: set[str]) -> str:

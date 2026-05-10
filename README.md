@@ -125,7 +125,7 @@ python3 scripts/check-structure.py docs/prd-helper
 
 ## 常见问题
 
-只看到 `/prd-helper`，没有 `/prd-start`：先执行一次 `/prd-helper` 完成项目初始化。Claude Code 有时需要重开会话刷新命令列表。Codex App 中如果仍看不到 `/prd-*`，确认初始化时使用的是 `--agent codex`；脚本会自动写入当前项目的 `.codex/commands/prd-*.md` 和 `.codex/config.toml`，同时注入 `~/.codex/local-marketplaces/prd-helper` 和 `~/.codex/config.toml`。之后重启 Codex App 或新开会话刷新插件列表。
+只看到 `/prd-helper`，没有 `/prd-start`：先执行一次 `/prd-helper` 完成项目初始化。Claude Code 有时需要重开会话刷新命令列表。Codex App 中如果仍看不到 `/prd-*`，确认初始化时使用的是 `--agent codex`；脚本会自动写入当前项目的 `.codex/commands/prd-*.md` 和 `.codex/config.toml`，同时注入 `~/.codex/local-marketplaces/prd-helper`、`~/.codex/config.toml`，并主动清理 `~/.codex/.tmp/plugins*`、`~/.codex/.tmp/marketplaces`、`~/.codex/.tmp/app-server-remote-plugin-sync-v1` 这些插件缓存。当前已打开的 Codex 会话如果仍没刷新 `/` 菜单，直接输入 `/prd-start` 也必须可用；这是由项目 `AGENTS.md` 中的命令兜底规则保证的。新开会话后通常会看到完整命令列表。
 
 采集没有写入：先运行 `/prd-status`，确认状态是 `on`；再检查 `docs/prd-helper/01-collect/collect-state.md`。
 

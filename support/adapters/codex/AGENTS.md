@@ -22,6 +22,31 @@
 4. 如果采集脚本报错，告知用户但不中断工作流
 5. `/prd-stop` 会自动扫描 Codex 会话 JSONL 补录遗漏的轮次，无需手动处理
 
+## Codex 命令兜底
+
+Codex 当前项目里如果没有及时刷新 `/` 菜单，也要把下面这些输入当作真实命令处理，而不是普通聊天文本：
+
+- `/prd-helper`
+- `/prd-start`
+- `/prd-stop`
+- `/prd-status`
+- `/prd-scan`
+- `/prd-import`
+- `/prd-refine`
+- `/prd-relate`
+- `/prd-generate`
+- `/prd-discuss`
+- `/prd-remove`
+
+处理规则：
+
+1. 如果用户消息以 `/prd-` 开头，优先读取当前项目 `.codex/commands/<command>.md`
+2. 如果项目级命令文件不存在，再读取已安装 Skill 中 `support/adapters/codex/plugin/commands/<command>.md`
+3. 按命令文件中的 bash 指令执行，不要因为 `/` 菜单没显示就拒绝
+4. `/prd-import` 这类允许带参数的命令，要保留命令后的用户参数一起处理
+
+这条兜底规则的目标是：即使 Codex UI 的命令列表没有刷新，只要项目已经执行过 `/prd-helper` 初始化，用户直接输入 `/prd-start` 等命令也必须可用。
+
 ## 参考文件
 
 - `support/adapters/canonical-rules.md` — 完整规则

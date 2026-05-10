@@ -18,6 +18,10 @@ CODEX_PLUGIN_DIR = "plugins/prd-helper"
 CODEX_LOCAL_MARKETPLACE_NAME = "prd-helper-local"
 CODEX_LOCAL_MARKETPLACE_REL = "local-marketplaces/prd-helper"
 CODEX_LOCAL_PLUGIN_REF = f"prd-helper@{CODEX_LOCAL_MARKETPLACE_NAME}"
+CODEX_TMP_PLUGIN_CACHE_REL = ".tmp/plugins"
+CODEX_TMP_PLUGIN_SHA_REL = ".tmp/plugins.sha"
+CODEX_TMP_MARKETPLACES_REL = ".tmp/marketplaces"
+CODEX_TMP_REMOTE_SYNC_REL = ".tmp/app-server-remote-plugin-sync-v1"
 
 REQUIRED_GENERATED_SUBDIRS = (
     "overview",
