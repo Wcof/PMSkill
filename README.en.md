@@ -38,6 +38,8 @@ The authoritative command set is cross-checked against `scripts/lib/command_regi
 
 Platform note: the `skills/` directory contains all 11 installer-discoverable Skills. `COMMAND_NAMES` still contains the 10 commands after `/prd-helper` for project-level fallback commands and uninstall cleanup.
 
+Command Skills (`prd-start`, etc.) now include dispatcher self-discovery: even when only one command Skill is installed, it resolves `scripts/prd-command-dispatch.py` from the current Skill, `prd-helper`, or Codex local plugin paths before invoking the shared runtime.
+
 ## Engineering Constraints
 
 PRD Helper keeps Python as the executor and static prompts/templates as the constraint layer:

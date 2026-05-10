@@ -81,9 +81,10 @@ def test_skills_package_exposes_each_prd_command_without_root_skill():
         assert f"name: {command.name}" in content
         assert command.zh_description in content
         if command.name != "prd-helper":
-            assert ".agents/skills/prd-helper/scripts/prd-command-dispatch.py" in content
+            assert "find_prd_dispatcher()" in content
+            assert "scripts/prd-command-dispatch.py" in content
+            assert "npx skills@latest add Wcof/PRDContextEngine --all" in content
             assert "--agent claude-code" not in content
-            assert ".claude/skills/prd-helper" not in content
 
 
 def test_command_wrappers_are_lightweight_without_runtime_symlinks():
@@ -104,11 +105,14 @@ def test_codex_plugin_command_templates_match_current_command_set():
     assert command_files == CURRENT_COMMANDS
 
 
-def test_codex_plugin_commands_are_symlinked_to_canonical_commands():
+def test_codex_plugin_commands_are_materialized_and_match_canonical_commands():
     plugin_commands_dir = ROOT / "support" / "adapters" / "codex" / "plugin" / "commands"
     for command in ALL_COMMANDS:
         path = plugin_commands_dir / f"{command.name}.md"
-        assert path.is_symlink(), f"{path} should symlink to canonical command file"
+        assert path.exists(), f"{path} missing"
+        assert not path.is_symlink(), f"{path} should be a materialized file"
+        canonical = _read(f"commands/{command.name}.md")
+        assert path.read_text(encoding="utf-8") == canonical
 
 
 def test_command_markdown_dispatcher_lookup_is_scoped_and_not_global_find():

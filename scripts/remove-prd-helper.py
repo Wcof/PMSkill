@@ -148,6 +148,32 @@ def run(cmd: list[str], cwd: Path) -> int:
     return completed.returncode
 
 
+def _run_capture(cmd: list[str], cwd: Path) -> tuple[int, str]:
+    print("+ " + " ".join(cmd))
+    completed = subprocess.run(
+        cmd,
+        cwd=str(cwd),
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    output = (completed.stdout or "") + (completed.stderr or "")
+    return completed.returncode, output
+
+
+def _is_not_installed_message(output: str) -> bool:
+    lowered = output.lower()
+    markers = (
+        "not installed",
+        "isn't installed",
+        "is not installed",
+        "could not find skill",
+        "未安装",
+        "未找到",
+    )
+    return any(marker in lowered for marker in markers)
+
+
 def remove_generated_commands(project: Path, agents: list[str]) -> None:
     if "claude-code" in agents:
         commands_dir = project / ".claude" / "commands"
@@ -229,7 +255,12 @@ def main() -> int:
         if args.global_scope:
             remove_cmd.append("--global")
 
-        remove_code = run(remove_cmd, project)
+        remove_code, remove_output = _run_capture(remove_cmd, project)
+        if remove_output.strip():
+            print(remove_output.strip())
+        if remove_code != 0 and _is_not_installed_message(remove_output):
+            print(f"跳过未安装技能：{skill_name}")
+            continue
         if remove_code != 0:
             failed.append((skill_name, remove_code))
 

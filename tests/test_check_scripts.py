@@ -516,13 +516,18 @@ def test_remove_prd_helper_cleans_commands_and_hooks(tmp_path: Path):
 
 def test_remove_main_uninstalls_all_prd_skills(tmp_path: Path, monkeypatch):
     module = load_script("scripts/remove-prd-helper.py")
-    calls = []
+    calls: list[list[str]] = []
 
     def fake_run(cmd, cwd):
         calls.append(cmd)
         return 0
 
+    def fake_run_capture(cmd, cwd):
+        calls.append(cmd)
+        return 0, ""
+
     monkeypatch.setattr(module, "run", fake_run)
+    monkeypatch.setattr(module, "_run_capture", fake_run_capture)
     monkeypatch.setattr(module, "remove_codex_plugin", lambda: None)
     monkeypatch.setattr(module, "remove_codex_config_entries", lambda path: None)
     monkeypatch.setattr(module, "remove_generated_commands", lambda project, agents: None)
@@ -541,6 +546,34 @@ def test_remove_main_uninstalls_all_prd_skills(tmp_path: Path, monkeypatch):
     assert "prd-start" in removed_skills
     assert "prd-remove" in removed_skills
     assert len(removed_skills) >= 11
+
+
+def test_remove_main_tolerates_not_installed_skill_failures(tmp_path: Path, monkeypatch):
+    module = load_script("scripts/remove-prd-helper.py")
+
+    def fake_run(cmd, cwd):
+        return 0
+
+    def fake_run_capture(cmd, cwd):
+        skill_name = cmd[3]
+        if skill_name == "prd-start":
+            return 1, "Skill prd-start is not installed"
+        return 0, ""
+
+    monkeypatch.setattr(module, "run", fake_run)
+    monkeypatch.setattr(module, "_run_capture", fake_run_capture)
+    monkeypatch.setattr(module, "remove_codex_plugin", lambda: None)
+    monkeypatch.setattr(module, "remove_codex_config_entries", lambda path: None)
+    monkeypatch.setattr(module, "remove_generated_commands", lambda project, agents: None)
+    monkeypatch.setattr(module, "remove_claude_hooks", lambda project: None)
+    monkeypatch.setattr(module, "remove_codex_hooks", lambda project: None)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["remove-prd-helper.py", "--project", str(tmp_path), "--agent", "claude-code"],
+    )
+
+    assert module.main() == 0
 
 
 def test_remove_codex_config_entries_removes_only_prd_helper_tables(tmp_path: Path):

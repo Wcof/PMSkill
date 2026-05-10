@@ -11,7 +11,26 @@ allowed-tools: Bash
 执行：
 
 ```bash
-python3 .agents/skills/prd-helper/scripts/prd-command-dispatch.py remove --project . --docs-root docs/prd-helper
+set -euo pipefail
+
+find_prd_dispatcher() {
+  for dir in ".agents/skills/prd-remove" ".agents/skills/prd-helper" ".claude/skills/prd-remove" ".claude/skills/prd-helper" ".trae/skills/prd-remove" ".trae/skills/prd-helper" "."; do
+    [ -f "$dir/scripts/prd-command-dispatch.py" ] && { printf '%s\n' "$dir/scripts/prd-command-dispatch.py"; return 0; }
+  done
+  for dir in \
+    "${CODEX_HOME:-$HOME/.codex}/plugins/prd-helper/skills/prd-helper" \
+    "${CODEX_HOME:-$HOME/.codex}/local-marketplaces/prd-helper/plugins/prd-helper/skills/prd-helper"; do
+    [ -f "$dir/scripts/prd-command-dispatch.py" ] && { printf '%s\n' "$dir/scripts/prd-command-dispatch.py"; return 0; }
+  done
+  return 1
+}
+
+dispatcher="$(find_prd_dispatcher)" || {
+  echo "未找到 PRD Helper 命令分发器。请先运行：npx skills@latest add Wcof/PRDContextEngine --all"
+  exit 1
+}
+
+python3 "$dispatcher" remove --project . --docs-root docs/prd-helper
 ```
 
 默认保留已经生成的 `docs/prd-helper/` 文档。只有用户明确要求删除产物时，才追加卸载脚本支持的删除参数。如果当前 Agent 将本 Skill 安装到其他目录，查找已安装 Skill 目录中的 `scripts/prd-command-dispatch.py`，并用同样参数执行。
