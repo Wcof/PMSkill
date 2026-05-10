@@ -13,14 +13,11 @@
 
 当 `capture_mode == on` 时（用户执行了 `/prd-start` 或 `/prd-resume`）：
 
-1. 每轮回答结束后，调用采集脚本记录本轮对话
-2. 采集命令：
-   ```bash
-   python3 "{skill_root}/modules/collect/scripts/capture-source.py" --user-query "<用户输入原文>" --agent-answer "<你的回答原文>" --agent codex
-   ```
-3. 不采集 prd- 开头的命令交互（/prd-start、/prd-stop 等）
-4. 如果采集脚本报错，告知用户但不中断工作流
-5. `/prd-stop` 会自动扫描 Codex 会话 JSONL 补录遗漏的轮次，无需手动处理
+1. `/prd-start` 会在当前项目安装 Codex hooks，后续轮次优先由 hook 自动采集
+2. 不采集 prd- 开头的命令交互（/prd-start、/prd-stop 等）
+3. 如果 hook 采集失败，告知用户但不中断工作流
+4. `/prd-stop` 会自动扫描 Codex 会话 JSONL 补录遗漏的轮次，无需手动处理
+5. 只有在 hook 明确不可用时，才退回手动调用采集脚本
 
 ## Codex 命令兜底
 

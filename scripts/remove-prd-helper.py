@@ -11,6 +11,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.claude_hooks import remove_claude_hooks
+from lib.codex_hooks import remove_codex_hooks
 from lib.constants import (
     CODEX_TMP_MARKETPLACES_REL,
     CODEX_TMP_PLUGIN_CACHE_REL,
@@ -85,6 +86,36 @@ def _remove_toml_tables(content: str, table_headers: set[str]) -> str:
     return "\n".join(output).rstrip() + ("\n" if output else "")
 
 
+def _remove_toml_key_from_table(content: str, table_header: str, key_prefix: str) -> str:
+    lines = content.splitlines()
+    output: list[str] = []
+    index = 0
+    while index < len(lines):
+        line = lines[index]
+        if line.strip() != table_header:
+            output.append(line)
+            index += 1
+            continue
+
+        body: list[str] = []
+        index += 1
+        while index < len(lines) and not lines[index].startswith("["):
+            if not lines[index].strip().startswith(key_prefix):
+                body.append(lines[index])
+            index += 1
+
+        non_empty_body = [entry for entry in body if entry.strip()]
+        if non_empty_body:
+            if output and output[-1] != "":
+                output.append("")
+            output.append(table_header)
+            output.extend(body)
+        elif output and output[-1] == "":
+            output.pop()
+
+    return "\n".join(output).rstrip() + ("\n" if output else "")
+
+
 def remove_codex_config_entries(config_path: Path) -> None:
     if not config_path.exists():
         return
@@ -98,6 +129,7 @@ def remove_codex_config_entries(config_path: Path) -> None:
             f'[plugins."{CODEX_LOCAL_PLUGIN_REF}"]',
         },
     )
+    updated = _remove_toml_key_from_table(updated, "[features]", "codex_hooks")
     if updated.strip():
         config_path.write_text(updated, encoding="utf-8")
     else:
@@ -173,6 +205,9 @@ def main() -> int:
             print(f"已清理 Claude Code Hook 配置：{hook_file}")
 
     if "codex" in agents:
+        hook_file = remove_codex_hooks(project)
+        if hook_file:
+            print(f"已清理 Codex Hook 配置：{hook_file}")
         remove_codex_plugin()
         from lib.discovery import find_codex_home
 

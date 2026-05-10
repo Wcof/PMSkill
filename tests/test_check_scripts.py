@@ -243,6 +243,26 @@ def test_collect_control_toggles_claude_hooks(tmp_path: Path):
     assert "claude-capture-hook.py" not in settings_file.read_text(encoding="utf-8")
 
 
+def test_collect_control_toggles_codex_hooks(tmp_path: Path):
+    module = load_script("modules/collect/scripts/collect-control.py")
+    root = tmp_path / "docs" / "prd-helper" / "01-collect"
+
+    module.cmd_start(root, "codex", tmp_path, "docs/prd-helper")
+    hooks_file = tmp_path / ".codex" / "hooks.json"
+    config_file = tmp_path / ".codex" / "config.toml"
+    hooks = json.loads(hooks_file.read_text(encoding="utf-8"))
+    config = config_file.read_text(encoding="utf-8")
+
+    assert "claude-capture-hook.py" in hooks["hooks"]["UserPromptSubmit"][0]["hooks"][0]["command"]
+    assert "--agent codex" in hooks["hooks"]["UserPromptSubmit"][0]["hooks"][0]["command"]
+    assert "claude-capture-hook.py" in hooks["hooks"]["Stop"][0]["hooks"][0]["command"]
+    assert "[features]" in config
+    assert "codex_hooks = true" in config
+
+    module.cmd_stop(root, "codex", tmp_path)
+    assert not hooks_file.exists()
+
+
 def test_collect_start_repairs_hooks_when_already_capturing(tmp_path: Path):
     module = load_script("modules/collect/scripts/collect-control.py")
     root = tmp_path / "docs" / "prd-helper" / "01-collect"
@@ -269,6 +289,37 @@ def test_collect_start_repairs_hooks_when_already_capturing(tmp_path: Path):
     settings = settings_file.read_text(encoding="utf-8")
     assert "/old/path/claude-capture-hook.py" not in settings
     assert settings.count("claude-capture-hook.py") == 2
+
+
+def test_collect_start_repairs_codex_hooks_when_already_capturing(tmp_path: Path):
+    module = load_script("modules/collect/scripts/collect-control.py")
+    root = tmp_path / "docs" / "prd-helper" / "01-collect"
+
+    module.cmd_start(root, "codex", tmp_path, "docs/prd-helper")
+    hooks_file = tmp_path / ".codex" / "hooks.json"
+    hooks_file.write_text(
+        json.dumps(
+            {
+                "hooks": {
+                    "UserPromptSubmit": [
+                        {"hooks": [{"type": "command", "command": "python3 \"/old/claude-capture-hook.py\" --agent codex"}]}
+                    ],
+                    "Stop": [
+                        {"hooks": [{"type": "command", "command": "python3 \"/old/claude-capture-hook.py\" --agent codex"}]}
+                    ],
+                }
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    module.cmd_start(root, "codex", tmp_path, "docs/prd-helper")
+    hooks = hooks_file.read_text(encoding="utf-8")
+    assert "/old/claude-capture-hook.py" not in hooks
+    assert hooks.count("claude-capture-hook.py") == 2
 
 
 def test_claude_capture_hook_records_turn_after_start(tmp_path: Path):
@@ -300,7 +351,7 @@ def test_claude_capture_hook_records_turn_after_start(tmp_path: Path):
         "last_assistant_message": "已记录这个需求，并会保留原始上下文。",
     }
 
-    assert module.handle_user_prompt(prompt_payload, root, tmp_path) == 0
+    assert module.handle_user_prompt(prompt_payload, root, tmp_path, "claude-code") == 0
     assert module.handle_stop(stop_payload, root, tmp_path, "claude-code") == 0
 
     captured = list((root / "active" / "sessions").glob("session-*.md"))
@@ -309,6 +360,46 @@ def test_claude_capture_hook_records_turn_after_start(tmp_path: Path):
     assert "机器人巡检点位管理功能" in content
     assert "已记录这个需求" in content
     assert "active/sessions/" in (root / "source-index.md").read_text(encoding="utf-8")
+
+
+def test_codex_capture_hook_records_turn_after_start(tmp_path: Path):
+    module = load_script("scripts/claude-capture-hook.py")
+    root = tmp_path / "docs" / "prd-helper" / "01-collect"
+    root.mkdir(parents=True)
+    write_collect_state(
+        root,
+        {
+            "capture_mode": "on",
+            "session_id": "prd-session-test",
+            "turn_count": "0",
+            "active_source_count": "0",
+            "total_sources": "0",
+            "possible_noise_count": "0",
+        },
+    )
+
+    prompt_payload = {
+        "session_id": "session-001",
+        "cwd": str(tmp_path),
+        "hook_event_name": "UserPromptSubmit",
+        "prompt": "请记录这次 Codex 风险态势首页讨论。",
+    }
+    stop_payload = {
+        "session_id": "session-001",
+        "cwd": str(tmp_path),
+        "hook_event_name": "Stop",
+        "last_assistant_message": "已记录当前讨论，并保留原始上下文。",
+    }
+
+    assert module.handle_user_prompt(prompt_payload, root, tmp_path, "codex") == 0
+    assert module.handle_stop(stop_payload, root, tmp_path, "codex") == 0
+
+    captured = list((root / "active" / "sessions").glob("session-*.md"))
+    assert len(captured) == 1
+    content = captured[0].read_text(encoding="utf-8")
+    assert "Codex 风险态势首页讨论" in content
+    assert "已记录当前讨论" in content
+    assert not (tmp_path / ".codex" / "prd-helper" / "hook-state" / "session-001.json").exists()
 
 
 def test_scan_passive_indexes_new_files_and_updates_state(tmp_path: Path, monkeypatch):
@@ -372,6 +463,24 @@ def test_remove_prd_helper_cleans_commands_and_hooks(tmp_path: Path):
     write(codex_commands / "prd-start.md", "start")
     write(codex_commands / "unrelated.md", "keep")
     write(
+        tmp_path / ".codex" / "hooks.json",
+        json.dumps(
+            {
+                "hooks": {
+                    "UserPromptSubmit": [
+                        {"hooks": [{"type": "command", "command": "python3 \"/old/claude-capture-hook.py\" --agent codex"}]}
+                    ],
+                    "Stop": [
+                        {"hooks": [{"type": "command", "command": "python3 \"/old/claude-capture-hook.py\" --agent codex"}]}
+                    ],
+                }
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n",
+    )
+    write(
         tmp_path / ".claude" / "settings.json",
         """
 {
@@ -390,6 +499,7 @@ def test_remove_prd_helper_cleans_commands_and_hooks(tmp_path: Path):
 
     module.remove_generated_commands(tmp_path, ["claude-code", "codex"])
     hook_file = module.remove_claude_hooks(tmp_path)
+    codex_hook_file = module.remove_codex_hooks(tmp_path)
 
     assert not (commands / "prd-start.md").exists()
     assert not (commands / "prd-helper.md").exists()
@@ -400,6 +510,8 @@ def test_remove_prd_helper_cleans_commands_and_hooks(tmp_path: Path):
     assert (codex_commands / "unrelated.md").exists()
     assert hook_file == tmp_path / ".claude" / "settings.json"
     assert "claude-capture-hook.py" not in (tmp_path / ".claude" / "settings.json").read_text(encoding="utf-8")
+    assert codex_hook_file == tmp_path / ".codex" / "hooks.json"
+    assert not (tmp_path / ".codex" / "hooks.json").exists()
 
 
 def test_remove_codex_config_entries_removes_only_prd_helper_tables(tmp_path: Path):
@@ -417,6 +529,10 @@ def test_remove_codex_config_entries_removes_only_prd_helper_tables(tmp_path: Pa
                 '[plugins."prd-helper@prd-helper-local"]',
                 "enabled = true",
                 "",
+                "[features]",
+                "codex_hooks = true",
+                "other_feature = false",
+                "",
                 '[plugins."github@openai-curated"]',
                 "enabled = true",
                 "",
@@ -430,6 +546,8 @@ def test_remove_codex_config_entries_removes_only_prd_helper_tables(tmp_path: Pa
     content = config.read_text(encoding="utf-8")
     assert "prd-helper-local" not in content
     assert "prd-helper@prd-helper-local" not in content
+    assert "codex_hooks = true" not in content
+    assert "other_feature = false" in content
     assert '[plugins."github@openai-curated"]' in content
 
 
@@ -657,6 +775,8 @@ def test_setup_installs_codex_project_commands_and_config(tmp_path: Path, monkey
     config = project_config.read_text(encoding="utf-8")
     assert "[marketplaces.prd-helper-local]" in config
     assert '[plugins."prd-helper@prd-helper-local"]' in config
+    assert "[features]" in config
+    assert "codex_hooks = true" in config
 
 
 def test_setup_main_installs_codex_project_commands(tmp_path: Path, monkeypatch):

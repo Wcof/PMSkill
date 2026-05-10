@@ -199,6 +199,11 @@ def install_codex_project_config(project: Path) -> Path:
         f'[plugins."{CODEX_LOCAL_PLUGIN_REF}"]',
         ['enabled = true'],
     )
+    content = _replace_toml_table(
+        content,
+        "[features]",
+        ["codex_hooks = true"],
+    )
     config_path.parent.mkdir(parents=True, exist_ok=True)
     config_path.write_text(content, encoding="utf-8")
     return config_path

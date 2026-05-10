@@ -24,7 +24,7 @@
 
 ## 工作流程
 
-安装后触发 `/prd-helper` 时，Agent 必须自动执行初始化脚本。初始化脚本是幂等的：它会创建 `docs/prd-helper/`、写入 Agent 配置文件，并在 Claude Code 项目中生成或补齐 `.claude/commands/prd-*.md` 命令文件。不要因为 `docs/prd-helper/prd-helper-config.md` 已存在就跳过 setup。Claude Code 采集 hooks 由 `/prd-start` 启用，由 `/prd-stop` 清理。
+安装后触发 `/prd-helper` 时，Agent 必须自动执行初始化脚本。初始化脚本是幂等的：它会创建 `docs/prd-helper/`、写入 Agent 配置文件，并在 Claude Code / Codex 项目中补齐命令与采集配置。不要因为 `docs/prd-helper/prd-helper-config.md` 已存在就跳过 setup。Claude Code 与 Codex 的采集 hooks 都由 `/prd-start` 启用，由 `/prd-stop` 清理。
 
 处理产品上下文时，必须按以下顺序执行：
 
@@ -53,8 +53,8 @@
 | 命令 | 含义 |
 |------|------|
 | `/prd-helper` | 初始化 PRD Helper：创建 docs 目录、启用 Agent、采集策略，并生成命令文件 |
-| `/prd-start` | 开启 PRD Capture Session，并启用 Claude Code hooks 自动采集后续轮次 |
-| `/prd-stop` | 停止采集，清理 Claude Code hooks，生成摘要和检查 |
+| `/prd-start` | 开启 PRD Capture Session，并启用 Claude Code / Codex hooks 自动采集后续轮次 |
+| `/prd-stop` | 停止采集，清理 Claude Code / Codex hooks，生成摘要和检查 |
 | `/prd-status` | 查看采集状态 |
 | `/prd-scan` | 扫描历史 Agent 会话并批量导入采集池 |
 | `/prd-import` | 导入第三方文件夹数据作为被动材料 |

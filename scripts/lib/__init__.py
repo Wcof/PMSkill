@@ -14,4 +14,5 @@ from .constants import DEFAULT_COLLECT_ROOT, DEFAULT_PRD_ROOT
 from .command_registry import ALL_COMMANDS, GENERATED_COMMANDS, command_by_name
 from .metadata import FIELD_ALIASES, metadata_status_for_text
 from .claude_hooks import install_claude_hooks, remove_claude_hooks
+from .codex_hooks import install_codex_hooks, remove_codex_hooks
 from . import id_registry

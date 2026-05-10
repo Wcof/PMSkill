@@ -28,6 +28,7 @@ from lib.time_util import now_iso, now_id
 from lib.source_index import ensure_index
 from lib.constants import DEFAULT_COLLECT_ROOT, DEFAULT_PRD_ROOT
 from lib.claude_hooks import install_claude_hooks, remove_claude_hooks
+from lib.codex_hooks import install_codex_hooks, remove_codex_hooks
 from lib.template_path import module_template_path
 from lib.template_renderer import render_template
 
@@ -55,6 +56,26 @@ def sync_claude_hooks(project: Path, docs_root: str, agent: str, enabled: bool) 
             print("Claude Code hooks already clean.")
 
 
+def sync_codex_hooks(project: Path, docs_root: str, agent: str, enabled: bool) -> None:
+    """Install or remove Codex hooks to match capture mode."""
+    if agent != "codex":
+        return
+    if enabled:
+        hook_file = install_codex_hooks(project, docs_root)
+        print(f"Codex hooks enabled: {hook_file}")
+    else:
+        hook_file = remove_codex_hooks(project)
+        if hook_file:
+            print(f"Codex hooks removed: {hook_file}")
+        else:
+            print("Codex hooks already clean.")
+
+
+def sync_agent_hooks(project: Path, docs_root: str, agent: str, enabled: bool) -> None:
+    sync_claude_hooks(project, docs_root, agent, enabled)
+    sync_codex_hooks(project, docs_root, agent, enabled)
+
+
 def cmd_start(root: Path, agent: str, project: Path, docs_root: str):
     """Start a new PRD Capture Session."""
     ensure_dirs(root)
@@ -64,10 +85,12 @@ def cmd_start(root: Path, agent: str, project: Path, docs_root: str):
 
     # 已经在采集中，只同步 hooks
     if current_mode == "on":
-        sync_claude_hooks(project, docs_root, agent, True)
+        sync_agent_hooks(project, docs_root, agent, True)
         print(f"Already capturing (session: {state.get('session_id', 'unknown')})")
         if agent == "claude-code":
             print("Claude Code hooks verified.")
+        elif agent == "codex":
+            print("Codex hooks verified.")
         print("Use '/prd-stop' to stop first.")
         return
 
@@ -86,7 +109,7 @@ def cmd_start(root: Path, agent: str, project: Path, docs_root: str):
         state["resumed_at"] = now_iso()
         state["ended_at"] = ""
         write_collect_state(root, state)
-        sync_claude_hooks(project, docs_root, agent, True)
+        sync_agent_hooks(project, docs_root, agent, True)
         print(f"PRD Capture Session resumed: {existing_session_id}")
         print(f"Agent: {agent}")
         print(f"Capture mode: on")
@@ -110,7 +133,7 @@ def cmd_start(root: Path, agent: str, project: Path, docs_root: str):
 
     write_collect_state(root, new_state)
     ensure_index(root)
-    sync_claude_hooks(project, docs_root, agent, True)
+    sync_agent_hooks(project, docs_root, agent, True)
 
     print(f"PRD Capture Session started: {session_id}")
     print(f"Agent: {agent}")
@@ -156,7 +179,7 @@ def cmd_stop(root: Path, agent: str, project: Path):
     state["grill_mode"] = "off"
     state["ended_at"] = now_iso()
     write_collect_state(root, state)
-    sync_claude_hooks(project, "", agent, False)
+    sync_agent_hooks(project, "", agent, False)
 
     summary_file = root / "collect-summary.md"
     summary_values = {

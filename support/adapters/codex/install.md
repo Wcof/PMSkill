@@ -36,10 +36,12 @@ Codex 目标必须使用 `--agent codex` 初始化。脚本会自动完成这些
 1. 安装兼容目录：`~/.codex/plugins/prd-helper`
 2. 注入本地 marketplace：`~/.codex/local-marketplaces/prd-helper`
 3. 写入并启用 `~/.codex/config.toml` 中的 `prd-helper@prd-helper-local`
-4. 写入当前项目的 `.codex/commands/prd-*.md` 和 `.codex/config.toml`
+4. 写入当前项目的 `.codex/commands/prd-*.md` 和 `.codex/config.toml`，并开启 `codex_hooks = true`
 5. 清理 `~/.codex/.tmp/plugins*`、`~/.codex/.tmp/marketplaces`、`~/.codex/.tmp/app-server-remote-plugin-sync-v1`，强制 Codex 重新扫描插件缓存
 
 如果初始化后当前会话的 `/` 菜单仍未出现 `/prd-*`，直接输入 `/prd-start`、`/prd-status` 等命令也必须可用；项目 `AGENTS.md` 会把这些输入当作真实命令执行。新开会话后通常会看到完整 `/` 菜单。
+
+`/prd-start` 除了开启采集状态，还会写入当前项目的 `.codex/hooks.json`，把 `UserPromptSubmit` 和 `Stop` 事件接到 PRD Helper 采集脚本上。`/prd-stop` 会清理这些 hook。
 
 ## 卸载
 
