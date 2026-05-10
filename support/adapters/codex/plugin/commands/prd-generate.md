@@ -12,31 +12,21 @@ allowed-tools: Bash
 ```bash
 set -euo pipefail
 
-find_prd_helper_root() {
-  for dir in ".agents/skills/prd-helper" "."; do
-    [ -f "$dir/scripts/setup-prd-helper.py" ] && { printf '%s\n' "$dir"; return 0; }
+find_prd_dispatcher() {
+  for dir in ".agents/skills/prd-generate" ".agents/skills/prd-helper" ".claude/skills/prd-generate" ".claude/skills/prd-helper" ".trae/skills/prd-generate" ".trae/skills/prd-helper" "."; do
+    [ -f "$dir/scripts/prd-command-dispatch.py" ] && { printf '%s\n' "$dir/scripts/prd-command-dispatch.py"; return 0; }
   done
+  candidate=$(find "${CODEX_HOME:-$HOME/.codex}" "${CLAUDE_CONFIG_DIR:-$HOME/.claude}" -path "*/prd-command-dispatch.py" -print -quit 2>/dev/null || true)
+  [ -n "$candidate" ] && { printf '%s\n' "$candidate"; return 0; }
   return 1
 }
 
-skill_root="$(find_prd_helper_root)" || {
-  echo "未找到 PRD Helper 安装目录。"
+dispatcher="$(find_prd_dispatcher)" || {
+  echo "未找到 PRD Helper 命令分发器。请先运行：npx skills@latest add Wcof/PRDContextEngine -y"
   exit 1
 }
 
-# 确保目录结构存在
-python3 "$skill_root/scripts/setup-prd-helper.py" --project . --docs-root docs/prd-helper
-
-# 执行生成 runner：manifest -> scaffold/generate -> check
-python3 "$skill_root/modules/generate/scripts/generate.py" docs/prd-helper
+python3 "$dispatcher" generate --project . --docs-root docs/prd-helper
 ```
 
-扫描 `docs/prd-helper/02-refine/` 和 `docs/prd-helper/03-relate/` 下的结果，执行生成流程：
-
-1. 读取 `modules/generate/guide.md` 了解生成规则
-2. 生成 Generate Manifest，确定所有应输出的 View
-3. 一次性生成或补齐项目说明、页面说明、规则说明、数据说明、验收标准和 Agent 上下文
-4. 输出到 `docs/prd-helper/04-generate/`
-5. 运行 `check-generated.py` 验证并写入 `check.md`
-
-如果精炼或关联结果为空，提示用户先用 `/prd-refine` 或 `/prd-relate` 处理。
+执行后用简短中文说明结果；如果用户使用英文，则用英文说明。

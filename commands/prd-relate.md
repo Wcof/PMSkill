@@ -12,33 +12,23 @@ allowed-tools: Bash
 ```bash
 set -euo pipefail
 
-find_prd_helper_root() {
-  for dir in ".claude/skills/prd-helper" ".agents/skills/prd-helper" "."; do
-    [ -f "$dir/scripts/setup-prd-helper.py" ] && { printf '%s\n' "$dir"; return 0; }
+find_prd_dispatcher() {
+  for dir in ".agents/skills/prd-relate" ".agents/skills/prd-helper" ".claude/skills/prd-relate" ".claude/skills/prd-helper" ".trae/skills/prd-relate" ".trae/skills/prd-helper" "."; do
+    [ -f "$dir/scripts/prd-command-dispatch.py" ] && { printf '%s\n' "$dir/scripts/prd-command-dispatch.py"; return 0; }
   done
-  candidate=$(find "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/cache" -path "*/prd-helper/*/scripts/setup-prd-helper.py" -print -quit 2>/dev/null || true)
-  [ -n "$candidate" ] && { dirname "$(dirname "$candidate")"; return 0; }
+  candidate=$(find "${CODEX_HOME:-$HOME/.codex}" "${CLAUDE_CONFIG_DIR:-$HOME/.claude}" -path "*/prd-command-dispatch.py" -print -quit 2>/dev/null || true)
+  [ -n "$candidate" ] && { printf '%s\n' "$candidate"; return 0; }
   return 1
 }
 
-skill_root="$(find_prd_helper_root)" || {
-  echo "未找到 PRD Helper 安装目录。请先运行：npx skills@latest add Wcof/PRDContextEngine --agent claude-code --skill prd-helper -y"
+dispatcher="$(find_prd_dispatcher)" || {
+  echo "未找到 PRD Helper 命令分发器。请先运行：npx skills@latest add Wcof/PRDContextEngine -y"
   exit 1
 }
 
-# 确保目录结构存在
-python3 "$skill_root/scripts/setup-prd-helper.py" --project . --docs-root docs/prd-helper --agent claude-code
-
-# 运行关联检查（报告模式，不阻断）
-python3 "$skill_root/modules/relate/scripts/check-relate.py" docs/prd-helper || true
+python3 "$dispatcher" relate --project . --docs-root docs/prd-helper
 ```
 
-扫描 `docs/prd-helper/02-refine/` 下的精炼结果，执行关联流程：
+执行后继续建立链路：至少覆盖 `fact -> page/feature -> rule -> data -> acceptance`，并把 question/conflict/assumption 挂到相关链路。断链或弱追溯仅可进入受限结果，不能进入确定性 PRD。
 
-1. 读取 `modules/relate/guide.md` 了解关联规则
-2. 扫描 `02-refine/` 下的事实、决策、约束等
-3. 建立事实、页面、功能、规则、数据、验收之间的关系
-4. 输出到 `docs/prd-helper/03-relate/`
-5. 运行 `check-relate.py` 验证
-
-如果精炼结果为空，提示用户先用 `/prd-refine` 精炼或直接粘贴内容。
+执行后用简短中文说明结果；如果用户使用英文，则用英文说明。

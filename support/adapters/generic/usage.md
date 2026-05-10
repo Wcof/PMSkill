@@ -10,13 +10,13 @@
 npx skills@latest add Wcof/PRDContextEngine --all
 ```
 
-如果需要手动选择 Agent，也可以运行 `npx skills@latest add Wcof/PRDContextEngine`。安装后运行：
+如果需要手动选择 Agent，也可以运行 `npx skills@latest add Wcof/PRDContextEngine`。安装后选择并注册全部 `prd-*` Skill，再运行：
 
 ```text
 /prd-helper
 ```
 
-运行 `/prd-helper` 会自动初始化或修复当前项目，创建 `docs/prd-helper/` 并写入 Agent 配置文件。Claude Code 项目还会生成或补齐 `.claude/commands/prd-start.md` 等真实斜杠命令文件。
+运行 `/prd-helper` 会自动初始化或修复当前项目，创建 `docs/prd-helper/` 并写入 Agent 配置文件。安装器已经注册的 `/prd-*` 命令会直接可用；Claude Code 项目还会生成或补齐 `.claude/commands/prd-start.md` 等真实斜杠命令文件。
 
 卸载当前项目中的 PRD Helper：
 
@@ -59,5 +59,5 @@ npx skills@latest remove prd-helper --agent '*' --global -y
 ## 参考文件
 
 - `support/adapters/canonical-rules.md` — 完整规则
-- `SKILL.md` — 流程编排
+- `skills/prd-helper/SKILL.md` — 流程编排
 - `modules/*/guide.md` — 各模块行为约束

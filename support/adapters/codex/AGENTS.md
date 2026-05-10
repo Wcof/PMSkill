@@ -11,7 +11,7 @@
 
 ## Codex 采集规则
 
-当 `capture_mode == on` 时（用户执行了 `/prd-start` 或 `/prd-resume`）：
+当 `capture_mode == on` 时（用户执行了 `/prd-start`）：
 
 1. `/prd-start` 会在当前项目安装 Codex hooks，后续轮次优先由 hook 自动采集
 2. 不采集 prd- 开头的命令交互（/prd-start、/prd-stop 等）
@@ -42,12 +42,12 @@ Codex 当前项目里如果没有及时刷新 `/` 菜单，也要把下面这些
 3. 按命令文件中的 bash 指令执行，不要因为 `/` 菜单没显示就拒绝
 4. `/prd-import` 这类允许带参数的命令，要保留命令后的用户参数一起处理
 
-这条兜底规则的目标是：即使 Codex UI 的命令列表没有刷新，只要项目已经执行过 `/prd-helper` 初始化，用户直接输入 `/prd-start` 等命令也必须可用。
+这条兜底规则的目标是：即使 Codex UI 的命令列表没有刷新，只要 PRD Helper Skill 已安装，用户直接输入 `/prd-start` 等命令也必须可用。
 
 ## 参考文件
 
 - `support/adapters/canonical-rules.md` — 完整规则
-- `SKILL.md` — 流程编排
+- `skills/prd-helper/SKILL.md` — 流程编排
 - `modules/*/guide.md` — 各模块行为约束
 - `checks/guide.md` — 检查系统说明
 <!-- PRD-HELPER:END -->

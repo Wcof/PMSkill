@@ -12,7 +12,7 @@
 ## 参考文件
 
 - `support/adapters/canonical-rules.md` — 完整规则
-- `SKILL.md` — 流程编排
+- `skills/prd-helper/SKILL.md` — 流程编排
 - `modules/*/guide.md` — 各模块行为约束
 - `checks/guide.md` — 检查系统说明
 <!-- PRD-HELPER:END -->

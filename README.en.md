@@ -20,11 +20,11 @@ Generated documents are **Views**, not an **Entity** type. Only objects that flo
 
 ## Current Commands
 
-The authoritative command set is cross-checked against `scripts/lib/constants.py`, `commands/*.md`, `SKILL.md`, and plugin manifests. README now documents these 11 commands:
+The authoritative command set is cross-checked against `scripts/lib/command_registry.py`, `skills/prd-*/SKILL.md`, `commands/*.md`, and plugin manifests. `npx skills@latest add Wcof/PRDContextEngine` discovers and installs these 11 command Skills:
 
 | Command | Stage/Type | Purpose | Main Outputs |
 |---|---|---|---|
-| `/prd-helper` | Setup entry | Initialize or repair project config, `docs/prd-helper/`, and project commands | Config, folders, Agent rules |
+| `/prd-helper` | Setup entry | Initialize or repair project config, `docs/prd-helper/`, and Agent rules | Config, folders, Agent rules |
 | `/prd-start` | Collect | Start active capture for upcoming product discussion | `01-collect/active/`, `collect-state.md` |
 | `/prd-stop` | Collect | Stop active capture, clean hooks, and write summary/check output | `collect-summary.md`, `01-collect/check.md` |
 | `/prd-status` | Collect utility | Show capture state, session, write roots, and counts | Status summary |
@@ -36,25 +36,25 @@ The authoritative command set is cross-checked against `scripts/lib/constants.py
 | `/prd-discuss` | Auxiliary discussion | Ask one question at a time about contradictions, vague terms, and unresolved issues | Discussion summary, open questions |
 | `/prd-remove` | Uninstall | Clean project config, commands, and hooks while preserving generated docs by default | Cleanup result |
 
-Platform note: the Claude Code plugin manifest includes all 11 commands. `COMMAND_NAMES` contains the 10 generated follow-up commands; `/prd-helper` is the root Skill entry.
+Platform note: the `skills/` directory contains all 11 installer-discoverable Skills. `COMMAND_NAMES` still contains the 10 commands after `/prd-helper` for project-level fallback commands and uninstall cleanup.
 
 ## Engineering Constraints
 
 PRD Helper keeps Python as the executor and static prompts/templates as the constraint layer:
 
 - Command facts live in `scripts/lib/command_registry.py`; `COMMAND_NAMES`, setup scripts, and consistency tests derive from it.
-- Business rules stay in `SKILL.md`, `modules/*/guide.md`, and `commands/*.md`; Python does not act as the prompt source.
+- Business rules stay in `skills/prd-helper/SKILL.md`, `modules/*/guide.md`, and `commands/*.md`; Python does not act as the prompt source.
 - Output structures and checklists live in `modules/*/templates/`; scripts only fill state, counts, check results, and source details.
 
 ## Quick Start
 
-### 1. Install the Skill
+### 1. Install the Command Skills
 
 ```bash
 npx skills@latest add Wcof/PRDContextEngine
 ```
 
-Use `↑/↓` to move, `Space` to select, and `Enter` to confirm. Select `prd-helper` and the target Agent, such as Claude Code or Codex.
+The installer discovers `prd-helper`, `prd-start`, `prd-stop`, `prd-status`, `prd-scan`, `prd-import`, `prd-refine`, `prd-relate`, `prd-generate`, `prd-discuss`, and `prd-remove` from `skills/`. In interactive mode, select these Skills and the target Agent, such as Claude Code, Codex, or Trae.
 
 ### 2. Initialize the Current Project
 
@@ -64,7 +64,7 @@ Run this in your Agent session:
 /prd-helper
 ```
 
-Initialization creates the default docs root `docs/prd-helper/` and generates follow-up commands.
+Initialization creates the default docs root `docs/prd-helper/` and repairs Agent rules, project-level fallback commands, and hook config. Follow-up commands are registered at install time; `/prd-helper` is not the gate for making them appear.
 
 ### 3. Follow the Four Stages
 
@@ -125,7 +125,7 @@ python3 scripts/check-structure.py docs/prd-helper
 
 ## FAQ
 
-Only `/prd-helper` appears, not `/prd-start`: run `/prd-helper` once to initialize project commands. Claude Code may need a new session to refresh command discovery. In Codex App, make sure initialization ran with `--agent codex`; the script writes `.codex/commands/prd-*.md` and `.codex/config.toml` in the current project, and also injects `~/.codex/local-marketplaces/prd-helper` plus `~/.codex/config.toml`. Codex App may need a restart or new session to refresh plugins.
+Only `/prd-helper` appears, not `/prd-start`: this usually means only `prd-helper` was selected during installation, or the current Agent has not refreshed its Skill list. Run `npx skills@latest add Wcof/PRDContextEngine` again and install all `prd-*` Skills; an already-open session may still need a restart. Even if the menu has not refreshed, typing `/prd-start` directly can still be handled by installed Skills or project-level fallback commands. Codex hooks are written by `/prd-start` and cleaned by `/prd-stop`.
 
 No capture output: run `/prd-status` and confirm the state is `on`; then inspect `docs/prd-helper/01-collect/collect-state.md`.
 

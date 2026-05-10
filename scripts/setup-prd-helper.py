@@ -131,15 +131,41 @@ def install_codex_plugin(skill_root: Path, docs_root: str) -> Path:
             shutil.rmtree(target)
         shutil.copytree(plugin_src, target)
 
-    skills_src = skill_root / ".agents" / "skills"
+    skills_src = skill_root / "skills"
+    copy_ignore = shutil.ignore_patterns(".git", "__pycache__", ".pytest_cache", ".DS_Store")
+
+    def is_helper_runtime(root: Path) -> bool:
+        return (root / "scripts" / "setup-prd-helper.py").exists() and (root / "SKILL.md").exists()
+
+    def is_prd_helper_skill(root: Path) -> bool:
+        if not is_helper_runtime(root):
+            return False
+        content = (root / "SKILL.md").read_text(encoding="utf-8")
+        return "name: prd-helper" in content
+
+    def resolve_helper_runtime() -> Path:
+        if skills_src.exists():
+            return skill_root
+        if is_prd_helper_skill(skill_root):
+            return skill_root
+        sibling = skill_root.parent / "prd-helper"
+        if is_prd_helper_skill(sibling):
+            return sibling
+        raise FileNotFoundError(
+            "未找到 prd-helper 运行时。请确保安装包包含 skills/prd-helper，"
+            "或在同级目录存在 prd-helper Skill。"
+        )
+
+    helper_runtime_root = resolve_helper_runtime()
+
     for target in (plugin_dest, marketplace_plugin_dest):
         if skills_src.exists():
-            shutil.copytree(skills_src, target / "skills")
+            shutil.copytree(skills_src, target / "skills", ignore=copy_ignore)
         else:
             shutil.copytree(
-                skill_root,
+                helper_runtime_root,
                 target / "skills" / "prd-helper",
-                ignore=shutil.ignore_patterns(".git", "__pycache__", ".pytest_cache"),
+                ignore=copy_ignore,
             )
 
     for target in (plugin_dest, marketplace_plugin_dest):

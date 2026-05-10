@@ -1,51 +1,38 @@
-# ADR 0003: `/prd-helper` 初始化后生成原子指令
+# ADR 0003: 安装时注册 `/prd-*` 原子指令
 
 ## Status
 
-Accepted (updated 2026-05-06)
+Accepted (updated 2026-05-10)
 
 ## Context
 
-早期命令体系采用 `/prd-helper` 作为总入口，通过 `/prd-helper start`、`/prd-helper status` 等子动作分发到具体脚本。后来尝试将初始化入口改为 `/prd-init`，但 `skills@latest` 只会把根 `SKILL.md` 注册成一个 Skill 命令，导致安装后仍只显示 `/prd-helper`。
+早期命令体系采用 `/prd-helper` 作为总入口，通过初始化脚本生成 `/prd-start`、`/prd-status` 等项目级命令。这个方案在 Claude Code 中可以作为兜底，但在 Codex App 等会话里存在刷新问题：用户执行 `/prd-helper` 后，当前 `/` 菜单不一定重新扫描新生成的命令。
 
-这种设计导致：
-- `/prd-init` 写在文档里，但安装后不会自动出现在 Claude Code 指令列表中
-- 用户看到 `/prd-helper` 后，不清楚它是否应该用于初始化
-- `/prd-helper <action>` 子动作仍然有包装感，和原子命令目标不一致
+`skills@latest` 的事实边界是：它安装 Skill，不执行项目初始化脚本，也没有可依赖的 postinstall hook。并且当仓库根目录存在 `SKILL.md` 时，安装器会把仓库识别为单一 Skill，只暴露 `/prd-helper`。
 
 ## Decision
 
-保留 `prd-helper` 作为唯一安装器可见入口，并明确它只负责初始化。初始化完成后，脚本生成后续原子命令文件。
+PRD Helper 改为多 Skill 命令包：`skills/` 下提供 11 个安装器可发现的 Skill。
 
-命令集合（2026-05-06 更新）：
-- `/prd-helper` — 初始化项目，由安装器注册
-- `/prd-start` — 开启采集（支持 session 续接），由初始化脚本生成
-- `/prd-stop` — 停止采集（提示可用 /prd-refine 精炼），由初始化脚本生成
-- `/prd-status` — 查看状态，由初始化脚本生成
-- `/prd-scan` — 扫描所有 AI 工具 session，由初始化脚本生成
-- `/prd-import` — 导入第三方文件夹数据，由初始化脚本生成
-- `/prd-refine` — 直接精炼（不强制前置步骤），由初始化脚本生成
-- `/prd-relate` — 直接关联（不强制前置步骤），由初始化脚本生成
-- `/prd-generate` — 直接生成（不强制前置步骤），由初始化脚本生成
-- `/prd-discuss` — 需求研讨模式，由初始化脚本生成
-- `/prd-remove` — 卸载，由初始化脚本生成
+- `/prd-helper` — 初始化或修复当前项目配置
+- `/prd-start` — 开启采集
+- `/prd-stop` — 停止采集
+- `/prd-status` — 查看状态
+- `/prd-scan` — 扫描所有 AI 工具 session
+- `/prd-import` — 导入第三方文件夹数据
+- `/prd-refine` — 直接精炼
+- `/prd-relate` — 直接关联
+- `/prd-generate` — 直接生成，必要时输出 Limited Generate
+- `/prd-discuss` — 需求研讨模式
+- `/prd-remove` — 卸载
 
-移除 `/prd-init` 和所有 `/prd-helper <action>` 兼容入口。
+根目录不再保留安装器可识别的 `SKILL.md`，避免扫描提前停止。`skills/prd-helper/SKILL.md` 承载核心业务规则；其他 `skills/prd-*/SKILL.md` 是轻量命令包装，只调用 `scripts/prd-command-dispatch.py`。
 
-### 2026-05-06 变更
-
-1. **删除暂停和恢复命令**：功能合并到 start/stop，减少认知负担
-2. **新增独立模块指令**：`/prd-refine`、`/prd-relate`、`/prd-generate` 可单独使用，不强制前置步骤
-3. **新增 `/prd-import`**：支持导入第三方文件夹数据作为被动材料
-4. **统一研讨命令为 `/prd-discuss`**：更直观地表达需求研讨模式
-5. **Session 续接**：stop 后再 start 时复用同一 session
-6. **Check 脚本报告模式**：无数据时不阻断，有数据时检查错误
+`/prd-helper` 不再是后续命令出现的前置条件。任意 `/prd-*` 首次执行时，都通过 dispatcher 懒初始化 `docs/prd-helper/`、Agent 配置、项目级兜底命令和 Hook 配置。
 
 ## Consequences
 
-- 安装后只看到 `/prd-helper` 是预期行为
-- 首次运行 `/prd-helper` 后，Claude Code 项目生成后续命令文件
-- 旧的 `/prd-init.md` 和 `/prd-setup.md` 作为遗留命令由卸载脚本清理
-- 用户可能需要开启新会话或刷新 Claude Code 命令列表，才能看到刚生成的命令
-- 四个业务模块（Collect/Refine/Relate/Generate）各有独立指令，可从任意步骤开始
-- Check 脚本改为报告模式，支持跳过前置步骤
+- `npx skills@latest add Wcof/PRDContextEngine` 应能发现完整 `/prd-*` Skill 集合。
+- 项目级 `.claude/commands`、`.codex/commands` 仍会由 setup 脚本补齐，但定位为旧版本或菜单刷新失败时的兜底。
+- 多 Skill 包装不是新的领域实体；Collect、Refine、Relate、Generate 的领域模型不变。
+- 如果用户只选择安装 `prd-helper`，仍只会看到 `/prd-helper`；文档必须提醒安装全部 `prd-*` Skill。

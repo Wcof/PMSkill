@@ -12,18 +12,21 @@ allowed-tools: Bash
 ```bash
 set -euo pipefail
 
-find_prd_helper_root() {
-  for dir in ".claude/skills/prd-helper" ".agents/skills/prd-helper" "."; do
-    [ -f "$dir/modules/collect/scripts/collect-control.py" ] && { printf '%s\n' "$dir"; return 0; }
+find_prd_dispatcher() {
+  for dir in ".agents/skills/prd-status" ".agents/skills/prd-helper" ".claude/skills/prd-status" ".claude/skills/prd-helper" ".trae/skills/prd-status" ".trae/skills/prd-helper" "."; do
+    [ -f "$dir/scripts/prd-command-dispatch.py" ] && { printf '%s\n' "$dir/scripts/prd-command-dispatch.py"; return 0; }
   done
-  candidate=$(find "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/cache" -path "*/prd-helper/*/modules/collect/scripts/collect-control.py" -print -quit 2>/dev/null || true)
-  [ -n "$candidate" ] && { dirname "$(dirname "$(dirname "$(dirname "$candidate")")")"; return 0; }
+  candidate=$(find "${CODEX_HOME:-$HOME/.codex}" "${CLAUDE_CONFIG_DIR:-$HOME/.claude}" -path "*/prd-command-dispatch.py" -print -quit 2>/dev/null || true)
+  [ -n "$candidate" ] && { printf '%s\n' "$candidate"; return 0; }
   return 1
 }
 
-skill_root="$(find_prd_helper_root)" || {
-  echo "未找到 PRD Helper 安装目录。请先运行：npx skills@latest add Wcof/PRDContextEngine --agent claude-code --skill prd-helper -y"
+dispatcher="$(find_prd_dispatcher)" || {
+  echo "未找到 PRD Helper 命令分发器。请先运行：npx skills@latest add Wcof/PRDContextEngine -y"
   exit 1
 }
-python3 "$skill_root/modules/collect/scripts/collect-control.py" status --root docs/prd-helper/01-collect --project . --docs-root docs/prd-helper --agent claude-code
+
+python3 "$dispatcher" status --project . --docs-root docs/prd-helper
 ```
+
+执行后用简短中文说明结果；如果用户使用英文，则用英文说明。

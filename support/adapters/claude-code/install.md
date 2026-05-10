@@ -2,28 +2,31 @@
 
 ## Step 0：推荐安装方式（skills@latest）
 
-推荐使用 `skills@latest` 安装到 Claude Code：
+推荐使用 `skills@latest` 安装到 Claude Code，并选择全部 `prd-*` Skill：
 
 ```bash
-npx skills@latest add Wcof/PRDContextEngine --agent claude-code --skill prd-helper -y
+npx skills@latest add Wcof/PRDContextEngine --agent claude-code -y
 ```
 
-安装完成后，Claude Code 会加载 `/prd-helper` 这个 Skill 指令。先运行：
+安装完成后，Claude Code 应能加载完整 `/prd-*` 指令。可先运行：
 
 ```text
 /prd-helper
 ```
 
-`/prd-helper` 会初始化当前项目，并生成项目级直出命令：
+`/prd-helper` 会初始化当前项目，并修复项目级直出命令：
 
 ```text
 /prd-helper
 /prd-start
-/prd-pause
-/prd-resume
 /prd-stop
 /prd-status
 /prd-scan
+/prd-import
+/prd-refine
+/prd-relate
+/prd-generate
+/prd-discuss
 /prd-remove
 ```
 
@@ -48,7 +51,7 @@ claude plugin install prd-helper@prd-helper --scope project
 npx skills@latest add Wcof/PRDContextEngine
 ```
 
-选择 `prd-helper`，并选择 Claude Code 作为安装目标。这个 Skill 内部包含采集、精炼、关联、生成四个模块，不拆分安装。
+选择全部 `prd-*` Skill，并选择 Claude Code 作为安装目标。`prd-helper` 承载四阶段业务规则，其它 `prd-*` Skill 是命令包装。
 
 交互选择时：
 
@@ -57,18 +60,18 @@ npx skills@latest add Wcof/PRDContextEngine
 - 使用 `Enter` 确认
 - 不需要输入数字
 
-安装完成后运行：
+安装完成后可直接运行：
 
 ```text
 /prd-helper
 ```
 
-运行 `/prd-helper` 会自动初始化或修复当前项目：创建 `docs/prd-helper/`、写入 `CLAUDE.md` 配置块，生成 `.claude/commands/prd-helper.md`、`.claude/commands/prd-start.md`、`.claude/commands/prd-status.md` 等真实斜杠命令文件。即使 `docs/prd-helper/` 已存在，也要允许 `/prd-helper` 再次执行，用来补齐缺失的命令文件。采集 hooks 不在初始化时常驻；它们由 `/prd-start` 和 `/prd-resume` 启用，由 `/prd-pause` 和 `/prd-stop` 清理。
+运行 `/prd-helper` 会自动初始化或修复当前项目：创建 `docs/prd-helper/`、写入 `CLAUDE.md` 配置块，修复 `.claude/commands/prd-helper.md`、`.claude/commands/prd-start.md`、`.claude/commands/prd-status.md` 等真实斜杠命令文件。即使 `docs/prd-helper/` 已存在，也要允许 `/prd-helper` 再次执行，用来补齐缺失的命令文件。采集 hooks 不在初始化时常驻；它们由 `/prd-start` 启用，由 `/prd-stop` 清理。
 
-如果 Claude Code 的 `/` 菜单没有显示 `/prd-helper`，先确认安装时选择了 Claude Code，或直接使用推荐的非交互命令：
+如果 Claude Code 的 `/` 菜单没有显示完整 `/prd-*`，先确认安装时选择了全部 Skill，或直接使用推荐的非交互命令：
 
 ```bash
-npx skills@latest add Wcof/PRDContextEngine --agent claude-code --skill prd-helper -y
+npx skills@latest add Wcof/PRDContextEngine --agent claude-code -y
 ```
 
 ## 卸载
@@ -103,7 +106,7 @@ npx skills@latest remove
 
 ## 验证安装
 
-先发送 `/prd-helper` 完成自动初始化，再确认 `.claude/commands/prd-helper.md` 和 `.claude/commands/prd-start.md` 已生成，然后重开 Claude Code 会话或刷新命令列表后发送 `/prd-start`。`/prd-start` 后可用 `/hooks` 查看 `UserPromptSubmit` 和 `Stop` 是否已有 PRD Helper hook；发送 `/prd-pause` 或 `/prd-stop` 后，这些 hook 应被清理。
+先发送 `/prd-start`，它会自动初始化并开启采集；再确认 `.claude/commands/prd-helper.md` 和 `.claude/commands/prd-start.md` 已生成。`/prd-start` 后可用 `/hooks` 查看 `UserPromptSubmit` 和 `Stop` 是否已有 PRD Helper hook；发送 `/prd-stop` 后，这些 hook 应被清理。
 
 ## 使用
 

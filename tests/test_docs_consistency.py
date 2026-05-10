@@ -17,7 +17,7 @@ def test_public_command_docs_use_current_command_set():
     docs = {
         "README.md": _read("README.md"),
         "README.en.md": _read("README.en.md"),
-        "SKILL.md": _read("SKILL.md"),
+        "skills/prd-helper/SKILL.md": _read("skills/prd-helper/SKILL.md"),
         "docs/adr/0003-atomic-commands.md": _read("docs/adr/0003-atomic-commands.md"),
         "support/adapters/canonical-rules.md": _read("support/adapters/canonical-rules.md"),
     }
@@ -47,6 +47,29 @@ def test_command_files_match_constants():
         assert command.zh_description in content
 
 
+def test_skills_package_exposes_each_prd_command_without_root_skill():
+    assert not (ROOT / "SKILL.md").exists()
+
+    skill_files = {
+        path.parent.name: path
+        for path in (ROOT / "skills").glob("prd-*/SKILL.md")
+    }
+    assert set(skill_files) == {command.name for command in ALL_COMMANDS}
+
+    helper = _read("skills/prd-helper/SKILL.md")
+    assert "PRD Context Compiler" in helper
+    assert "modules/collect/guide.md" in helper
+
+    for command in ALL_COMMANDS:
+        content = skill_files[command.name].read_text(encoding="utf-8")
+        assert f"name: {command.name}" in content
+        assert command.zh_description in content
+        if command.name != "prd-helper":
+            assert "scripts/prd-command-dispatch.py" in content
+            assert "--agent claude-code" not in content
+            assert ".claude/skills/prd-helper" not in content
+
+
 def test_codex_plugin_command_templates_match_current_command_set():
     command_files = {
         f"/{path.stem}"
@@ -67,7 +90,7 @@ def test_repo_root_is_installable_as_codex_plugin():
 
     plugin = __import__("json").loads(plugin_path.read_text(encoding="utf-8"))
     assert plugin["name"] == "prd-helper"
-    assert plugin["skills"] == "./.agents/skills/"
+    assert plugin["skills"] == "./skills/"
     assert plugin["interface"]["displayName"] == "PRD Helper"
 
     command_paths = set(plugin["commands"])
@@ -78,7 +101,7 @@ def test_repo_root_is_installable_as_codex_plugin():
 
 
 def test_skill_activation_includes_codex_setup_before_claude_setup():
-    skill = _read("SKILL.md")
+    skill = _read("skills/prd-helper/SKILL.md")
 
     codex_command = "setup-prd-helper.py --project . --docs-root docs/prd-helper --agent codex"
     claude_command = "setup-prd-helper.py --project . --docs-root docs/prd-helper --agent claude-code"
@@ -114,7 +137,7 @@ def test_check_scripts_are_template_driven():
 
 
 def test_guides_keep_four_stage_model_and_discuss_auxiliary():
-    skill = _read("SKILL.md")
+    skill = _read("skills/prd-helper/SKILL.md")
     context = _read("CONTEXT.md")
 
     for content in (skill, context):
@@ -133,7 +156,7 @@ def test_docs_use_prd_context_compiler_boundaries():
         "CONTEXT.md": _read("CONTEXT.md"),
         "README.md": _read("README.md"),
         "README.en.md": _read("README.en.md"),
-        "SKILL.md": _read("SKILL.md"),
+        "skills/prd-helper/SKILL.md": _read("skills/prd-helper/SKILL.md"),
         "modules/generate/guide.md": _read("modules/generate/guide.md"),
         "checks/guide.md": _read("checks/guide.md"),
     }
@@ -204,5 +227,6 @@ def test_prd_generate_commands_invoke_generate_runner():
     ]
     for path in command_paths:
         content = _read(path)
-        assert "modules/generate/scripts/generate.py" in content
+        assert "scripts/prd-command-dispatch.py" in content
+        assert " generate " in content
         assert "check-generated.py\" docs/prd-helper || true" not in content

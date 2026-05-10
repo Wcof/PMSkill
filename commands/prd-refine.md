@@ -12,33 +12,23 @@ allowed-tools: Bash
 ```bash
 set -euo pipefail
 
-find_prd_helper_root() {
-  for dir in ".claude/skills/prd-helper" ".agents/skills/prd-helper" "."; do
-    [ -f "$dir/scripts/setup-prd-helper.py" ] && { printf '%s\n' "$dir"; return 0; }
+find_prd_dispatcher() {
+  for dir in ".agents/skills/prd-refine" ".agents/skills/prd-helper" ".claude/skills/prd-refine" ".claude/skills/prd-helper" ".trae/skills/prd-refine" ".trae/skills/prd-helper" "."; do
+    [ -f "$dir/scripts/prd-command-dispatch.py" ] && { printf '%s\n' "$dir/scripts/prd-command-dispatch.py"; return 0; }
   done
-  candidate=$(find "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/cache" -path "*/prd-helper/*/scripts/setup-prd-helper.py" -print -quit 2>/dev/null || true)
-  [ -n "$candidate" ] && { dirname "$(dirname "$candidate")"; return 0; }
+  candidate=$(find "${CODEX_HOME:-$HOME/.codex}" "${CLAUDE_CONFIG_DIR:-$HOME/.claude}" -path "*/prd-command-dispatch.py" -print -quit 2>/dev/null || true)
+  [ -n "$candidate" ] && { printf '%s\n' "$candidate"; return 0; }
   return 1
 }
 
-skill_root="$(find_prd_helper_root)" || {
-  echo "未找到 PRD Helper 安装目录。请先运行：npx skills@latest add Wcof/PRDContextEngine --agent claude-code --skill prd-helper -y"
+dispatcher="$(find_prd_dispatcher)" || {
+  echo "未找到 PRD Helper 命令分发器。请先运行：npx skills@latest add Wcof/PRDContextEngine -y"
   exit 1
 }
 
-# 确保目录结构存在
-python3 "$skill_root/scripts/setup-prd-helper.py" --project . --docs-root docs/prd-helper --agent claude-code
-
-# 运行精炼检查（报告模式，不阻断）
-python3 "$skill_root/modules/refine/scripts/check-refine.py" docs/prd-helper || true
+python3 "$dispatcher" refine --project . --docs-root docs/prd-helper
 ```
 
-扫描 `docs/prd-helper/01-collect/` 下的材料，执行精炼流程：
+执行后继续完成精炼：把材料拆成事实/决策/约束/目标/冲突/待确认，补齐 Strong Trace（`source_id + path + quote/paraphrase + locator`）。无 locator 的内容只能进入待确认，不能作为确定性要求。
 
-1. 读取 `modules/refine/guide.md` 了解精炼规则
-2. 扫描 `01-collect/active/sessions/` 和 `01-collect/passive/` 下的材料
-3. 提取事实、背景、目标、决策、约束、冲突、问题和 AI 推断
-4. 输出到 `docs/prd-helper/02-refine/`
-5. 运行 `check-refine.py` 验证
-
-如果材料为空，提示用户先用 `/prd-start` 采集或直接粘贴内容。
+执行后用简短中文说明结果；如果用户使用英文，则用英文说明。

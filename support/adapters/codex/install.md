@@ -14,7 +14,7 @@ npx skills@latest add Wcof/PRDContextEngine --all
 npx skills@latest add Wcof/PRDContextEngine
 ```
 
-选择 `prd-helper`，并选择 Codex 作为安装目标。这个 Skill 内部包含采集、精炼、关联、生成四个模块，不拆分安装。
+选择全部 `prd-*` Skill，并选择 Codex 作为安装目标。`prd-helper` 承载四阶段业务规则，其它 `prd-*` Skill 是命令包装，用于安装时注册 slash command。
 
 交互选择时：
 
@@ -23,13 +23,13 @@ npx skills@latest add Wcof/PRDContextEngine
 - 使用 `Enter` 确认
 - 不需要输入数字
 
-安装完成后，在 Codex 中运行：
+安装完成后，Codex 应能看到完整 `/prd-*` 指令。首次可运行：
 
 ```text
 /prd-helper
 ```
 
-首次运行 `/prd-helper` 会自动初始化项目：创建 `docs/prd-helper/`，并写入 `AGENTS.md` 配置块。
+首次运行任意 `/prd-*` 都会自动初始化项目：创建 `docs/prd-helper/`，并写入 `AGENTS.md` 配置块。
 
 Codex 目标必须使用 `--agent codex` 初始化。脚本会自动完成这些事：
 
@@ -39,7 +39,7 @@ Codex 目标必须使用 `--agent codex` 初始化。脚本会自动完成这些
 4. 写入当前项目的 `.codex/commands/prd-*.md` 和 `.codex/config.toml`，并开启 `codex_hooks = true`
 5. 清理 `~/.codex/.tmp/plugins*`、`~/.codex/.tmp/marketplaces`、`~/.codex/.tmp/app-server-remote-plugin-sync-v1`，强制 Codex 重新扫描插件缓存
 
-如果初始化后当前会话的 `/` 菜单仍未出现 `/prd-*`，直接输入 `/prd-start`、`/prd-status` 等命令也必须可用；项目 `AGENTS.md` 会把这些输入当作真实命令执行。新开会话后通常会看到完整 `/` 菜单。
+如果安装后当前会话的 `/` 菜单仍未出现完整 `/prd-*`，先确认安装时选择了全部 `prd-*` Skill；已打开的 Codex 会话可能需要重开。直接输入 `/prd-start`、`/prd-status` 等命令也必须可用；项目 `AGENTS.md` 和项目级命令文件会作为兜底。
 
 `/prd-start` 除了开启采集状态，还会写入当前项目的 `.codex/hooks.json`，把 `UserPromptSubmit` 和 `Stop` 事件接到 PRD Helper 采集脚本上。`/prd-stop` 会清理这些 hook。
 
@@ -114,7 +114,7 @@ your-project/
 
 ## 使用方式
 
-安装后，先发送 `/prd-helper` 自动初始化。开始主动采集时发送：
+安装后可直接发送 `/prd-start`；它会先自动初始化，再开启主动采集：
 
 ```text
 /prd-start

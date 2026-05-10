@@ -15,7 +15,7 @@
     "capture",
     "context"
   ],
-  "skills": "./.agents/skills/",
+  "skills": "./skills/",
   "commands": [
     "./commands/prd-helper.md",
     "./commands/prd-start.md",

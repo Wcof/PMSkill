@@ -8,6 +8,9 @@ allowed-tools: Bash
 
 你正在帮助用户把分散的产品上下文沉淀为可追溯、可检查、可复用的结构化 PRD 资产。PRD Helper 是 **PRD Context Compiler（PRD 上下文编译流程）**，不是自动 PRD 写作器；它把材料编译成 PRD 文档和指导人或 Agent 实施的 **Agent Context**。
 
+本指令用于初始化或修复 PRD Helper 项目配置。
+初始化或修复 PRD Helper 项目配置。
+
 ## Core Rule
 
 PRD Helper 只有四个业务阶段：
@@ -36,7 +39,9 @@ PRD Helper 只有四个业务阶段：
 
 当用户触发 `/prd-helper` 时，直接执行已安装 Skill 目录中的初始化脚本。初始化脚本是幂等修复入口：已存在的 docs 产物会保留，缺失的 Agent 配置和命令文件会补齐。
 
-`.agents/` 目录是由 `npx skills@latest add` 安装生成的副本，不应手动编辑。根目录的 `modules/`、`scripts/`、`checks/` 是唯一开发源。
+`npx skills@latest add Wcof/PRDContextEngine` 会安装 `skills/` 下的多个命令 Skill：`prd-helper`、`prd-start`、`prd-stop`、`prd-status`、`prd-scan`、`prd-import`、`prd-refine`、`prd-relate`、`prd-generate`、`prd-discuss`、`prd-remove`。`/prd-helper` 只是初始化/修复入口，不是后续命令注册的前置条件。
+
+`.agents/` 目录是由安装器生成的副本，不应手动编辑。根目录的 `modules/`、`scripts/`、`checks/` 和 `skills/` 是开发源。
 
 在 Codex 中触发时必须使用 `--agent codex`；在 Claude Code 中触发时使用 `--agent claude-code`。不要在 Codex 会话里生成 `.claude/commands` 后就告诉用户 `/prd-*` 已可用。
 
@@ -52,7 +57,7 @@ python3 .trae/skills/prd-helper/scripts/setup-prd-helper.py --project . --docs-r
 如果三个路径都不存在，先自修复安装再重试：
 
 ```bash
-npx skills@latest add Wcof/PRDContextEngine --skill prd-helper -y
+npx skills@latest add Wcof/PRDContextEngine -y
 ```
 
 只有用户明确要求自定义 docs 目录或 Agent 范围时，才先询问配置。默认使用 `docs/prd-helper/`，采集策略为只通过 `/prd-start` 显式开启。
@@ -61,7 +66,7 @@ npx skills@latest add Wcof/PRDContextEngine --skill prd-helper -y
 
 | Command | Action |
 |---|---|
-| `/prd-helper` | 初始化或修复当前项目配置，生成后续命令。 |
+| `/prd-helper` | 初始化或修复当前项目配置，补齐项目级兜底命令。 |
 | `/prd-start` | 开启主动采集，创建或续接采集 session。 |
 | `/prd-stop` | 停止主动采集，清理 hooks，生成采集摘要和检查。 |
 | `/prd-status` | 查看 `collect-state.md` 中的真实采集状态。 |
@@ -115,7 +120,7 @@ Final check output goes to `docs/prd-helper/05-check/`, including `context-delta
 
 ## Note: `.agents/` is a generated copy
 
-The `.agents/skills/prd-helper/` directory is installed by `npx skills@latest add Wcof/PRDContextEngine --skill prd-helper -y`. It is listed in `.gitignore` and should not be edited directly. All development happens in the root-level `modules/`, `scripts/`, `checks/`, and `tests/` directories.
+The `.agents/skills/prd-helper/` directory is installed by `npx skills@latest add Wcof/PRDContextEngine -y`. It is listed in `.gitignore` and should not be edited directly. All development happens in the root-level `skills/`, `modules/`, `scripts/`, `checks/`, and `tests/` directories.
 
 ## Remove
 
@@ -127,4 +132,4 @@ python3 .claude/skills/prd-helper/scripts/remove-prd-helper.py --project .
 python3 .trae/skills/prd-helper/scripts/remove-prd-helper.py --project .
 ```
 
-If none exists, install `prd-helper` once with `npx skills@latest add Wcof/PRDContextEngine --skill prd-helper -y` and retry. Do not ask the user to run shell commands manually unless the current Agent cannot execute commands.
+If none exists, install PRD Helper once with `npx skills@latest add Wcof/PRDContextEngine -y` and retry. Do not ask the user to run shell commands manually unless the current Agent cannot execute commands.

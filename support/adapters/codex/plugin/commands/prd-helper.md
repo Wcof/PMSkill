@@ -1,17 +1,32 @@
+---
+description: 初始化或修复 PRD Helper 项目配置
+allowed-tools: Bash
+---
+
 # /prd-helper
 
-初始化或修复当前项目的 PRD Helper 配置。
+请使用用户当前语言响应。中文用户默认中文，英文用户默认英文。
 
-## Workflow
-
-1. 创建或修复 `docs/prd-helper/` 目录结构
-2. 写入当前项目的 Agent 规则
-3. 安装 Codex 插件命令模板
-4. 告知用户下一步可以使用 `/prd-start`
-
-## 执行
+执行：
 
 ```bash
-python3 "{skill_root}/scripts/setup-prd-helper.py" --project . --docs-root "{docs_root}" --agent codex
+set -euo pipefail
+
+find_prd_dispatcher() {
+  for dir in ".agents/skills/prd-helper" ".claude/skills/prd-helper" ".trae/skills/prd-helper" "."; do
+    [ -f "$dir/scripts/prd-command-dispatch.py" ] && { printf '%s\n' "$dir/scripts/prd-command-dispatch.py"; return 0; }
+  done
+  candidate=$(find "${CODEX_HOME:-$HOME/.codex}" "${CLAUDE_CONFIG_DIR:-$HOME/.claude}" -path "*/prd-command-dispatch.py" -print -quit 2>/dev/null || true)
+  [ -n "$candidate" ] && { printf '%s\n' "$candidate"; return 0; }
+  return 1
+}
+
+dispatcher="$(find_prd_dispatcher)" || {
+  echo "未找到 PRD Helper 命令分发器。请先运行：npx skills@latest add Wcof/PRDContextEngine -y"
+  exit 1
+}
+
+python3 "$dispatcher" helper --project . --docs-root docs/prd-helper
 ```
 
+执行后用简短中文说明结果；如果用户使用英文，则用英文说明。

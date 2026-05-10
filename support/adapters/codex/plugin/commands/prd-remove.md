@@ -1,15 +1,32 @@
+---
+description: 卸载 PRD Helper 并清理 Agent 配置
+allowed-tools: Bash
+---
+
 # /prd-remove
 
-从当前项目卸载 PRD Helper。
+请使用用户当前语言响应。中文用户默认中文，英文用户默认英文。
 
-## Workflow
-
-1. 确认用户要卸载
-2. 执行卸载脚本，清理 Agent 配置和插件文件
-3. 告知用户卸载完成
-
-## 执行
+执行：
 
 ```bash
-python3 "{skill_root}/scripts/remove-prd-helper.py" --project . --agent codex
+set -euo pipefail
+
+find_prd_dispatcher() {
+  for dir in ".agents/skills/prd-remove" ".agents/skills/prd-helper" ".claude/skills/prd-remove" ".claude/skills/prd-helper" ".trae/skills/prd-remove" ".trae/skills/prd-helper" "."; do
+    [ -f "$dir/scripts/prd-command-dispatch.py" ] && { printf '%s\n' "$dir/scripts/prd-command-dispatch.py"; return 0; }
+  done
+  candidate=$(find "${CODEX_HOME:-$HOME/.codex}" "${CLAUDE_CONFIG_DIR:-$HOME/.claude}" -path "*/prd-command-dispatch.py" -print -quit 2>/dev/null || true)
+  [ -n "$candidate" ] && { printf '%s\n' "$candidate"; return 0; }
+  return 1
+}
+
+dispatcher="$(find_prd_dispatcher)" || {
+  echo "未找到 PRD Helper 命令分发器。请先运行：npx skills@latest add Wcof/PRDContextEngine -y"
+  exit 1
+}
+
+python3 "$dispatcher" remove --project . --docs-root docs/prd-helper
 ```
+
+执行后用简短中文说明结果；如果用户使用英文，则用英文说明。

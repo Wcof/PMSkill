@@ -14,7 +14,7 @@ npx skills@latest add Wcof/PRDContextEngine --all
 npx skills@latest add Wcof/PRDContextEngine
 ```
 
-选择 `prd-helper`，并选择 Trae 或 Trae CN 作为安装目标。这个 Skill 内部包含采集、精炼、关联、生成四个模块，不拆分安装。
+选择全部 `prd-*` Skill，并选择 Trae 或 Trae CN 作为安装目标。`prd-helper` 承载四阶段业务规则，其它 `prd-*` Skill 是命令包装。
 
 交互选择时：
 
@@ -23,13 +23,13 @@ npx skills@latest add Wcof/PRDContextEngine
 - 使用 `Enter` 确认
 - 不需要输入数字
 
-安装完成后，在 Trae 中运行：
+安装完成后，在 Trae 中可直接运行：
 
 ```text
 /prd-helper
 ```
 
-首次运行 `/prd-helper` 会自动初始化项目：创建 `docs/prd-helper/`，并写入 Trae `project_rules.md` 配置块。
+首次运行任意 `/prd-*` 会自动初始化项目：创建 `docs/prd-helper/`，并写入 Trae `project_rules.md` 配置块。
 
 ## 卸载
 
@@ -100,7 +100,7 @@ your-project/
 
 ## 使用方式
 
-安装后，先发送 `/prd-helper` 自动初始化。开始主动采集时发送：
+安装后，先发送 `/prd-start` 自动初始化并开始主动采集：
 
 ```text
 /prd-start

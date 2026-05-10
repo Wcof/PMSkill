@@ -1,31 +1,34 @@
+---
+description: 开启需求研讨模式 — 追问矛盾、模糊术语和未决问题
+allowed-tools: Bash
+---
+
 # /prd-discuss
 
-开启需求研讨模式 — 压力测试产品方案。
+请使用用户当前语言响应。中文用户默认中文，英文用户默认英文。
 
-## 前置条件
+执行：
 
-- 必须已执行 `/prd-start`（`capture_mode` 为 `on`）
+```bash
+set -euo pipefail
 
-## 流程
+find_prd_dispatcher() {
+  for dir in ".agents/skills/prd-discuss" ".agents/skills/prd-helper" ".claude/skills/prd-discuss" ".claude/skills/prd-helper" ".trae/skills/prd-discuss" ".trae/skills/prd-helper" "."; do
+    [ -f "$dir/scripts/prd-command-dispatch.py" ] && { printf '%s\n' "$dir/scripts/prd-command-dispatch.py"; return 0; }
+  done
+  candidate=$(find "${CODEX_HOME:-$HOME/.codex}" "${CLAUDE_CONFIG_DIR:-$HOME/.claude}" -path "*/prd-command-dispatch.py" -print -quit 2>/dev/null || true)
+  [ -n "$candidate" ] && { printf '%s\n' "$candidate"; return 0; }
+  return 1
+}
 
-### Phase 1: 扫描与呈现
+dispatcher="$(find_prd_dispatcher)" || {
+  echo "未找到 PRD Helper 命令分发器。请先运行：npx skills@latest add Wcof/PRDContextEngine -y"
+  exit 1
+}
 
-1. 读取 `{docs_root}/01-collect/active/` 和 `{docs_root}/01-collect/passive/` 下所有文件
-2. 梳理矛盾点、模糊术语、未解决的冲突
-3. 向用户呈现发现，询问：基于这些矛盾来 battle，还是有新命题？
+python3 "$dispatcher" discuss --project . --docs-root docs/prd-helper
+```
 
-### Phase 2: 持续 Battle
+然后进入研讨模式：基于 `CONTEXT.md`、`docs/adr/`、`docs/prd-helper/01-collect/` 与当前会话，追问术语歧义、目标冲突、约束缺失和待确认问题；将结论沉淀到 `docs/prd-helper/02-refine/`（facts/decisions/constraints/questions/conflicts）。
 
-进入 grill 模式，遵循以下规则：
-
-- 逐个问题追问，等用户回答后再继续
-- 每个问题附带推荐答案
-- 挑战术语表冲突、精炼模糊语言
-- 用具体场景压力测试领域关系
-- 交叉引用代码/文档验证用户陈述
-- 实时更新项目 `CONTEXT.md`（格式见 `{skill_root}/modules/grill/templates/CONTEXT-FORMAT.md`）
-- 谨慎创建 ADR（格式见 `{skill_root}/modules/grill/templates/ADR-FORMAT.md`）
-
-### 结束
-
-生成 `{docs_root}/01-collect/grill/battle-summary.md` 和 `open-questions.md`。
+执行后用简短中文说明结果；如果用户使用英文，则用英文说明。

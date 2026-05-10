@@ -193,9 +193,9 @@ def test_setup_installs_agent_configs_and_claude_commands(tmp_path: Path):
     assert tmp_path / ".claude" / "commands" / "prd-start.md" in command_files
     assert not (tmp_path / ".claude" / "commands" / "prd-init.md").exists()
     assert not (tmp_path / ".claude" / "commands" / "prd-setup.md").exists()
-    assert "setup-prd-helper.py" in (tmp_path / ".claude" / "commands" / "prd-helper.md").read_text(encoding="utf-8")
-    assert "collect-control.py\" start" in (tmp_path / ".claude" / "commands" / "prd-start.md").read_text(encoding="utf-8")
-    assert "--project . --docs-root docs/prd-helper --agent claude-code" in (
+    assert "scripts/prd-command-dispatch.py" in (tmp_path / ".claude" / "commands" / "prd-helper.md").read_text(encoding="utf-8")
+    assert "scripts/prd-command-dispatch.py" in (tmp_path / ".claude" / "commands" / "prd-start.md").read_text(encoding="utf-8")
+    assert " start --project . --docs-root docs/prd-helper" in (
         tmp_path / ".claude" / "commands" / "prd-start.md"
     ).read_text(encoding="utf-8")
     assert not (tmp_path / ".claude" / "settings.json").exists()
@@ -843,7 +843,7 @@ def test_enable_codex_plugin_updates_existing_config_without_duplicate_tables(tm
     assert "[plugins.\"github@openai-curated\"]" in content
 
 
-def test_codex_plugin_install_can_copy_current_skill_when_no_nested_agents_dir(tmp_path: Path, monkeypatch):
+def test_codex_plugin_install_can_copy_current_helper_skill_when_no_nested_agents_dir(tmp_path: Path, monkeypatch):
     monkeypatch.setenv("CODEX_HOME", str(tmp_path / "codex-home"))
     module = load_script("scripts/setup-prd-helper.py")
     skill_root = tmp_path / "installed-skill"
@@ -855,6 +855,21 @@ def test_codex_plugin_install_can_copy_current_skill_when_no_nested_agents_dir(t
 
     assert (plugin_dir / "skills" / "prd-helper" / "SKILL.md").exists()
     assert not (plugin_dir / "skills" / "prd-helper" / ".agents").exists()
+
+
+def test_codex_plugin_install_rejects_non_helper_skill_root(tmp_path: Path, monkeypatch):
+    monkeypatch.setenv("CODEX_HOME", str(tmp_path / "codex-home"))
+    module = load_script("scripts/setup-prd-helper.py")
+    skill_root = tmp_path / "installed-skill"
+    shutil.copytree(ROOT / "support", skill_root / "support")
+    write(skill_root / "SKILL.md", "---\nname: prd-start\n---\n# PRD Start\n")
+    write(skill_root / "scripts" / "setup-prd-helper.py", "# setup\n")
+
+    try:
+        module.install_codex_plugin(skill_root, "docs/prd-helper")
+        assert False, "non-helper skill root should be rejected"
+    except FileNotFoundError:
+        pass
 
 
 def test_bootstrap_file_does_not_exist():
