@@ -19,6 +19,7 @@ from lib.constants import (
     CODEX_TMP_REMOTE_SYNC_REL,
     COMMAND_NAMES,
 )
+from lib.command_registry import ALL_COMMAND_NAMES
 
 
 AGENTS = ("codex", "claude-code", "trae", "trae-cn")
@@ -214,21 +215,28 @@ def main() -> int:
         remove_codex_config_entries(find_codex_home() / "config.toml")
         remove_codex_config_entries(project / ".codex" / "config.toml")
 
-    remove_cmd = [
-        "npx",
-        "skills@latest",
-        "remove",
-        "prd-helper",
-        "--agent",
-        *agents,
-        "-y",
-    ]
-    if args.global_scope:
-        remove_cmd.append("--global")
+    failed: list[tuple[str, int]] = []
+    for skill_name in ALL_COMMAND_NAMES:
+        remove_cmd = [
+            "npx",
+            "skills@latest",
+            "remove",
+            skill_name,
+            "--agent",
+            *agents,
+            "-y",
+        ]
+        if args.global_scope:
+            remove_cmd.append("--global")
 
-    remove_code = run(remove_cmd, project)
-    if remove_code != 0:
-        return remove_code
+        remove_code = run(remove_cmd, project)
+        if remove_code != 0:
+            failed.append((skill_name, remove_code))
+
+    if failed:
+        for skill_name, code in failed:
+            print(f"卸载失败：{skill_name} (exit={code})")
+        return failed[0][1]
 
     if args.delete_docs:
         docs = project / "docs" / "prd-helper"

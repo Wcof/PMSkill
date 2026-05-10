@@ -11,7 +11,7 @@ allowed-tools: Bash
 先执行初始化分发：
 
 ```bash
-python3 .agents/skills/prd-import/scripts/prd-command-dispatch.py import --project . --docs-root docs/prd-helper
+python3 .agents/skills/prd-helper/scripts/prd-command-dispatch.py import --project . --docs-root docs/prd-helper
 ```
 
 然后根据用户给出的文件夹路径，扫描支持的文件并写入 `docs/prd-helper/01-collect/passive/`，同时更新 `docs/prd-helper/01-collect/source-index.md`。如果当前 Agent 将本 Skill 安装到其他目录，查找已安装 Skill 目录中的 `scripts/prd-command-dispatch.py`，并用同样参数执行。

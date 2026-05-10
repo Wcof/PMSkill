@@ -514,6 +514,35 @@ def test_remove_prd_helper_cleans_commands_and_hooks(tmp_path: Path):
     assert not (tmp_path / ".codex" / "hooks.json").exists()
 
 
+def test_remove_main_uninstalls_all_prd_skills(tmp_path: Path, monkeypatch):
+    module = load_script("scripts/remove-prd-helper.py")
+    calls = []
+
+    def fake_run(cmd, cwd):
+        calls.append(cmd)
+        return 0
+
+    monkeypatch.setattr(module, "run", fake_run)
+    monkeypatch.setattr(module, "remove_codex_plugin", lambda: None)
+    monkeypatch.setattr(module, "remove_codex_config_entries", lambda path: None)
+    monkeypatch.setattr(module, "remove_generated_commands", lambda project, agents: None)
+    monkeypatch.setattr(module, "remove_claude_hooks", lambda project: None)
+    monkeypatch.setattr(module, "remove_codex_hooks", lambda project: None)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["remove-prd-helper.py", "--project", str(tmp_path), "--agent", "claude-code"],
+    )
+
+    assert module.main() == 0
+    uninstall_calls = [cmd for cmd in calls if len(cmd) >= 4 and cmd[:3] == ["npx", "skills@latest", "remove"]]
+    removed_skills = {cmd[3] for cmd in uninstall_calls}
+    assert "prd-helper" in removed_skills
+    assert "prd-start" in removed_skills
+    assert "prd-remove" in removed_skills
+    assert len(removed_skills) >= 11
+
+
 def test_remove_codex_config_entries_removes_only_prd_helper_tables(tmp_path: Path):
     module = load_script("scripts/remove-prd-helper.py")
     config = tmp_path / "config.toml"
@@ -662,7 +691,7 @@ def test_claude_plugin_manifest_references_existing_commands():
     plugin = json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))
     marketplace = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text(encoding="utf-8"))
 
-    assert plugin["name"] == "PRD Helper"
+    assert plugin["name"] == "prd-helper"
     assert marketplace["plugins"][0]["source"] == "./"
     assert "./skills/prd-helper" in plugin["skills"]
     assert "./skills/prd-start" in plugin["skills"]
@@ -682,7 +711,7 @@ def test_claude_plugin_manifest_references_existing_commands():
 def test_codex_plugin_manifest_references_existing_commands_and_skills():
     plugin = json.loads((ROOT / "support" / "adapters" / "codex" / "plugin" / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
 
-    assert plugin["name"] == "PRD Helper"
+    assert plugin["name"] == "prd-helper"
     assert "./skills/prd-helper" in plugin["skills"]
     assert "./skills/prd-start" in plugin["skills"]
 

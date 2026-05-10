@@ -11,7 +11,7 @@ allowed-tools: Bash
 执行：
 
 ```bash
-python3 .agents/skills/prd-relate/scripts/prd-command-dispatch.py relate --project . --docs-root docs/prd-helper
+python3 .agents/skills/prd-helper/scripts/prd-command-dispatch.py relate --project . --docs-root docs/prd-helper
 ```
 
 随后读取 `modules/relate/guide.md`，把事实、页面、功能、规则、数据、验收之间的关系写入 `docs/prd-helper/03-relate/`。如果当前 Agent 将本 Skill 安装到其他目录，查找已安装 Skill 目录中的 `scripts/prd-command-dispatch.py`，并用同样参数执行。

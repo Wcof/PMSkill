@@ -11,7 +11,7 @@ allowed-tools: Bash
 执行：
 
 ```bash
-python3 .agents/skills/prd-refine/scripts/prd-command-dispatch.py refine --project . --docs-root docs/prd-helper
+python3 .agents/skills/prd-helper/scripts/prd-command-dispatch.py refine --project . --docs-root docs/prd-helper
 ```
 
 随后读取 `modules/refine/guide.md` 和采集材料，把事实、决策、约束、冲突、问题和推断写入 `docs/prd-helper/02-refine/`。如果当前 Agent 将本 Skill 安装到其他目录，查找已安装 Skill 目录中的 `scripts/prd-command-dispatch.py`，并用同样参数执行。

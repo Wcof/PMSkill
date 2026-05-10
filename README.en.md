@@ -34,7 +34,7 @@ The authoritative command set is cross-checked against `scripts/lib/command_regi
 | `/prd-relate` | Relate | Build upstream/downstream links across facts, pages, features, rules, data, and acceptance | `03-relate/` |
 | `/prd-generate` | Generate | Generate PRD docs and Agent context from refined and related outputs | `04-generate/` |
 | `/prd-discuss` | Auxiliary discussion | Ask one question at a time about contradictions, vague terms, and unresolved issues | Discussion summary, open questions |
-| `/prd-remove` | Uninstall | Clean project config, commands, and hooks while preserving generated docs by default | Cleanup result |
+| `/prd-remove` | Uninstall | Clean project config, commands, hooks, and the full `prd-*` Skill command package while preserving generated docs by default | Cleanup result |
 
 Platform note: the `skills/` directory contains all 11 installer-discoverable Skills. `COMMAND_NAMES` still contains the 10 commands after `/prd-helper` for project-level fallback commands and uninstall cleanup.
 
@@ -139,7 +139,7 @@ No capture output: run `/prd-status` and confirm the state is `on`; then inspect
 
 Not sure whether to use `/prd-scan` or `/prd-import`: use `/prd-scan` for historical Agent sessions; use `/prd-import` or `01-collect/passive/` for third-party folders, meeting notes, legacy PRDs, and customer feedback.
 
-Want to uninstall: run `/prd-remove`. It cleans project config, commands, and hooks while keeping existing `docs/prd-helper/` documents by default.
+Want to uninstall: run `/prd-remove`. It cleans project config, commands, hooks, and the full `prd-*` Skill command package while keeping existing `docs/prd-helper/` documents by default.
 
 ## Open-source Governance
 

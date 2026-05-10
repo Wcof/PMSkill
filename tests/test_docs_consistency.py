@@ -81,9 +81,19 @@ def test_skills_package_exposes_each_prd_command_without_root_skill():
         assert f"name: {command.name}" in content
         assert command.zh_description in content
         if command.name != "prd-helper":
-            assert "scripts/prd-command-dispatch.py" in content
+            assert ".agents/skills/prd-helper/scripts/prd-command-dispatch.py" in content
             assert "--agent claude-code" not in content
             assert ".claude/skills/prd-helper" not in content
+
+
+def test_command_wrappers_are_lightweight_without_runtime_symlinks():
+    for command in ALL_COMMANDS:
+        if command.name == "prd-helper":
+            continue
+        skill_dir = ROOT / "skills" / command.name
+        assert (skill_dir / "SKILL.md").exists()
+        for extra in ("checks", "commands", "modules", "scripts", "support"):
+            assert not (skill_dir / extra).exists(), f"{skill_dir / extra} should not exist"
 
 
 def test_codex_plugin_command_templates_match_current_command_set():
@@ -92,6 +102,24 @@ def test_codex_plugin_command_templates_match_current_command_set():
         for path in (ROOT / "support/adapters/codex/plugin/commands").glob("prd-*.md")
     }
     assert command_files == CURRENT_COMMANDS
+
+
+def test_codex_plugin_commands_are_symlinked_to_canonical_commands():
+    plugin_commands_dir = ROOT / "support" / "adapters" / "codex" / "plugin" / "commands"
+    for command in ALL_COMMANDS:
+        path = plugin_commands_dir / f"{command.name}.md"
+        assert path.is_symlink(), f"{path} should symlink to canonical command file"
+
+
+def test_command_markdown_dispatcher_lookup_is_scoped_and_not_global_find():
+    command_paths = [f"commands/{command.name}.md" for command in ALL_COMMANDS]
+    command_paths.append("support/adapters/codex/plugin/commands/prd-generate.md")
+
+    for path in command_paths:
+        content = _read(path)
+        assert "find \"${CODEX_HOME:-$HOME/.codex}\" \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}\"" not in content
+        assert "/plugins/prd-helper/skills/prd-helper" in content
+        assert "npx skills@latest add Wcof/PRDContextEngine --all" in content
 
 
 def test_repo_root_is_installable_as_codex_plugin():
@@ -105,7 +133,7 @@ def test_repo_root_is_installable_as_codex_plugin():
     assert command_files == CURRENT_COMMANDS
 
     plugin = json.loads(plugin_path.read_text(encoding="utf-8"))
-    assert plugin["name"] == "PRD Helper"
+    assert plugin["name"] == "prd-helper"
     assert set(plugin["skills"]) == {f"./skills/{command.name}" for command in ALL_COMMANDS}
     assert plugin["interface"]["displayName"] == "PRD Helper"
 
@@ -126,7 +154,7 @@ def test_plugin_manifests_group_all_prd_skills_under_plugin_node():
 
     for manifest in manifests:
         plugin = json.loads(manifest.read_text(encoding="utf-8"))
-        assert plugin["name"] == "PRD Helper"
+        assert plugin["name"] == "prd-helper"
         assert set(plugin["skills"]) == expected_skills, f"{manifest} does not declare every command Skill"
         for skill_path in plugin["skills"]:
             assert (ROOT / skill_path.removeprefix("./") / "SKILL.md").exists(), skill_path
