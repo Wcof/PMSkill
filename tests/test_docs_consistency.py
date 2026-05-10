@@ -29,6 +29,21 @@ def test_public_command_docs_use_current_command_set():
             assert command not in content, f"{path} still mentions legacy {command}"
 
 
+def test_install_docs_cover_one_shot_and_interactive_paths():
+    docs = {
+        "README.md": _read("README.md"),
+        "README.en.md": _read("README.en.md"),
+        "support/adapters/codex/install.md": _read("support/adapters/codex/install.md"),
+        "support/adapters/claude-code/install.md": _read("support/adapters/claude-code/install.md"),
+        "support/adapters/trae/install.md": _read("support/adapters/trae/install.md"),
+        "support/adapters/generic/usage.md": _read("support/adapters/generic/usage.md"),
+    }
+
+    for path, content in docs.items():
+        assert "--all" in content, f"{path} missing one-shot install path"
+        assert "npx skills@latest add Wcof/PRDContextEngine" in content, f"{path} missing interactive install path"
+
+
 def test_constants_are_derived_from_command_registry():
     assert COMMAND_NAMES == GENERATED_COMMAND_NAMES
     assert {command.name for command in ALL_COMMANDS} == {command.removeprefix("/") for command in CURRENT_COMMANDS}

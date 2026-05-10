@@ -5,7 +5,7 @@
 推荐使用 `skills@latest` 安装到 Claude Code，并选择全部 `prd-*` Skill：
 
 ```bash
-npx skills@latest add Wcof/PRDContextEngine --agent claude-code -y
+npx skills@latest add Wcof/PRDContextEngine --agent claude-code --all
 ```
 
 安装完成后，Claude Code 应能加载完整 `/prd-*` 指令。可先运行：
@@ -71,7 +71,7 @@ npx skills@latest add Wcof/PRDContextEngine
 如果 Claude Code 的 `/` 菜单没有显示完整 `/prd-*`，先确认安装时选择了全部 Skill，或直接使用推荐的非交互命令：
 
 ```bash
-npx skills@latest add Wcof/PRDContextEngine --agent claude-code -y
+npx skills@latest add Wcof/PRDContextEngine --agent claude-code --all
 ```
 
 ## 卸载

@@ -50,6 +50,14 @@ PRD Helper 遵循“Python 执行化，静态提示词约束化”：
 
 ### 1. 安装命令 Skills
 
+默认推荐一键安装全部 `prd-*` Skill：
+
+```bash
+npx skills@latest add Wcof/PRDContextEngine --all
+```
+
+如果你想按需一个个选择（保留单选能力），使用交互安装：
+
 ```bash
 npx skills@latest add Wcof/PRDContextEngine
 ```
@@ -125,7 +133,7 @@ python3 scripts/check-structure.py docs/prd-helper
 
 ## 常见问题
 
-只看到 `/prd-helper`，没有 `/prd-start`：这通常表示安装时只选择了 `prd-helper`，或当前 Agent 没刷新 Skill 列表。重新运行 `npx skills@latest add Wcof/PRDContextEngine` 并安装全部 `prd-*` Skill；已打开的会话可能仍需重开。即使菜单未刷新，直接输入 `/prd-start` 也会由已安装 Skill 或项目级兜底命令执行。Codex 的 hooks 会在 `/prd-start` 写入 `.codex/hooks.json`，并在 `/prd-stop` 清理。
+只看到 `/prd-helper`，没有 `/prd-start`：这通常表示安装时只选择了 `prd-helper`，或当前 Agent 没刷新 Skill 列表。优先执行 `npx skills@latest add Wcof/PRDContextEngine --all` 一键全装；如果你走交互安装，请确认已勾选全部 `prd-*` Skill。已打开的会话可能仍需重开。即使菜单未刷新，直接输入 `/prd-start` 也会由已安装 Skill 或项目级兜底命令执行。Codex 的 hooks 会在 `/prd-start` 写入 `.codex/hooks.json`，并在 `/prd-stop` 清理。
 
 采集没有写入：先运行 `/prd-status`，确认状态是 `on`；再检查 `docs/prd-helper/01-collect/collect-state.md`。
 

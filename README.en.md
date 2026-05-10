@@ -50,6 +50,14 @@ PRD Helper keeps Python as the executor and static prompts/templates as the cons
 
 ### 1. Install the Command Skills
 
+Default recommendation: install all `prd-*` Skills in one shot:
+
+```bash
+npx skills@latest add Wcof/PRDContextEngine --all
+```
+
+If you prefer selecting Skills one-by-one, use interactive mode:
+
 ```bash
 npx skills@latest add Wcof/PRDContextEngine
 ```
@@ -125,7 +133,7 @@ python3 scripts/check-structure.py docs/prd-helper
 
 ## FAQ
 
-Only `/prd-helper` appears, not `/prd-start`: this usually means only `prd-helper` was selected during installation, or the current Agent has not refreshed its Skill list. Run `npx skills@latest add Wcof/PRDContextEngine` again and install all `prd-*` Skills; an already-open session may still need a restart. Even if the menu has not refreshed, typing `/prd-start` directly can still be handled by installed Skills or project-level fallback commands. Codex hooks are written by `/prd-start` and cleaned by `/prd-stop`.
+Only `/prd-helper` appears, not `/prd-start`: this usually means only `prd-helper` was selected during installation, or the current Agent has not refreshed its Skill list. Prefer `npx skills@latest add Wcof/PRDContextEngine --all` for one-shot installation; if you use interactive mode, confirm all `prd-*` Skills are selected. An already-open session may still need a restart. Even if the menu has not refreshed, typing `/prd-start` directly can still be handled by installed Skills or project-level fallback commands. Codex hooks are written by `/prd-start` and cleaned by `/prd-stop`.
 
 No capture output: run `/prd-status` and confirm the state is `on`; then inspect `docs/prd-helper/01-collect/collect-state.md`.
 
