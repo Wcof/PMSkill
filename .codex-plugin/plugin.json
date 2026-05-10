@@ -1,5 +1,5 @@
 {
-  "name": "prd-helper",
+  "name": "PRD Helper",
   "version": "0.1.0",
   "description": "PRD Helper - 产品上下文采集与 PRD 生成工具",
   "author": {
@@ -15,7 +15,19 @@
     "capture",
     "context"
   ],
-  "skills": "./skills/",
+  "skills": [
+    "./skills/prd-helper",
+    "./skills/prd-start",
+    "./skills/prd-stop",
+    "./skills/prd-status",
+    "./skills/prd-scan",
+    "./skills/prd-import",
+    "./skills/prd-refine",
+    "./skills/prd-relate",
+    "./skills/prd-generate",
+    "./skills/prd-discuss",
+    "./skills/prd-remove"
+  ],
   "commands": [
     "./commands/prd-helper.md",
     "./commands/prd-start.md",

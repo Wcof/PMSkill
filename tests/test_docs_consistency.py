@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 
 from scripts.lib.command_registry import ALL_COMMANDS, GENERATED_COMMAND_NAMES
 from scripts.lib.constants import COMMAND_NAMES
@@ -103,9 +104,9 @@ def test_repo_root_is_installable_as_codex_plugin():
     }
     assert command_files == CURRENT_COMMANDS
 
-    plugin = __import__("json").loads(plugin_path.read_text(encoding="utf-8"))
-    assert plugin["name"] == "prd-helper"
-    assert plugin["skills"] == "./skills/"
+    plugin = json.loads(plugin_path.read_text(encoding="utf-8"))
+    assert plugin["name"] == "PRD Helper"
+    assert set(plugin["skills"]) == {f"./skills/{command.name}" for command in ALL_COMMANDS}
     assert plugin["interface"]["displayName"] == "PRD Helper"
 
     command_paths = set(plugin["commands"])
@@ -113,6 +114,22 @@ def test_repo_root_is_installable_as_codex_plugin():
 
     for command_path in command_paths:
         assert (ROOT / command_path.removeprefix("./")).exists(), command_path
+
+
+def test_plugin_manifests_group_all_prd_skills_under_plugin_node():
+    manifests = [
+        ROOT / ".claude-plugin" / "plugin.json",
+        ROOT / ".codex-plugin" / "plugin.json",
+        ROOT / "support" / "adapters" / "codex" / "plugin" / ".codex-plugin" / "plugin.json",
+    ]
+    expected_skills = {f"./skills/{command.name}" for command in ALL_COMMANDS}
+
+    for manifest in manifests:
+        plugin = json.loads(manifest.read_text(encoding="utf-8"))
+        assert plugin["name"] == "PRD Helper"
+        assert set(plugin["skills"]) == expected_skills, f"{manifest} does not declare every command Skill"
+        for skill_path in plugin["skills"]:
+            assert (ROOT / skill_path.removeprefix("./") / "SKILL.md").exists(), skill_path
 
 
 def test_skill_activation_includes_codex_setup_before_claude_setup():

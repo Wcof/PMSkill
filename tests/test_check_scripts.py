@@ -662,8 +662,10 @@ def test_claude_plugin_manifest_references_existing_commands():
     plugin = json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))
     marketplace = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text(encoding="utf-8"))
 
-    assert plugin["name"] == "prd-helper"
+    assert plugin["name"] == "PRD Helper"
     assert marketplace["plugins"][0]["source"] == "./"
+    assert "./skills/prd-helper" in plugin["skills"]
+    assert "./skills/prd-start" in plugin["skills"]
 
     command_paths = plugin["commands"]
     assert "./commands/prd-helper.md" in command_paths
@@ -680,8 +682,9 @@ def test_claude_plugin_manifest_references_existing_commands():
 def test_codex_plugin_manifest_references_existing_commands_and_skills():
     plugin = json.loads((ROOT / "support" / "adapters" / "codex" / "plugin" / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
 
-    assert plugin["name"] == "prd-helper"
-    assert plugin["skills"] == "./skills/"
+    assert plugin["name"] == "PRD Helper"
+    assert "./skills/prd-helper" in plugin["skills"]
+    assert "./skills/prd-start" in plugin["skills"]
 
     command_paths = plugin["commands"]
     assert "./commands/prd-helper.md" in command_paths
@@ -714,7 +717,8 @@ def test_setup_installs_codex_plugin_with_commands_and_skills(tmp_path: Path, mo
     assert (marketplace_plugin_dir / "skills" / "prd-helper" / "SKILL.md").exists()
 
     plugin = json.loads((plugin_dir / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
-    assert plugin["skills"] == "./skills/"
+    assert "./skills/prd-helper" in plugin["skills"]
+    assert "./skills/prd-start" in plugin["skills"]
     assert "./commands/prd-helper.md" in plugin["commands"]
 
     marketplace = json.loads(
