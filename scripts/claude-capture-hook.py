@@ -145,9 +145,25 @@ def handle_stop(payload: dict, root: Path, project: Path, agent: str) -> int:
         answer_file.unlink(missing_ok=True)
         return 0
 
-    if completed.stderr:
-        print(completed.stderr.strip(), file=sys.stderr)
-    return 1
+    failure_report = {
+        "session_id": session_id,
+        "agent": agent,
+        "root": str(root),
+        "command": command,
+        "returncode": completed.returncode,
+        "stderr": completed.stderr.strip(),
+        "state_file": str(state_file),
+        "user_file": str(user_file),
+        "answer_file": str(answer_file),
+    }
+    try:
+        (temp_dir / f"{session_id}-stop-error.json").write_text(
+            json.dumps(failure_report, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+    except OSError:
+        pass
+    return 0
 
 
 def main() -> int:

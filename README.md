@@ -135,7 +135,7 @@ python3 scripts/check-structure.py docs/prd-helper
 
 ## 常见问题
 
-只看到 `/prd-helper`，没有 `/prd-start`：这通常表示安装时只选择了 `prd-helper`，或当前 Agent 没刷新 Skill 列表。优先执行 `npx skills@latest add Wcof/PRDContextEngine --all --full-depth` 一键全装；如果你走交互安装，请确认已勾选全部 `prd-*` Skill。已打开的会话可能仍需重开。即使菜单未刷新，直接输入 `/prd-start` 也会由已安装 Skill 或项目级兜底命令执行。Codex 的 hooks 会在 `/prd-start` 写入 `.codex/hooks.json`，并在 `/prd-stop` 清理。
+只看到 `/prd-helper`，没有 `/prd-start`：这通常表示安装时只选择了 `prd-helper`，或当前 Agent 没刷新 Skill 列表。优先执行 `npx skills@latest add Wcof/PRDContextEngine --all --full-depth` 一键全装；如果你走交互安装，请确认已勾选全部 `prd-*` Skill。已打开的会话可能仍需重开。即使菜单未刷新，直接输入 `/prd-start` 也会由已安装 Skill 或项目级兜底命令执行。Codex 的 hooks 会在 `/prd-start` 写入 `.codex/hooks.json`，并在 `/prd-stop` 清理；若收尾脚本失败，只会生成 `.codex/prd-helper/hook-state/*-stop-error.json` 诊断文件，不会把会话打断成 `hook exited with code 1`。
 
 采集没有写入：先运行 `/prd-status`，确认状态是 `on`；再检查 `docs/prd-helper/01-collect/collect-state.md`。
 

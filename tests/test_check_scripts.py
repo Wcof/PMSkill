@@ -402,6 +402,57 @@ def test_codex_capture_hook_records_turn_after_start(tmp_path: Path):
     assert not (tmp_path / ".codex" / "prd-helper" / "hook-state" / "session-001.json").exists()
 
 
+def test_codex_capture_hook_downgrades_stop_failure_to_warning(tmp_path: Path, monkeypatch, capsys):
+    module = load_script("scripts/claude-capture-hook.py")
+    root = tmp_path / "docs" / "prd-helper" / "01-collect"
+    root.mkdir(parents=True)
+    write_collect_state(
+        root,
+        {
+            "capture_mode": "on",
+            "session_id": "prd-session-test",
+            "turn_count": "0",
+            "active_source_count": "0",
+            "total_sources": "0",
+            "possible_noise_count": "0",
+        },
+    )
+
+    prompt_payload = {
+        "session_id": "session-001",
+        "cwd": str(tmp_path),
+        "hook_event_name": "UserPromptSubmit",
+        "prompt": "请记录这次 Codex 风险态势首页讨论。",
+    }
+    stop_payload = {
+        "session_id": "session-001",
+        "cwd": str(tmp_path),
+        "hook_event_name": "Stop",
+        "last_assistant_message": "已记录当前讨论，并保留原始上下文。",
+    }
+
+    assert module.handle_user_prompt(prompt_payload, root, tmp_path, "codex") == 0
+
+    def fake_run(*args, **kwargs):
+        class Completed:
+            returncode = 1
+            stderr = "capture failed"
+
+        return Completed()
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+
+    assert module.handle_stop(stop_payload, root, tmp_path, "codex") == 0
+    captured = capsys.readouterr()
+    assert "capture failed" not in captured.err
+    assert (tmp_path / ".codex" / "prd-helper" / "hook-state" / "session-001.json").exists()
+    error_file = tmp_path / ".codex" / "prd-helper" / "hook-state" / "session-001-stop-error.json"
+    assert error_file.exists()
+    error = json.loads(error_file.read_text(encoding="utf-8"))
+    assert error["returncode"] == 1
+    assert error["stderr"] == "capture failed"
+
+
 def test_scan_passive_indexes_new_files_and_updates_state(tmp_path: Path, monkeypatch):
     module = load_script("modules/collect/scripts/scan-passive.py")
     root = tmp_path / "docs" / "prd-helper" / "01-collect"
