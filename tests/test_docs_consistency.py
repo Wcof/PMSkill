@@ -42,6 +42,7 @@ def test_install_docs_cover_one_shot_and_interactive_paths():
 
     for path, content in docs.items():
         assert "--all" in content, f"{path} missing one-shot install path"
+        assert "--full-depth" in content, f"{path} missing full-depth install path"
         assert "npx skills@latest add Wcof/PRDContextEngine" in content, f"{path} missing interactive install path"
 
 
@@ -63,8 +64,11 @@ def test_command_files_match_constants():
         assert command.zh_description in content
 
 
-def test_skills_package_exposes_each_prd_command_without_root_skill():
-    assert not (ROOT / "SKILL.md").exists()
+def test_skills_package_exposes_root_local_entry_and_each_prd_command():
+    root_skill = _read("SKILL.md")
+    assert "name: prd-helper" in root_skill
+    assert "local-install entry" in root_skill
+    assert "--all --full-depth" in root_skill
 
     skill_files = {
         path.parent.name: path

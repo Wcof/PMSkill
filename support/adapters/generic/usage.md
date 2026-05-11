@@ -7,10 +7,10 @@
 如果 Agent 支持标准 Skills，默认先完整安装：
 
 ```bash
-npx skills@latest add Wcof/PRDContextEngine --all
+npx skills@latest add Wcof/PRDContextEngine --all --full-depth
 ```
 
-如果需要手动选择 Agent，也可以运行 `npx skills@latest add Wcof/PRDContextEngine`。安装后选择并注册全部 `prd-*` Skill，再运行：
+如果需要手动选择 Agent，也可以运行 `npx skills@latest add Wcof/PRDContextEngine --full-depth`。安装后选择并注册全部 `prd-*` Skill，再运行：
 
 ```text
 /prd-helper

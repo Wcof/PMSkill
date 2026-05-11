@@ -20,7 +20,7 @@ Generated documents are **Views**, not an **Entity** type. Only objects that flo
 
 ## Current Commands
 
-The authoritative command set is cross-checked against `scripts/lib/command_registry.py`, `skills/prd-*/SKILL.md`, `commands/*.md`, and plugin manifests. `npx skills@latest add Wcof/PRDContextEngine` discovers and installs these 11 command Skills:
+The authoritative command set is cross-checked against `scripts/lib/command_registry.py`, the root `SKILL.md`, `skills/prd-*/SKILL.md`, `commands/*.md`, and plugin manifests. The root `SKILL.md` is the local direct-download/clone entry; `npx skills@latest add Wcof/PRDContextEngine --full-depth` discovers and installs these 11 command Skills:
 
 | Command | Stage/Type | Purpose | Main Outputs |
 |---|---|---|---|
@@ -55,13 +55,13 @@ PRD Helper keeps Python as the executor and static prompts/templates as the cons
 Default recommendation: install all `prd-*` Skills in one shot:
 
 ```bash
-npx skills@latest add Wcof/PRDContextEngine --all
+npx skills@latest add Wcof/PRDContextEngine --all --full-depth
 ```
 
 If you prefer selecting Skills one-by-one, use interactive mode:
 
 ```bash
-npx skills@latest add Wcof/PRDContextEngine
+npx skills@latest add Wcof/PRDContextEngine --full-depth
 ```
 
 The installer discovers `prd-helper`, `prd-start`, `prd-stop`, `prd-status`, `prd-scan`, `prd-import`, `prd-refine`, `prd-relate`, `prd-generate`, `prd-discuss`, and `prd-remove` from `skills/`. In interactive mode, select these Skills and the target Agent, such as Claude Code, Codex, or Trae.
@@ -135,7 +135,7 @@ python3 scripts/check-structure.py docs/prd-helper
 
 ## FAQ
 
-Only `/prd-helper` appears, not `/prd-start`: this usually means only `prd-helper` was selected during installation, or the current Agent has not refreshed its Skill list. Prefer `npx skills@latest add Wcof/PRDContextEngine --all` for one-shot installation; if you use interactive mode, confirm all `prd-*` Skills are selected. An already-open session may still need a restart. Even if the menu has not refreshed, typing `/prd-start` directly can still be handled by installed Skills or project-level fallback commands. Codex hooks are written by `/prd-start` and cleaned by `/prd-stop`.
+Only `/prd-helper` appears, not `/prd-start`: this usually means only `prd-helper` was selected during installation, or the current Agent has not refreshed its Skill list. Prefer `npx skills@latest add Wcof/PRDContextEngine --all --full-depth` for one-shot installation; if you use interactive mode, confirm all `prd-*` Skills are selected. An already-open session may still need a restart. Even if the menu has not refreshed, typing `/prd-start` directly can still be handled by installed Skills or project-level fallback commands. Codex hooks are written by `/prd-start` and cleaned by `/prd-stop`.
 
 No capture output: run `/prd-status` and confirm the state is `on`; then inspect `docs/prd-helper/01-collect/collect-state.md`.
 
