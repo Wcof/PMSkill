@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 from scripts.lib.source_index import append_index, ensure_index
+from scripts.lib.relation_chain import parse_relation_chain, relation_chain_report
 from scripts.lib.state import read_collect_state, write_collect_state
 
 
@@ -175,6 +176,87 @@ def test_check_relate_writes_template_shaped_check(tmp_path: Path):
     assert "## 1. 断链检查" in content
     assert "每个核心规则有关联数据对象" in content
     assert "本轮关联是否可以进入生成阶段" in content
+
+
+def test_relation_chain_parser_reports_complete_chain(tmp_path: Path):
+    root = tmp_path / "prd-helper"
+    relate = root / "03-relate"
+    write(root / "02-refine" / "facts.md", "## fact_001\n")
+    write(relate / "page-map.md", "\n".join([
+        "## page_001",
+        "- 来源事实：fact_001",
+        "- 关联功能：feature_001",
+    ]))
+    write(relate / "feature-map.md", "\n".join([
+        "## feature_001",
+        "- 来源事实：fact_001",
+        "- 触发页面：page_001",
+        "- 关联规则：rule_001",
+    ]))
+    write(relate / "rule-map.md", "\n".join([
+        "## rule_001",
+        "- 来源事实：fact_001",
+        "- 触发功能：feature_001",
+        "- 关联数据对象：data_001",
+        "- 关联验收标准：acceptance_001",
+    ]))
+    write(relate / "data-map.md", "\n".join([
+        "## data_001",
+        "- 来源事实：fact_001",
+        "- 关联规则：rule_001",
+    ]))
+    write(relate / "acceptance-map.md", "\n".join([
+        "## acceptance_001",
+        "- 来源事实：fact_001",
+        "- 关联规则：rule_001",
+    ]))
+    write(relate / "context-map.md", "\n".join([
+        "fact_001 -> page_001 -> feature_001 -> rule_001 -> data_001 -> acceptance_001",
+    ]))
+
+    chain = parse_relation_chain(root)
+    report = relation_chain_report(chain)
+
+    assert report["safe"] is True
+    assert report["breaks"] == []
+    assert report["facts"]["fact_001"]["path"] == ["page_001", "feature_001", "rule_001", "data_001", "acceptance_001"]
+    assert report["entities"]["page"] == ["page_001"]
+
+
+def test_relation_chain_parser_locates_missing_rule_target(tmp_path: Path):
+    root = tmp_path / "prd-helper"
+    relate = root / "03-relate"
+    write(root / "02-refine" / "facts.md", "## fact_001\n")
+    write(relate / "page-map.md", "\n".join([
+        "## page_001",
+        "- 来源事实：fact_001",
+        "- 关联功能：feature_001",
+    ]))
+    write(relate / "feature-map.md", "\n".join([
+        "## feature_001",
+        "- 来源事实：fact_001",
+        "- 触发页面：page_001",
+        "- 关联规则：rule_001",
+    ]))
+    write(relate / "rule-map.md", "\n".join([
+        "## rule_001",
+        "- 来源事实：fact_001",
+        "- 触发功能：feature_001",
+        "- 关联数据对象：data_001",
+    ]))
+    write(relate / "data-map.md", "## data_001\n- 来源事实：fact_001\n")
+    write(relate / "acceptance-map.md", "## acceptance_001\n- 来源事实：fact_001\n")
+    write(relate / "context-map.md", "\n".join([
+        "fact_001 -> page_001 -> feature_001 -> rule_001 -> data_001",
+    ]))
+
+    chain = parse_relation_chain(root)
+    report = relation_chain_report(chain)
+
+    assert report["safe"] is False
+    assert any(break_["fact_id"] == "fact_001" for break_ in report["breaks"])
+    assert any(break_["missing"] == "acceptance" for break_ in report["breaks"])
+    assert report["breaks"][0]["location"]["id"] == "rule_001"
 
 
 def test_setup_installs_agent_configs_and_claude_commands(tmp_path: Path):
@@ -743,6 +825,7 @@ def test_generate_quality_report_exposes_actionable_safety_sections(tmp_path: Pa
     report = module.build_quality_report(root)
 
     assert "coverage" in report
+    assert report["soft_gate"].status == "limited"
     assert "traceability" in report
     assert "relation_chain" in report
     assert "agent_context_safety" in report
@@ -751,6 +834,27 @@ def test_generate_quality_report_exposes_actionable_safety_sections(tmp_path: Pa
     assert "02-refine/ 缺失" in report["limited_generate"]["risks"]
     assert report["agent_context_safety"]["prohibited_items"]
     assert not report["agent_context_safety"]["safe_for_execution"]
+
+
+def test_generate_agent_context_safety_uses_source_anchor_contract(tmp_path: Path):
+    module = load_script("modules/generate/scripts/check-generated.py")
+    root = tmp_path / "prd-helper"
+    write(
+        root / "04-generate" / "agent-context" / "frontend-context.md",
+        "\n".join([
+            "# Agent Context",
+            "",
+            "## 来源说明",
+            "- source_id：turn-001",
+            "- path：active/sessions/session-test.md",
+            "- quote：用户要求巡检点位管理",
+            "",
+        ]),
+    )
+
+    report = module.build_quality_report(root)
+
+    assert "04-generate/agent-context/frontend-context.md 缺少 Strong Trace 来源锚点" in report["agent_context_safety"]["prohibited_items"]
 
 
 def test_check_page_completeness_detects_missing_sections(tmp_path: Path):

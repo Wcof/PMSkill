@@ -48,6 +48,15 @@ PRD Helper keeps Python as the executor and static prompts/templates as the cons
 - Business rules stay in `skills/prd-helper/SKILL.md`, `modules/*/guide.md`, and `commands/*.md`; Python does not act as the prompt source.
 - Output structures and checklists live in `modules/*/templates/`; scripts only fill state, counts, check results, and source details.
 
+Runtime rules are concentrated in deep modules so scripts do not duplicate hidden contracts:
+
+- `collect_writer` unifies Active Capture, historical Session, and Passive Source writes, indexing, deduplication, and counters.
+- `source_anchor` centralizes Strong Trace / Weak Trace evaluation; the minimum anchor remains `source_id + path + quote/paraphrase + locator`.
+- `relation_chain` parses Relation Chain data and reports located breaks instead of relying on text inclusion.
+- `generate_contract` defines expected Generate Views, Limited Generate risks, and the generation contract; `generate_manifest` remains as a compatibility wrapper.
+- `check_result` provides the shared Soft Gate result model.
+- `install_state`, `command_plan`, and `command_packaging` centralize install state, Atomic Command execution semantics, and command wrapper rules.
+
 ## Quick Start
 
 ### 1. Install the Command Skills
@@ -113,13 +122,13 @@ docs/prd-helper/01-collect/passive/
 
 ### How Generate Produces the Complete Set
 
-Generate now uses a manifest-driven flow instead of relying only on an Agent following prompt text:
+Generate now uses a contract-driven flow instead of relying only on an Agent following prompt text:
 
-1. **Generate Manifest** derives the complete expected View set from `02-refine/` and `03-relate/`, including overview, pages, rules, data, acceptance, four Agent Context files, and `check.md`.
+1. **Generate Contract** derives the complete expected View set from `02-refine/` and `03-relate/`, including overview, pages, rules, data, acceptance, four Agent Context files, and `check.md`. The old Generate Manifest entry point remains as a compatibility wrapper.
 2. **Generate Runner** executes `manifest -> scaffold/generate -> check`, creates missing Views, preserves existing user-authored content, and reports created/existing/skipped/limited/failed outputs.
 3. **Quality Report** powers `04-generate/check.md` and checks coverage, template completeness, Traceability, Relation Chain, Agent Context Safety, and Limited Generate risk.
 
-This means “all PRDs were generated” is judged against the Generate Manifest, not only by inspecting files that already happen to exist.
+This means “all PRDs were generated” is judged against the Generate Contract, not only by inspecting files that already happen to exist.
 
 ## Check Commands
 

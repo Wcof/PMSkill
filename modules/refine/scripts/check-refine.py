@@ -16,11 +16,10 @@ from lib.markdown_util import has_field, extract_template_sections
 from lib.constants import DEFAULT_PRD_ROOT
 from lib.template_path import module_template_path
 from lib.check_framework import CheckWriter
+from lib.source_anchor import has_source_anchor
 
 
 TRACE_ENTITY_NAMES = ("fact", "decision", "constraint", "conflict", "assumption")
-TRACE_ANCHOR_FIELDS = ("source_id", "path", "locator")
-QUOTE_FIELDS = ("quote", "paraphrase", "引用", "转述")
 
 
 def _entity_blocks(content: str, entity) -> list[tuple[str, str]]:
@@ -33,17 +32,6 @@ def _entity_blocks(content: str, entity) -> list[tuple[str, str]]:
         end = headings[i + 1].start() if i + 1 < len(headings) else len(content)
         blocks.append((heading.group(1), content[start:end]))
     return blocks
-
-
-def _has_any_field(block: str, fields: tuple[str, ...]) -> bool:
-    return any(has_field(block, field) for field in fields)
-
-
-def _has_strong_trace(block: str) -> bool:
-    return (
-        all(has_field(block, field) for field in TRACE_ANCHOR_FIELDS)
-        and _has_any_field(block, QUOTE_FIELDS)
-    )
 
 
 def _check_background(refine_dir: Path) -> dict:
@@ -99,7 +87,7 @@ def check_refine(root: Path) -> dict:
         content = (refine_dir / entity.filename).read_text(encoding="utf-8") if data.get("exists") else ""
         blocks = _entity_blocks(content, entity) if content else []
         for item_id, block in blocks:
-            if _has_strong_trace(block):
+            if has_source_anchor(block):
                 strong.append(item_id)
             else:
                 weak.append(item_id)

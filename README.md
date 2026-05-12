@@ -48,6 +48,15 @@ PRD Helper 遵循“Python 执行化，静态提示词约束化”：
 - 业务规则保留在 `skills/prd-helper/SKILL.md`、`modules/*/guide.md` 和 `commands/*.md`，Python 不承担提示词职责。
 - 产物结构和检查清单优先放在 `modules/*/templates/`，脚本只填入状态、计数、检查结果和来源信息。
 
+运行时规则收敛到一组深 Module，避免脚本之间重复维护隐性契约：
+
+- `collect_writer` 统一 Active Capture、历史 Session 和 Passive Source 的写入、索引、去重和计数。
+- `source_anchor` 统一 Strong Trace / Weak Trace 判断，最低锚点仍是 `source_id + path + quote/paraphrase + locator`。
+- `relation_chain` 解析 Relation Chain，并输出可定位断链，而不是只做文本包含检查。
+- `generate_contract` 定义 Generate 应输出的 View 清单、Limited Generate 风险和生成契约；`generate_manifest` 作为兼容入口保留。
+- `check_result` 统一 Soft Gate 结果模型，便于各阶段检查输出一致语义。
+- `install_state`、`command_plan`、`command_packaging` 分别收敛安装状态、命令执行语义和命令包装规则。
+
 ## 快速开始
 
 ### 1. 安装命令 Skills
@@ -113,13 +122,13 @@ docs/prd-helper/01-collect/passive/
 
 ### Generate 如何保证一次性生成完整
 
-Generate 现在采用 manifest-driven 流程，不再只依赖 Agent 按提示词手动补文件：
+Generate 现在采用 contract-driven 流程，不再只依赖 Agent 按提示词手动补文件：
 
-1. **Generate Manifest** 从 `02-refine/` 和 `03-relate/` 推导应输出的完整 View 清单，包括 overview、pages、rules、data、acceptance、4 份 Agent Context 和 `check.md`。
+1. **Generate Contract** 从 `02-refine/` 和 `03-relate/` 推导应输出的完整 View 清单，包括 overview、pages、rules、data、acceptance、4 份 Agent Context 和 `check.md`。旧的 Generate Manifest 入口继续保留，作为兼容包装。
 2. **Generate Runner** 执行 `manifest -> scaffold/generate -> check`，创建缺失 View，保留已有用户内容，并输出 created/existing/skipped/limited/failed 摘要。
 3. **Quality Report** 驱动 `04-generate/check.md`，检查覆盖率、模板完整性、Traceability、Relation Chain、Agent Context Safety 和 Limited Generate 风险。
 
-因此，“是否生成完所有 PRD”以 Generate Manifest 为准，而不是只检查当前目录里已经存在的文件。
+因此，“是否生成完所有 PRD”以 Generate Contract 为准，而不是只检查当前目录里已经存在的文件。
 
 ## 检查命令
 

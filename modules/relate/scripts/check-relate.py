@@ -15,6 +15,7 @@ from lib.id_registry import RELATE_ENTITIES, RELATION_CHAIN_RULES, get_entity
 from lib.constants import DEFAULT_PRD_ROOT
 from lib.check_framework import CheckWriter
 from lib.template_path import module_template_path
+from lib.relation_chain import parse_relation_chain, relation_chain_report
 
 
 def _read(path: Path) -> str:
@@ -25,17 +26,13 @@ def check_relate(root: Path) -> dict:
     refine_dir = root / "02-refine"
     relate_dir = root / "03-relate"
     context = _read(relate_dir / "context-map.md")
-    all_relate_text = "\n".join(_read(relate_dir / entity.filename) for entity in RELATE_ENTITIES)
+    chain_report = relation_chain_report(parse_relation_chain(root))
 
     fact = get_entity("fact")
     question = get_entity("question")
     conflict = get_entity("conflict")
     assumption = get_entity("assumption")
-    page = get_entity("page")
-    feature = get_entity("feature")
-    rule = get_entity("rule")
-    data = get_entity("data")
-    acceptance = get_entity("acceptance")
+    all_relate_text = "\n".join(_read(relate_dir / entity.filename) for entity in RELATE_ENTITIES)
 
     facts = fact.extract_ids(_read(refine_dir / "facts.md"))
     questions = question.extract_ids(_read(refine_dir / "questions.md"))
@@ -44,14 +41,14 @@ def check_relate(root: Path) -> dict:
 
     entity_ids = {
         "facts": facts,
-        "pages": page.extract_ids(all_relate_text),
-        "features": feature.extract_ids(all_relate_text),
-        "rules": rule.extract_ids(all_relate_text),
-        "data": data.extract_ids(all_relate_text),
-        "acceptance": acceptance.extract_ids(all_relate_text),
+        "pages": chain_report["entities"]["page"],
+        "features": chain_report["entities"]["feature"],
+        "rules": chain_report["entities"]["rule"],
+        "data": chain_report["entities"]["data"],
+        "acceptance": chain_report["entities"]["acceptance"],
     }
 
-    mapped_facts = fact.extract_ids(all_relate_text + "\n" + context)
+    mapped_facts = fact.extract_ids(context)
     mapped_questions = question.extract_ids(all_relate_text + "\n" + context)
     mapped_conflicts = conflict.extract_ids(all_relate_text + "\n" + context)
     mapped_assumptions = assumption.extract_ids(all_relate_text + "\n" + context)
@@ -65,11 +62,12 @@ def check_relate(root: Path) -> dict:
         "questions_mapped": bool(not questions or questions <= mapped_questions),
         "conflicts_mapped": bool(not conflicts or conflicts <= mapped_conflicts),
         "assumptions_mapped": bool(not assumptions or assumptions <= mapped_assumptions),
-        "fact_to_page_or_feature": bool(not facts or not (facts - mapped_facts)),
-        "feature_to_rule": bool(feature.extract_ids(context) and rule.extract_ids(context)),
-        "rule_to_data": bool(rule.extract_ids(context) and data.extract_ids(context)),
-        "rule_to_acceptance": bool(rule.extract_ids(context) and acceptance.extract_ids(context)),
-        "page_to_feature_or_rule": bool(page.extract_ids(context) and (feature.extract_ids(context) or rule.extract_ids(context))),
+        "fact_to_page_or_feature": chain_report["rule_checks"]["fact_to_page_or_feature"],
+        "feature_to_rule": chain_report["rule_checks"]["feature_to_rule"],
+        "rule_to_data": chain_report["rule_checks"]["rule_to_data"],
+        "rule_to_acceptance": chain_report["rule_checks"]["rule_to_acceptance"],
+        "page_to_feature_or_rule": chain_report["rule_checks"]["page_to_feature_or_rule"],
+        "relation_chain": chain_report,
     }
 
 
@@ -81,6 +79,8 @@ def write_check(root: Path, result: dict) -> Path:
     orphan_issues = []
     if result["unmapped_facts"]:
         orphan_issues.append("未映射事实：" + ", ".join(result["unmapped_facts"]))
+    for break_item in result.get("relation_chain", {}).get("breaks", []):
+        orphan_issues.append(f"{break_item['fact_id']} 缺少 {break_item['missing']} 链路")
     for label, ids in result["ids"].items():
         if label != "facts" and not ids:
             orphan_issues.append(f"缺少 {label} 实体")
@@ -134,6 +134,7 @@ def main() -> None:
         failures.append("03-relate/ missing")
     failures.extend(fname for fname, exists in result["files"].items() if not exists)
     failures.extend(result["unmapped_facts"])
+    failures.extend(f"{item['fact_id']} 缺少 {item['missing']} 链路" for item in result["relation_chain"]["breaks"])
     for key in ("feature_to_rule", "rule_to_data", "rule_to_acceptance", "page_to_feature_or_rule"):
         if not result[key]:
             failures.append(key)

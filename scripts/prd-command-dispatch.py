@@ -9,6 +9,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from lib.command_plan import build_command_plan, build_setup_command
+
 
 COMMANDS = (
     "helper",
@@ -114,70 +118,23 @@ def _run(cmd: list[str], project: Path) -> int:
 
 
 def _setup(skill_root: Path, project: Path, docs_root: str, agent: str) -> int:
-    return _run(
-        [
-            sys.executable,
-            str(skill_root / "scripts" / "setup-prd-helper.py"),
-            "--project",
-            ".",
-            "--docs-root",
-            docs_root,
-            "--agent",
-            agent,
-        ],
-        project,
-    )
+    return _run(build_setup_command(skill_root, docs_root, agent), project)
 
 
 def _dispatch(command: str, skill_root: Path, project: Path, docs_root: str, agent: str, extra: list[str]) -> int:
-    if command == "remove":
-        return _run(
-            [
-                sys.executable,
-                str(skill_root / "scripts" / "remove-prd-helper.py"),
-                "--project",
-                ".",
-                "--agent",
-                agent,
-                *extra,
-            ],
-            project,
-        )
+    plan = build_command_plan(command, skill_root, docs_root, agent, extra)
+    if not plan.requires_setup:
+        return _run(plan.command, project)
 
     setup_code = _setup(skill_root, project, docs_root, agent)
     if setup_code != 0:
         return setup_code
 
-    collect_root = f"{docs_root}/01-collect"
-    if command in {"helper"}:
+    if not plan.command:
+        if plan.message:
+            print(plan.message)
         return 0
-    if command in {"start", "stop", "status", "scan"}:
-        return _run(
-            [
-                sys.executable,
-                str(skill_root / "modules" / "collect" / "scripts" / "collect-control.py"),
-                command,
-                "--root",
-                collect_root,
-                "--project",
-                ".",
-                "--docs-root",
-                docs_root,
-                "--agent",
-                agent,
-            ],
-            project,
-        )
-    if command == "refine":
-        return _run([sys.executable, str(skill_root / "modules" / "refine" / "scripts" / "check-refine.py"), docs_root], project)
-    if command == "relate":
-        return _run([sys.executable, str(skill_root / "modules" / "relate" / "scripts" / "check-relate.py"), docs_root], project)
-    if command == "generate":
-        return _run([sys.executable, str(skill_root / "modules" / "generate" / "scripts" / "generate.py"), docs_root], project)
-    if command in {"import", "discuss"}:
-        print(f"/prd-{command} 已完成初始化。请按该命令 Skill 的说明继续处理用户输入。")
-        return 0
-    raise ValueError(f"Unknown PRD command: {command}")
+    return _run(plan.command, project)
 
 
 def parse_args() -> argparse.Namespace:

@@ -20,11 +20,11 @@ from lib.constants import (
     COMMAND_NAMES,
 )
 from lib.command_registry import ALL_COMMAND_NAMES
+from lib.install_state import command_files, remove_project_commands
 
 
 AGENTS = ("codex", "claude-code", "trae", "trae-cn")
-LEGACY_CLAUDE_COMMANDS = ("prd-helper.md", "prd-init.md", "prd-setup.md")
-CLAUDE_COMMANDS = tuple(f"{name}.md" for name in COMMAND_NAMES) + LEGACY_CLAUDE_COMMANDS
+CLAUDE_COMMANDS = command_files()
 
 
 def invalidate_codex_plugin_cache(codex_home: Path) -> list[Path]:
@@ -175,20 +175,10 @@ def _is_not_installed_message(output: str) -> bool:
 
 
 def remove_generated_commands(project: Path, agents: list[str]) -> None:
-    if "claude-code" in agents:
-        commands_dir = project / ".claude" / "commands"
-        for name in CLAUDE_COMMANDS:
-            path = commands_dir / name
-            if path.exists():
-                path.unlink()
-                print(f"已删除 Claude Code 命令：{path}")
-    if "codex" in agents:
-        commands_dir = project / ".codex" / "commands"
-        for name in CLAUDE_COMMANDS:
-            path = commands_dir / name
-            if path.exists():
-                path.unlink()
-                print(f"已删除 Codex 命令：{path}")
+    for agent in agents:
+        for path in remove_project_commands(project, agent):
+            label = "Claude Code" if agent == "claude-code" else "Codex" if agent == "codex" else agent
+            print(f"已删除 {label} 命令：{path}")
 
 
 def parse_args() -> argparse.Namespace:

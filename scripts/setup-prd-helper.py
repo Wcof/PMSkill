@@ -12,6 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from lib.command_registry import ALL_COMMANDS, GENERATED_COMMANDS, command_markdown_list
+from lib.install_state import render_codex_project_config, replace_toml_table
 from lib.source_index import INDEX_HEADER
 from lib.state import write_collect_state
 AGENTS = ("codex", "claude-code", "trae", "trae-cn")
@@ -206,30 +207,13 @@ def install_codex_project_commands(project: Path, skill_root: Path, docs_root: s
 
 def install_codex_project_config(project: Path) -> Path:
     from lib.discovery import find_codex_home
-    from lib.constants import CODEX_LOCAL_MARKETPLACE_NAME, CODEX_LOCAL_MARKETPLACE_REL, CODEX_LOCAL_PLUGIN_REF
+    from lib.constants import CODEX_LOCAL_MARKETPLACE_REL
 
     codex_home = find_codex_home()
     config_path = project / ".codex" / "config.toml"
     content = config_path.read_text(encoding="utf-8") if config_path.exists() else ""
     marketplace_root = codex_home / CODEX_LOCAL_MARKETPLACE_REL
-    content = _replace_toml_table(
-        content,
-        f"[marketplaces.{CODEX_LOCAL_MARKETPLACE_NAME}]",
-        [
-            'source_type = "local"',
-            f'source = "{marketplace_root}"',
-        ],
-    )
-    content = _replace_toml_table(
-        content,
-        f'[plugins."{CODEX_LOCAL_PLUGIN_REF}"]',
-        ['enabled = true'],
-    )
-    content = _replace_toml_table(
-        content,
-        "[features]",
-        ["codex_hooks = true"],
-    )
+    content = render_codex_project_config(content, marketplace_root)
     config_path.parent.mkdir(parents=True, exist_ok=True)
     config_path.write_text(content, encoding="utf-8")
     return config_path
@@ -291,30 +275,7 @@ def invalidate_codex_plugin_cache(codex_home: Path) -> list[Path]:
     return removed
 
 
-def _replace_toml_table(content: str, table_header: str, body: list[str]) -> str:
-    lines = content.splitlines()
-    output: list[str] = []
-    index = 0
-    replaced = False
-    while index < len(lines):
-        line = lines[index]
-        if line.strip() == table_header:
-            if output and output[-1] != "":
-                output.append("")
-            output.extend([table_header, *body])
-            replaced = True
-            index += 1
-            while index < len(lines) and not lines[index].startswith("["):
-                index += 1
-            continue
-        output.append(line)
-        index += 1
-
-    if not replaced:
-        if output and output[-1] != "":
-            output.append("")
-        output.extend([table_header, *body])
-    return "\n".join(output).rstrip() + "\n"
+_replace_toml_table = replace_toml_table
 
 
 def enable_codex_plugin(

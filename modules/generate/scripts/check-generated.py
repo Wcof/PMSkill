@@ -25,7 +25,10 @@ from lib.markdown_util import extract_template_sections
 from lib.constants import DEFAULT_PRD_ROOT
 from lib.template_path import module_template_path
 from lib.check_framework import CheckWriter
-from lib.generate_manifest import build_generate_manifest
+from lib.check_result import CheckResult
+from scripts.lib.generate_manifest import build_generate_manifest
+from lib.relation_chain import parse_relation_chain, relation_chain_report
+from lib.source_anchor import has_source_anchor
 
 
 def _safe_rglob(directory: Path, pattern: str = "*.md"):
@@ -227,12 +230,15 @@ def check_relation_chain_safety(root_path: Path) -> dict:
             "safe": False,
             "risks": ["03-relate/context-map.md 缺失，无法证明 Relation Chain 完整"],
         }
-    content = context_map.read_text(encoding="utf-8")
-    required = ("fact", "rule", "data", "acceptance")
-    missing = [name for name in required if f"{name}_" not in content and f"{name}-" not in content]
+    report = relation_chain_report(parse_relation_chain(root_path))
     return {
-        "safe": not missing,
-        "risks": [f"context-map.md 缺少 {name} 链路" for name in missing],
+        "safe": report["safe"],
+        "risks": [
+            f"{item['fact_id']} 缺少 {item['missing']} 链路"
+            for item in report["breaks"]
+        ],
+        "report": report,
+        "breaks": report["breaks"],
     }
 
 
@@ -248,6 +254,8 @@ def check_agent_context_safety(files: list[tuple[str, str]], prerequisites: dict
             prohibited_items.append(f"{rel_path} 包含 Weak Trace 风险")
         if "断链" in content:
             prohibited_items.append(f"{rel_path} 包含断链风险")
+        if ("source_id" in content or "来源说明" in content) and not has_source_anchor(content):
+            prohibited_items.append(f"{rel_path} 缺少 Strong Trace 来源锚点")
     return {
         "files": [path for path, _ in agent_files],
         "safe_for_execution": not prohibited_items,
@@ -266,9 +274,29 @@ def build_quality_report(root_path: Path, files: list[tuple[str, str]] | None = 
     prerequisites = check_prerequisites(root_path)
     relation_chain = check_relation_chain_safety(root_path)
     agent_context_safety = check_agent_context_safety(files, prerequisites, relation_chain)
+    can_final = (
+        coverage["complete"]
+        and not unresolved
+        and consolidation["all_consolidated"]
+        and not any(r["status"] == "FAIL" for r in traceability)
+        and not pages
+        and not rules
+        and not prerequisites["limited"]
+        and relation_chain["safe"]
+        and agent_context_safety["safe_for_execution"]
+    )
+    status = "passed" if can_final else "limited" if prerequisites["limited"] else "failed"
+    soft_gate = CheckResult(
+        stage="Generate",
+        status=status,
+        can_proceed=can_final,
+        risks=tuple(prerequisites["missing"] + relation_chain["risks"] + agent_context_safety["prohibited_items"]),
+        pending=tuple(item["path"] + " 缺失" for item in coverage["missing"][:5]),
+    )
     return {
         "files": files,
         "manifest": coverage["manifest"],
+        "soft_gate": soft_gate,
         "coverage": coverage,
         "unresolved": unresolved,
         "consolidation": consolidation,
