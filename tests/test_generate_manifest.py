@@ -1,3 +1,4 @@
+import importlib.util
 from pathlib import Path
 
 from scripts.lib.generate_manifest import build_generate_manifest
@@ -68,3 +69,14 @@ def test_generate_runner_scaffolds_all_manifest_views_and_preserves_existing_con
     assert (root / "04-generate" / "agent-context" / "frontend-context.md").exists()
     assert "保留内容" in (root / "04-generate" / "overview" / "project-overview.md").read_text(encoding="utf-8")
     assert (root / "04-generate" / "check.md").exists()
+
+
+def test_check_generated_imports_with_dispatch_style_loader():
+    path = Path("modules/generate/scripts/check-generated.py").resolve()
+    spec = importlib.util.spec_from_file_location("check_generated", path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+
+    spec.loader.exec_module(module)
+
+    assert hasattr(module, "build_quality_report")
