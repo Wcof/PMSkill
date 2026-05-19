@@ -1,12 +1,8 @@
----
-name: prd-helper
-description: PRD Helper local entry. Initialize or repair PRD Helper and expose the traceable PRD Context Compiler workflow for local Claude, Codex, and Trae installs.
-allowed-tools: Bash, Read
----
-
 # PRD Helper Local Entry
 
-This root `SKILL.md` is the local-install entry for users who download or clone this repository and ask Claude, Codex, or Trae to install/use it directly.
+This root `SKILL.md` is the local direct-install fallback for users who download or clone this repository and ask Claude, Codex, or Trae to install/use it directly without `npx`.
+
+It intentionally does not contain installable Skill frontmatter. `npx skills@latest add Wcof/PRDContextEngine` should discover the grouped command Skills under `skills/prd-*/SKILL.md`; this root file is only for natural-language loading by an Agent.
 
 PRD Helper is a **PRD Context Compiler**, not an automatic PRD writer. It compiles product context through:
 
@@ -28,7 +24,7 @@ python3 scripts/setup-prd-helper.py --project . --docs-root docs/prd-helper --ag
 
 Use the agent that matches the current runtime. For Trae, use `--agent trae`.
 
-After initialization, use the command Skills in `skills/prd-*/SKILL.md`:
+After initialization, use the command Skills in `skills/prd-helper/prd-*/SKILL.md`:
 
 - `/prd-helper`
 - `/prd-start`
@@ -42,13 +38,12 @@ After initialization, use the command Skills in `skills/prd-*/SKILL.md`:
 - `/prd-discuss`
 - `/prd-remove`
 
-The detailed workflow rules live in `skills/prd-helper/SKILL.md`, `modules/*/guide.md`, and `checks/guide.md`.
+The detailed workflow rules live in `skills/prd-helper/prd-helper/SKILL.md`, `modules/*/guide.md`, and `checks/guide.md`.
 
 ## Installer Note
 
-Because this root entry exists for local direct installation, `npx skills@latest add Wcof/PRDContextEngine` should use full-depth discovery when installing the complete command package:
+Because this root entry is not an installable Skill, normal `npx` installation should discover the complete command package:
 
 ```bash
-npx skills@latest add Wcof/PRDContextEngine --all --full-depth
+npx skills@latest add Wcof/PRDContextEngine --all
 ```
-

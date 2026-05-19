@@ -20,7 +20,7 @@ Generated documents are **Views**, not an **Entity** type. Only objects that flo
 
 ## Current Commands
 
-The authoritative command set is cross-checked against `scripts/lib/command_registry.py`, the root `SKILL.md`, `skills/prd-*/SKILL.md`, `commands/*.md`, and plugin manifests. The root `SKILL.md` is the local direct-download/clone entry; `npx skills@latest add Wcof/PRDContextEngine --full-depth` discovers and installs these 11 command Skills:
+The authoritative command set is cross-checked against `scripts/lib/command_registry.py`, the root `SKILL.md`, `skills/prd-*/SKILL.md`, `commands/*.md`, and plugin manifests. The root `SKILL.md` is the natural-language fallback for direct local download/clone usage and intentionally has no installer frontmatter; `npx skills@latest add Wcof/PRDContextEngine` discovers and installs these 11 command Skills:
 
 | Command | Stage/Type | Purpose | Main Outputs |
 |---|---|---|---|
@@ -36,7 +36,7 @@ The authoritative command set is cross-checked against `scripts/lib/command_regi
 | `/prd-discuss` | Auxiliary discussion | Ask one question at a time about contradictions, vague terms, and unresolved issues | Discussion summary, open questions |
 | `/prd-remove` | Uninstall | Clean project config, commands, hooks, and the full `prd-*` Skill command package while preserving generated docs by default | Cleanup result |
 
-Platform note: the `skills/` directory contains all 11 installer-discoverable Skills. `COMMAND_NAMES` still contains the 10 commands after `/prd-helper` for project-level fallback commands and uninstall cleanup.
+Platform note: the `skills/` directory contains all 11 installer-discoverable Skills. `skills/prd-helper/` also packages the runtime scripts so the lightweight command Skills can locate the dispatcher. `COMMAND_NAMES` still contains the 10 commands after `/prd-helper` for project-level fallback commands and uninstall cleanup.
 
 Command Skills (`prd-start`, etc.) now include dispatcher self-discovery: even when only one command Skill is installed, it resolves `scripts/prd-command-dispatch.py` from the current Skill, `prd-helper`, or Codex local plugin paths before invoking the shared runtime.
 
@@ -64,13 +64,13 @@ Runtime rules are concentrated in deep modules so scripts do not duplicate hidde
 Default recommendation: install all `prd-*` Skills in one shot:
 
 ```bash
-npx skills@latest add Wcof/PRDContextEngine --all --full-depth
+npx skills@latest add Wcof/PRDContextEngine --all
 ```
 
 If you prefer selecting Skills one-by-one, use interactive mode:
 
 ```bash
-npx skills@latest add Wcof/PRDContextEngine --full-depth
+npx skills@latest add Wcof/PRDContextEngine
 ```
 
 The installer discovers `prd-helper`, `prd-start`, `prd-stop`, `prd-status`, `prd-scan`, `prd-import`, `prd-refine`, `prd-relate`, `prd-generate`, `prd-discuss`, and `prd-remove` from `skills/`. In interactive mode, select these Skills and the target Agent, such as Claude Code, Codex, or Trae.
@@ -128,6 +128,8 @@ Generate now uses a contract-driven flow instead of relying only on an Agent fol
 2. **Generate Runner** executes `manifest -> scaffold/generate -> check`, creates missing Views, preserves existing user-authored content, and reports created/existing/skipped/limited/failed outputs.
 3. **Quality Report** powers `04-generate/check.md` and checks coverage, template completeness, Traceability, Relation Chain, Agent Context Safety, and Limited Generate risk.
 
+Generate scripts support both dispatcher-based dynamic loading and direct execution with `python3 modules/generate/scripts/generate.py docs/prd-helper`; check scripts load shared libraries from the runtime `scripts/lib` path so installed Skill paths and local source paths resolve imports consistently.
+
 This means “all PRDs were generated” is judged against the Generate Contract, not only by inspecting files that already happen to exist.
 
 ## Check Commands
@@ -144,7 +146,7 @@ python3 scripts/check-structure.py docs/prd-helper
 
 ## FAQ
 
-Only `/prd-helper` appears, not `/prd-start`: this usually means only `prd-helper` was selected during installation, or the current Agent has not refreshed its Skill list. Prefer `npx skills@latest add Wcof/PRDContextEngine --all --full-depth` for one-shot installation; if you use interactive mode, confirm all `prd-*` Skills are selected. An already-open session may still need a restart. Even if the menu has not refreshed, typing `/prd-start` directly can still be handled by installed Skills or project-level fallback commands. Codex hooks are written by `/prd-start` and cleaned by `/prd-stop`.
+Only `/prd-helper` appears, not `/prd-start`: this usually means only `prd-helper` was selected during installation, or the current Agent has not refreshed its Skill list. Prefer `npx skills@latest add Wcof/PRDContextEngine --all` for one-shot installation; if you use interactive mode, confirm all `prd-*` Skills are selected. An already-open session may still need a restart. Even if the menu has not refreshed, typing `/prd-start` directly can still be handled by installed Skills or project-level fallback commands. Codex hooks are written by `/prd-start` and cleaned by `/prd-stop`.
 
 No capture output: run `/prd-status` and confirm the state is `on`; then inspect `docs/prd-helper/01-collect/collect-state.md`.
 

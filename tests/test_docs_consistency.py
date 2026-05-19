@@ -41,8 +41,8 @@ def test_install_docs_cover_one_shot_and_interactive_paths():
     }
 
     for path, content in docs.items():
-        assert "--all" in content, f"{path} missing one-shot install path"
-        assert "--full-depth" in content, f"{path} missing full-depth install path"
+        assert "--all" in content or "--skill '*'" in content, f"{path} missing one-shot install path"
+        assert "--full-depth" not in content, f"{path} should not require full-depth for normal install"
         assert "npx skills@latest add Wcof/PRDContextEngine" in content, f"{path} missing interactive install path"
 
 
@@ -66,9 +66,10 @@ def test_command_files_match_constants():
 
 def test_skills_package_exposes_root_local_entry_and_each_prd_command():
     root_skill = _read("SKILL.md")
-    assert "name: prd-helper" in root_skill
-    assert "local-install entry" in root_skill
-    assert "--all --full-depth" in root_skill
+    assert "PRD Helper Local Entry" in root_skill
+    assert "local direct-install fallback" in root_skill
+    assert "name: prd-helper" not in root_skill
+    assert "description:" not in root_skill
 
     skill_files = {
         path.parent.name: path
@@ -92,6 +93,10 @@ def test_skills_package_exposes_root_local_entry_and_each_prd_command():
 
 
 def test_command_wrappers_are_lightweight_without_runtime_symlinks():
+    helper_dir = ROOT / "skills" / "prd-helper"
+    for runtime_dir in ("checks", "commands", "modules", "scripts", "support"):
+        assert (helper_dir / runtime_dir).exists(), f"{helper_dir / runtime_dir} should be packaged with prd-helper"
+
     for command in ALL_COMMANDS:
         if command.name == "prd-helper":
             continue

@@ -17,6 +17,8 @@ find_prd_dispatcher() {
     [ -f "$dir/scripts/prd-command-dispatch.py" ] && { printf '%s\n' "$dir/scripts/prd-command-dispatch.py"; return 0; }
   done
   for dir in \
+    "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills/prd-helper" \
+    "${TRAE_HOME:-$HOME/.trae}/skills/prd-helper" \
     "${CODEX_HOME:-$HOME/.codex}/plugins/prd-helper/skills/prd-helper" \
     "${CODEX_HOME:-$HOME/.codex}/local-marketplaces/prd-helper/plugins/prd-helper/skills/prd-helper"; do
     [ -f "$dir/scripts/prd-command-dispatch.py" ] && { printf '%s\n' "$dir/scripts/prd-command-dispatch.py"; return 0; }
@@ -25,7 +27,7 @@ find_prd_dispatcher() {
 }
 
 dispatcher="$(find_prd_dispatcher)" || {
-  echo "未找到 PRD Helper 命令分发器。请先运行：npx skills@latest add Wcof/PRDContextEngine --all --full-depth"
+  echo "未找到 PRD Helper 命令分发器。请先运行：npx skills@latest add Wcof/PRDContextEngine --all"
   exit 1
 }
 

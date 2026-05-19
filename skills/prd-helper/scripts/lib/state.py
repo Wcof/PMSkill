@@ -1,0 +1,131 @@
+"""
+采集状态文件（collect-state.md）的统一读写。
+
+所有脚本必须通过此模块读写 collect-state.md，
+不再各自实现解析逻辑。
+"""
+
+from pathlib import Path
+
+from .markdown_util import extract_table_rows_with_headers
+
+
+STATE_FILE = "collect-state.md"
+
+
+def safe_int(value: str, default: int = 0) -> int:
+    """Convert string to int, returning default on failure."""
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return default
+
+# 状态表格的标准 key 顺序
+STATE_KEYS = (
+    "capture_mode",
+    "active_root",
+    "passive_root",
+    "session_id",
+    "agent",
+    "started_at",
+    "paused_at",
+    "resumed_at",
+    "ended_at",
+    "capture_scope",
+    "turn_count",
+    "last_collect_at",
+    "last_source_id",
+    "last_content_hash",
+    "last_write_file",
+    "total_sources",
+    "active_source_count",
+    "passive_source_count",
+    "anomaly_count",
+    "possible_noise_count",
+    "grill_mode",
+)
+
+
+def default_state() -> dict:
+    """返回包含所有 STATE_KEYS 默认值的状态字典。"""
+    return {key: "" for key in STATE_KEYS}
+
+
+class InvalidTransition(Exception):
+    """非法状态转换。"""
+
+
+VALID_TRANSITIONS: dict[str, set[str]] = {
+    "off": {"on"},
+    "on": {"paused", "off"},
+    "paused": {"on", "off"},
+}
+
+
+def transition(current: str, target: str) -> str:
+    """验证并执行状态转换。返回目标状态。
+
+    Raises InvalidTransition if the transition is not allowed.
+    """
+    allowed = VALID_TRANSITIONS.get(current, set())
+    if target not in allowed:
+        raise InvalidTransition(
+            f"Cannot transition from '{current}' to '{target}'. "
+            f"Allowed: {allowed or '(none)'}"
+        )
+    return target
+
+
+def read_collect_state(root: Path) -> dict:
+    """读取 collect-state.md，返回 key-value 字典。
+
+    文件不存在时返回空 dict，不报错。
+    调用方需自行判断是否需要文件必须存在。
+    """
+    state_file = root / STATE_FILE
+    if not state_file.exists():
+        return {}
+    content = state_file.read_text(encoding="utf-8")
+    rows = extract_table_rows_with_headers(content, ("key", "value"))
+    return {row["key"]: row["value"] for row in rows if row.get("key")}
+
+
+def write_collect_state(root: Path, state: dict):
+    """将 state 字典写入 collect-state.md。
+
+    按 STATE_KEYS 顺序输出。
+    未知 key 会触发警告但不会阻止写入（向后兼容）。
+    """
+    known_keys = set(STATE_KEYS)
+    unknown = set(state.keys()) - known_keys
+    if unknown:
+        import warnings
+        warnings.warn(f"Unknown state keys: {unknown}", UserWarning, stacklevel=2)
+
+    state_file = root / STATE_FILE
+    lines = ["# Collect State", ""]
+    lines.append("| key | value |")
+    lines.append("|---|---|")
+    written = set()
+    for key in STATE_KEYS:
+        if key in state:
+            lines.append(f"| {key} | {state[key]} |")
+            written.add(key)
+    for key, value in state.items():
+        if key not in written:
+            lines.append(f"| {key} | {value} |")
+    lines.append("")
+    state_file.write_text("\n".join(lines), encoding="utf-8")
+
+
+def require_state(root: Path) -> dict:
+    """读取 collect-state.md，文件不存在时退出。
+
+    用于 capture-source.py 等必须有状态文件才能工作的脚本。
+    """
+    state = read_collect_state(root)
+    if not state:
+        import sys
+        print("Error: collect-state.md not found. Run '/prd-start' first.")
+        sys.exit(1)
+    return state
