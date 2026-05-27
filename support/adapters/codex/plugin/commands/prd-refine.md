@@ -34,6 +34,4 @@ dispatcher="$(find_prd_dispatcher)" || {
 python3 "$dispatcher" refine --project . --docs-root docs/prd-helper
 ```
 
-执行后继续完成精炼：把材料拆成事实/决策/约束/目标/冲突/待确认，补齐 Strong Trace（`source_id + path + quote/paraphrase + locator`）。无 locator 的内容只能进入待确认，不能作为确定性要求。
-
 执行后用简短中文说明结果；如果用户使用英文，则用英文说明。

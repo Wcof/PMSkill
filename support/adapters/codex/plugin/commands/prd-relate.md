@@ -34,6 +34,4 @@ dispatcher="$(find_prd_dispatcher)" || {
 python3 "$dispatcher" relate --project . --docs-root docs/prd-helper
 ```
 
-执行后继续建立链路：至少覆盖 `fact -> page/feature -> rule -> data -> acceptance`，并把 question/conflict/assumption 挂到相关链路。断链或弱追溯仅可进入受限结果，不能进入确定性 PRD。
-
 执行后用简短中文说明结果；如果用户使用英文，则用英文说明。

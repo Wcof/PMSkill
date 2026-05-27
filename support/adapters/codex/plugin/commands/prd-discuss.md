@@ -34,6 +34,4 @@ dispatcher="$(find_prd_dispatcher)" || {
 python3 "$dispatcher" discuss --project . --docs-root docs/prd-helper
 ```
 
-然后进入研讨模式：基于 `CONTEXT.md`、`docs/adr/`、`docs/prd-helper/01-collect/` 与当前会话，追问术语歧义、目标冲突、约束缺失和待确认问题；将结论沉淀到 `docs/prd-helper/02-refine/`（facts/decisions/constraints/questions/conflicts）。
-
 执行后用简短中文说明结果；如果用户使用英文，则用英文说明。

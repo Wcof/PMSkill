@@ -13,14 +13,9 @@ allowed-tools: Bash
 set -euo pipefail
 
 find_prd_dispatcher() {
-  for dir in \
-    ".agents/skills/prd-helper" \
-    ".claude/skills/prd-helper" \
-    ".trae/skills/prd-helper" \
-    "."; do
+  for dir in ".agents/skills/prd-helper" ".claude/skills/prd-helper" ".trae/skills/prd-helper" "."; do
     [ -f "$dir/scripts/prd-command-dispatch.py" ] && { printf '%s\n' "$dir/scripts/prd-command-dispatch.py"; return 0; }
   done
-
   for dir in \
     "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills/prd-helper" \
     "${TRAE_HOME:-$HOME/.trae}/skills/prd-helper" \
@@ -28,7 +23,6 @@ find_prd_dispatcher() {
     "${CODEX_HOME:-$HOME/.codex}/local-marketplaces/prd-helper/plugins/prd-helper/skills/prd-helper"; do
     [ -f "$dir/scripts/prd-command-dispatch.py" ] && { printf '%s\n' "$dir/scripts/prd-command-dispatch.py"; return 0; }
   done
-
   return 1
 }
 

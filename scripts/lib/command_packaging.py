@@ -15,7 +15,7 @@ def dispatcher_lookup_snippet(command_name: str) -> str:
         ".trae/skills/prd-helper",
         ".",
     )
-    dirs = " ".join(f'"{path}"' for path in helper_dirs)
+    dirs = " ".join(f'"{path}"' for path in dict.fromkeys(helper_dirs))
     return "\n".join(
         [
             "find_prd_dispatcher() {",
@@ -69,6 +69,8 @@ def render_command_markdown(command: CommandSpec, include_skill_frontmatter: boo
             "",
             f'python3 "$dispatcher" {action} --project . --docs-root docs/prd-helper',
             "```",
+            "",
+            "执行后用简短中文说明结果；如果用户使用英文，则用英文说明。",
             "",
         ]
     )

@@ -34,6 +34,4 @@ dispatcher="$(find_prd_dispatcher)" || {
 python3 "$dispatcher" import --project . --docs-root docs/prd-helper
 ```
 
-执行后按用户给定来源完成导入：写入 `docs/prd-helper/01-collect/passive/`，并在 `source-index.csv` 登记来源锚点。无法定位 `locator` 的内容标记为弱追溯，后续只能进入待确认区。
-
 执行后用简短中文说明结果；如果用户使用英文，则用英文说明。
