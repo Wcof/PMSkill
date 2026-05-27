@@ -6,16 +6,19 @@ Checks whether 02-refine/ satisfies the refine quality gate and writes
 02-refine/check.md using the refine check template structure.
 """
 
+import argparse
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(next(p / "scripts" for p in Path(__file__).resolve().parents if (p / "scripts" / "lib").exists())))  # noqa: E501
+sys.path.insert(0, str(next(p / "scripts" for p in Path(__file__).resolve().parents if (p / "scripts" / "_bootstrap.py").exists())))  # noqa: E501
+from _bootstrap import setup_path
+setup_path(__file__)
 
 from lib.id_registry import REFINE_ENTITIES, get_entity
 from lib.markdown_util import has_field, extract_template_sections
 from lib.constants import DEFAULT_PRD_ROOT
 from lib.template_path import module_template_path
-from lib.check_framework import CheckWriter
+from lib.check_framework import CheckWriter, print_header, print_footer
 from lib.source_anchor import has_source_anchor
 
 
@@ -182,7 +185,12 @@ def write_check(root: Path, result: dict) -> Path:
 
 
 def main() -> None:
-    root = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(DEFAULT_PRD_ROOT)
+    parser = argparse.ArgumentParser(description="PRD Check Refine")
+    parser.add_argument("root_arg", nargs="?", help="PRD root directory")
+    parser.add_argument("--root", default=None, help="PRD root directory")
+    args = parser.parse_args()
+
+    root = Path(args.root or args.root_arg or DEFAULT_PRD_ROOT)
     if not root.exists():
         print(f"Error: Directory '{root}' does not exist.")
         sys.exit(1)
@@ -198,9 +206,7 @@ def main() -> None:
         for item in data["failures"]:
             failures.append(f"{fname}:{item['id']} missing {', '.join(item['missing'])}")
 
-    print("=" * 60)
-    print("PRD Helper Refine Check")
-    print("=" * 60)
+    print_header("PRD Helper Refine Check")
     if failures:
         for failure in failures:
             print(f"  ❌ {failure}")

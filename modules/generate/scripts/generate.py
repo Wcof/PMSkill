@@ -8,7 +8,9 @@ import importlib.util
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(next(p / "scripts" for p in Path(__file__).resolve().parents if (p / "scripts" / "lib").exists())))  # noqa: E501
+sys.path.insert(0, str(next(p / "scripts" for p in Path(__file__).resolve().parents if (p / "scripts" / "_bootstrap.py").exists())))  # noqa: E501
+from _bootstrap import setup_path
+setup_path(__file__)
 
 from lib.constants import DEFAULT_PRD_ROOT
 from lib.generate_manifest import build_generate_manifest

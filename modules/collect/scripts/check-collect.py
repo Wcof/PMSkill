@@ -13,12 +13,14 @@ import argparse
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(next(p / "scripts" for p in Path(__file__).resolve().parents if (p / "scripts" / "lib").exists())))  # noqa: E501
+sys.path.insert(0, str(next(p / "scripts" for p in Path(__file__).resolve().parents if (p / "scripts" / "_bootstrap.py").exists())))  # noqa: E501
+from _bootstrap import setup_path
+setup_path(__file__)
 
 from lib.state import read_collect_state, STATE_FILE, safe_int
 from lib.source_index import INDEX_FILE, read_indexed_paths
 from lib.constants import DEFAULT_COLLECT_ROOT
-from lib.check_framework import CheckWriter
+from lib.check_framework import CheckWriter, print_header, print_footer, print_section
 from lib.template_path import module_template_path
 
 
@@ -174,10 +176,7 @@ def main():
     result = check(root)
 
     # Console output
-    print("=" * 60)
-    print("PRD Helper Collect Check")
-    print("=" * 60)
-    print()
+    print_header("PRD Helper Collect Check")
 
     total = result["active_count"] + result["passive_count"]
     checks = [

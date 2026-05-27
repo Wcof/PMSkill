@@ -15,16 +15,19 @@ Output:
     Prints check results to stdout.
 """
 
+import argparse
 import re
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(next(p / "scripts" for p in Path(__file__).resolve().parents if (p / "scripts" / "lib").exists())))  # noqa: E501
+sys.path.insert(0, str(next(p / "scripts" for p in Path(__file__).resolve().parents if (p / "scripts" / "_bootstrap.py").exists())))  # noqa: E501
+from _bootstrap import setup_path
+setup_path(__file__)
 from lib.id_registry import ALL_ENTITIES
 from lib.markdown_util import extract_template_sections
 from lib.constants import DEFAULT_PRD_ROOT
 from lib.template_path import module_template_path
-from lib.check_framework import CheckWriter
+from lib.check_framework import CheckWriter, print_header, print_footer
 from lib.check_result import CheckResult
 from lib.generate_manifest import build_generate_manifest
 from lib.relation_chain import parse_relation_chain, relation_chain_report
@@ -343,10 +346,7 @@ def print_results(
     pages: list[dict],
     rules: list[dict],
 ):
-    print("=" * 60)
-    print("PRD Helper Generated Content Check")
-    print("=" * 60)
-    print()
+    print_header("PRD Helper Generated Content Check")
 
     print("--- Unresolved Content ---")
     if unresolved:
@@ -396,8 +396,6 @@ def print_results(
     else:
         print("  ℹ️  No rules to check")
     print()
-
-    print("=" * 60)
 
 
 def _report_from_legacy_args(
@@ -555,10 +553,12 @@ def write_check_md(root_path: Path, *args) -> Path:
 
 
 def main():
-    if len(sys.argv) > 1:
-        root = sys.argv[1]
-    else:
-        root = DEFAULT_PRD_ROOT
+    parser = argparse.ArgumentParser(description="PRD Check Generated Content")
+    parser.add_argument("root_arg", nargs="?", help="PRD root directory")
+    parser.add_argument("--root", default=None, help="PRD root directory")
+    args = parser.parse_args()
+
+    root = args.root or args.root_arg or DEFAULT_PRD_ROOT
 
     root_path = Path(root)
     if not root_path.exists():

@@ -6,14 +6,17 @@ Checks whether 03-relate/ satisfies the relation quality gate and writes
 03-relate/check.md using the relate check template structure.
 """
 
+import argparse
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(next(p / "scripts" for p in Path(__file__).resolve().parents if (p / "scripts" / "lib").exists())))  # noqa: E501
+sys.path.insert(0, str(next(p / "scripts" for p in Path(__file__).resolve().parents if (p / "scripts" / "_bootstrap.py").exists())))  # noqa: E501
+from _bootstrap import setup_path
+setup_path(__file__)
 
 from lib.id_registry import RELATE_ENTITIES, RELATION_CHAIN_RULES, get_entity
 from lib.constants import DEFAULT_PRD_ROOT
-from lib.check_framework import CheckWriter
+from lib.check_framework import CheckWriter, print_header, print_footer
 from lib.template_path import module_template_path
 from lib.relation_chain import parse_relation_chain, relation_chain_report
 
@@ -122,7 +125,12 @@ def write_check(root: Path, result: dict) -> Path:
 
 
 def main() -> None:
-    root = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(DEFAULT_PRD_ROOT)
+    parser = argparse.ArgumentParser(description="PRD Check Relate")
+    parser.add_argument("root_arg", nargs="?", help="PRD root directory")
+    parser.add_argument("--root", default=None, help="PRD root directory")
+    args = parser.parse_args()
+
+    root = Path(args.root or args.root_arg or DEFAULT_PRD_ROOT)
     if not root.exists():
         print(f"Error: Directory '{root}' does not exist.")
         sys.exit(1)
@@ -139,9 +147,7 @@ def main() -> None:
         if not result[key]:
             failures.append(key)
 
-    print("=" * 60)
-    print("PRD Helper Relate Check")
-    print("=" * 60)
+    print_header("PRD Helper Relate Check")
     if failures:
         for failure in failures:
             print(f"  ❌ {failure}")

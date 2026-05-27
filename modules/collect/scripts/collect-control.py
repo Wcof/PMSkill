@@ -2,26 +2,28 @@
 """
 PRD Helper - Collect Control
 
-Controls PRD Capture Session: start, pause, resume, stop, status, scan.
+Controls PRD Capture Session: start, stop, status, scan.
 
 Usage:
     python collect-control.py <command> [--root <collect-root>] [--agent <agent-name>]
 
 Commands:
     start   - Start a new PRD Capture Session
-    pause   - Pause the current session
-    resume  - Resume the current session
     stop    - Stop the current session, generate summary and check
     status  - Show current capture state
     scan    - Scan all AI tool sessions for the current project
 """
+
+from __future__ import annotations
 
 import argparse
 import subprocess
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(next(p / "scripts" for p in Path(__file__).resolve().parents if (p / "scripts" / "lib").exists())))  # noqa: E501
+sys.path.insert(0, str(next(p / "scripts" for p in Path(__file__).resolve().parents if (p / "scripts" / "_bootstrap.py").exists())))  # noqa: E501
+from _bootstrap import setup_path
+setup_path(__file__)
 
 from lib.state import read_collect_state, write_collect_state, default_state, transition, InvalidTransition
 from lib.time_util import now_iso, now_id
@@ -161,6 +163,27 @@ def _run_scan(root: Path, project: Path, agent: str) -> int:
     return subprocess.run(cmd, cwd=str(project), check=False).returncode
 
 
+def _run_check(root: Path) -> Path | None:
+    """Run check-collect.py and return the check file path, or None on failure."""
+    check_script = Path(__file__).resolve().parent / "check-collect.py"
+    if not check_script.exists():
+        print(f"Check script not found: {check_script}")
+        return None
+    result = subprocess.run(
+        [sys.executable, str(check_script), str(root)],
+        cwd=str(root.parent.parent) if root.parent.parent.exists() else str(root),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.stdout:
+        print(result.stdout.rstrip())
+    if result.returncode != 0 and result.stderr:
+        print(result.stderr.rstrip())
+    check_file = root / "check.md"
+    return check_file if check_file.exists() else None
+
+
 def cmd_stop(root: Path, agent: str, project: Path):
     """Stop the current PRD Capture Session."""
     state = read_collect_state(root)
@@ -199,8 +222,13 @@ def cmd_stop(root: Path, agent: str, project: Path):
     summary = render_template(module_template_path(__file__, "collect-summary-template.md"), summary_values)
     summary_file.write_text(summary, encoding="utf-8")
 
+    # Generate check.md
+    check_file = _run_check(root)
+
     print(f"Session stopped: {state.get('session_id')}")
     print(f"Summary written to: {summary_file}")
+    if check_file:
+        print(f"Check written to: {check_file}")
     print("可以用 `/prd-refine` 开始精炼。")
 
 
