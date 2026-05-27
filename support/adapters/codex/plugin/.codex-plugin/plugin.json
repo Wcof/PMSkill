@@ -42,6 +42,7 @@
     "displayName": "PRD Helper",
     "shortDescription": "产品上下文采集与 PRD 生成",
     "longDescription": "通过主动采集和被动采集，将原始产品上下文转化为结构化、可追溯的 PRD 文档。支持采集、精炼、关联、生成四阶段流程。",
+    "developerName": "PRD Helper",
     "category": "Productivity",
     "capabilities": [
       "Interactive",
