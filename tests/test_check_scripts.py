@@ -1,30 +1,15 @@
-﻿import importlib.util
-import json
+﻿import json
 import shutil
 import sys
 from pathlib import Path
+
+import pytest
 
 from scripts.lib.source_index import append_index, ensure_index
 from scripts.lib.relation_chain import parse_relation_chain, relation_chain_report
 from scripts.lib.state import read_collect_state, write_collect_state
 
-
-ROOT = Path(__file__).resolve().parents[1]
-
-
-def load_script(relative_path: str):
-    path = ROOT / relative_path
-    name = Path(relative_path).name
-    spec = importlib.util.spec_from_file_location(name.replace("-", "_").removesuffix(".py"), path)
-    module = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None
-    spec.loader.exec_module(module)
-    return module
-
-
-def write(path: Path, content: str = "content") -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8")
+from conftest import ROOT, load_script, write
 
 
 COMPLETE_BACKGROUND = "\n".join([
@@ -1088,7 +1073,7 @@ def test_codex_plugin_install_rejects_non_helper_skill_root(tmp_path: Path, monk
 
     try:
         module.install_codex_plugin(skill_root, "docs/prd-helper")
-        assert False, "non-helper skill root should be rejected"
+        raise AssertionError("non-helper skill root should be rejected")
     except FileNotFoundError:
         pass
 
@@ -1106,11 +1091,8 @@ def test_get_entity_returns_correct_type():
     assert get_entity("fact") is FACT
     assert get_entity("page").source_module == "relate"
 
-    try:
+    with pytest.raises(KeyError):
         get_entity("nonexistent")
-        assert False, "Should have raised KeyError"
-    except KeyError:
-        pass
 
 
 def test_module_scripts_do_not_contain_inline_bootstrap():
@@ -1259,17 +1241,11 @@ def test_transition_rejects_invalid():
     """transition() 应该拒绝非法状态转换。"""
     from scripts.lib.state import transition, InvalidTransition
     # off -> paused 不合法
-    try:
+    with pytest.raises(InvalidTransition):
         transition("off", "paused")
-        assert False, "Should have raised InvalidTransition"
-    except InvalidTransition:
-        pass
     # off -> off 不合法
-    try:
+    with pytest.raises(InvalidTransition):
         transition("off", "off")
-        assert False, "Should have raised InvalidTransition"
-    except InvalidTransition:
-        pass
 
 
 def test_transition_accepts_valid():

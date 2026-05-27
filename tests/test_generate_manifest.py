@@ -4,10 +4,7 @@ from pathlib import Path
 from scripts.lib.generate_manifest import build_generate_manifest
 from modules.generate.scripts.generate import run_generate
 
-
-def write(path: Path, content: str = "content") -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8")
+from conftest import write
 
 
 def test_generate_manifest_lists_all_expected_views_from_relation_artifacts(tmp_path: Path):
