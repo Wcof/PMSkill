@@ -5,13 +5,13 @@
 推荐使用免交互安装，避免安装器英文提示干扰：
 
 ```bash
-npx skills@latest add Wcof/PRDContextEngine --all
+npx skills@latest add Wcof/PMSkill --all
 ```
 
 也可以运行 skills.sh 交互安装器（installer）：
 
 ```bash
-npx skills@latest add Wcof/PRDContextEngine
+npx skills@latest add Wcof/PMSkill
 ```
 
 选择全部 `prd-*` Skill，并选择 Codex 作为安装目标。`prd-helper` 承载四阶段业务规则，其它 `prd-*` Skill 是命令包装，用于安装时注册 slash command。
@@ -78,13 +78,13 @@ npx skills@latest remove
 1. 将本仓库复制到目标项目的 `.agents/repository root/`：
 
 ```bash
-cp -r /path/to/PRDContextEngine /path/to/your-project/.agents/repository root
+cp -r /path/to/PMSkill /path/to/your-project/.agents/repository root
 ```
 
 2. 将 `support/adapters/codex/AGENTS.md` 复制到目标项目根目录：
 
 ```bash
-cp /path/to/PRDContextEngine/support/adapters/codex/AGENTS.md /path/to/your-project/AGENTS.md
+cp /path/to/PMSkill/support/adapters/codex/AGENTS.md /path/to/your-project/AGENTS.md
 ```
 
 3. 如果目标项目已有 `AGENTS.md`，将内容追加到现有文件中。

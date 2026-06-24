@@ -5,7 +5,7 @@
 推荐使用 `skills@latest` 安装到 Claude Code，并选择全部 `prd-*` Skill：
 
 ```bash
-npx skills@latest add Wcof/PRDContextEngine --skill '*' --agent claude-code -y
+npx skills@latest add Wcof/PMSkill --skill '*' --agent claude-code -y
 ```
 
 安装完成后，Claude Code 应能加载完整 `/prd-*` 指令。可先运行：
@@ -35,7 +35,7 @@ npx skills@latest add Wcof/PRDContextEngine --skill '*' --agent claude-code -y
 如果你希望安装后 `/` 菜单立刻出现插件命令，也可以使用 Claude Code Plugin：
 
 ```bash
-claude plugin marketplace add Wcof/PRDContextEngine --scope user
+claude plugin marketplace add Wcof/PMSkill --scope user
 claude plugin install prd-helper@prd-helper --scope project
 ```
 
@@ -48,7 +48,7 @@ claude plugin install prd-helper@prd-helper --scope project
 也可以运行 skills.sh 交互安装器（installer）：
 
 ```bash
-npx skills@latest add Wcof/PRDContextEngine
+npx skills@latest add Wcof/PMSkill
 ```
 
 选择全部 `prd-*` Skill，并选择 Claude Code 作为安装目标。`prd-helper` 承载四阶段业务规则，其它 `prd-*` Skill 是命令包装。
@@ -71,7 +71,7 @@ npx skills@latest add Wcof/PRDContextEngine
 如果 Claude Code 的 `/` 菜单没有显示完整 `/prd-*`，先确认安装时选择了全部 Skill，或直接使用推荐的非交互命令：
 
 ```bash
-npx skills@latest add Wcof/PRDContextEngine --skill '*' --agent claude-code -y
+npx skills@latest add Wcof/PMSkill --skill '*' --agent claude-code -y
 ```
 
 ## 卸载
@@ -121,7 +121,7 @@ npx skills@latest remove
 
 ```bash
 # 将仓库克隆到你的 Agent skills 目录
-git clone https://github.com/Wcof/PRDContextEngine.git ~/.claude/skills/prd-helper
+git clone https://github.com/Wcof/PMSkill.git ~/.claude/skills/prd-helper
 ```
 
 然后在项目的 `CLAUDE.md` 中引用：

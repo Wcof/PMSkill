@@ -91,7 +91,7 @@ def find_skill_root(project: Path, env: dict[str, str] | None = None) -> Path:
     for root in candidate_roots(project, env):
         if _has_runtime(root):
             return root
-    raise FileNotFoundError("未找到 PRD Helper 运行时。请先运行 npx skills@latest add Wcof/PRDContextEngine")
+    raise FileNotFoundError("未找到 PRD Helper 运行时。请先运行 npx skills@latest add Wcof/PMSkill")
 
 
 def detect_agent(project: Path, env: dict[str, str] | None = None, skill_root: Path | None = None) -> str:

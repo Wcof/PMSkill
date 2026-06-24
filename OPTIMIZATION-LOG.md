@@ -1,4 +1,4 @@
-# PRDContextEngine Optimization Log
+# PMSkill Optimization Log
 
 ## Iteration 1 — 2026-05-27
 

@@ -64,10 +64,10 @@
 
   <text x="108" y="1018" class="subtitle">怎么用？</text>
   <rect x="108" y="1052" width="864" height="178" rx="24" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
-  <text x="142" y="1108" class="code">npx skills@latest add Wcof/PRDContextEngine</text>
+  <text x="142" y="1108" class="code">npx skills@latest add Wcof/PMSkill</text>
   <text x="142" y="1164" class="code">/prd-helper  →  /prd-start</text>
   <text x="142" y="1210" class="small">然后按 Collect → Refine → Relate → Generate 推进</text>
 
   <text x="108" y="1302" class="small">适合：产品经理 / 独立开发者 / AI 编程工作流</text>
-  <text x="108" y="1346" class="small">GitHub: Wcof/PRDContextEngine</text>
+  <text x="108" y="1346" class="small">GitHub: Wcof/PMSkill</text>
 </svg>

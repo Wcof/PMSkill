@@ -43,7 +43,7 @@ def test_install_docs_cover_one_shot_and_interactive_paths():
     for path, content in docs.items():
         assert "--all" in content or "--skill '*'" in content, f"{path} missing one-shot install path"
         assert "--full-depth" not in content, f"{path} should not require full-depth for normal install"
-        assert "npx skills@latest add Wcof/PRDContextEngine" in content, f"{path} missing interactive install path"
+        assert "npx skills@latest add Wcof/PMSkill" in content, f"{path} missing interactive install path"
 
 
 def test_constants_are_derived_from_command_registry():
@@ -88,7 +88,7 @@ def test_skills_package_exposes_root_local_entry_and_each_prd_command():
         if command.name != "prd-helper":
             assert "find_prd_dispatcher()" in content
             assert "scripts/prd-command-dispatch.py" in content
-            assert "npx skills@latest add Wcof/PRDContextEngine --all" in content
+            assert "npx skills@latest add Wcof/PMSkill --all" in content
             assert "--agent claude-code" not in content
 
 
@@ -132,7 +132,7 @@ def test_command_markdown_dispatcher_lookup_is_scoped_and_not_global_find():
         content = _read(path)
         assert "find \"${CODEX_HOME:-$HOME/.codex}\" \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}\"" not in content
         assert "/plugins/prd-helper/skills/prd-helper" in content
-        assert "npx skills@latest add Wcof/PRDContextEngine --all" in content
+        assert "npx skills@latest add Wcof/PMSkill --all" in content
 
 
 def test_repo_root_is_installable_as_codex_plugin():

@@ -63,7 +63,7 @@ def render_command_markdown(command: CommandSpec, include_skill_frontmatter: boo
             dispatcher_lookup_snippet(command.name),
             "",
             'dispatcher="$(find_prd_dispatcher)" || {',
-            '  echo "未找到 PRD Helper 命令分发器。请先运行：npx skills@latest add Wcof/PRDContextEngine --all"',
+            '  echo "未找到 PRD Helper 命令分发器。请先运行：npx skills@latest add Wcof/PMSkill --all"',
             "  exit 1",
             "}",
             "",

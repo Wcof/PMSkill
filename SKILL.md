@@ -2,7 +2,7 @@
 
 This root `SKILL.md` is the local direct-install fallback for users who download or clone this repository and ask Claude, Codex, or Trae to install/use it directly without `npx`.
 
-It intentionally does not contain installable Skill frontmatter. `npx skills@latest add Wcof/PRDContextEngine` should discover the grouped command Skills under `skills/prd-*/SKILL.md`; this root file is only for natural-language loading by an Agent.
+It intentionally does not contain installable Skill frontmatter. `npx skills@latest add Wcof/PMSkill` should discover the grouped command Skills under `skills/prd-*/SKILL.md`; this root file is only for natural-language loading by an Agent.
 
 PRD Helper is a **PRD Context Compiler**, not an automatic PRD writer. It compiles product context through:
 
@@ -45,5 +45,5 @@ The detailed workflow rules live in `skills/prd-helper/prd-helper/SKILL.md`, `mo
 Because this root entry is not an installable Skill, normal `npx` installation should discover the complete command package:
 
 ```bash
-npx skills@latest add Wcof/PRDContextEngine --all
+npx skills@latest add Wcof/PMSkill --all
 ```
