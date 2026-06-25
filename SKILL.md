@@ -1,48 +1,28 @@
-# PRD Helper Local Entry
+# PMSkill Local Entry
 
 This root `SKILL.md` is the local direct-install fallback for users who download or clone this repository and ask Claude, Codex, or Trae to install/use it directly without `npx`.
 
-It intentionally does not contain installable Skill frontmatter. `npx skills@latest add Wcof/PMSkill` should discover the grouped command Skills under `skills/prd-*/SKILL.md`; this root file is only for natural-language loading by an Agent.
+It intentionally does not contain installable Skill frontmatter. `npx skills@latest add Wcof/PMSkill` should discover the grouped command Skills under `skills/*/SKILL.md`; this root file is only for natural-language loading by an Agent.
 
-PRD Helper is a **PRD Context Compiler**, not an automatic PRD writer. It compiles product context through:
+PMSkill is a **product manager's Skill toolkit for working in Agents**. It turns fuzzy ideas and user requests into traceable PMContext, then derives deliverable PRD (for AI or human) and sketches (wireframe, IA, state machine, flowchart).
 
-1. Collect
-2. Refine
-3. Relate
-4. Generate
+## Core Model
 
-Check is a Soft Gate across the workflow, not a fifth business stage. Generated documents are Views, not domain Entities. Only objects that flow across stages, need IDs, need references, and participate in relation chains are Entities. Strong Trace requires `source_id + path + quote/paraphrase + locator`; Weak Trace cannot become deterministic implementation requirements.
+**PMContext is the sole Entity (source). PRD and Sketch are its downstream Views.**
 
 ## Activation
 
-When the user invokes this local Skill, initialize or repair the current project:
+When the user invokes this local Skill, run `/pm-setup` to configure the project.
 
-```bash
-python3 scripts/setup-prd-helper.py --project . --docs-root docs/prd-helper --agent codex
-python3 scripts/setup-prd-helper.py --project . --docs-root docs/prd-helper --agent claude-code
-```
+After setup, use the command Skills:
 
-Use the agent that matches the current runtime. For Trae, use `--agent trae`.
+- `/pm-need` — collect materials + refine into PMContext
+- `/pm-prd` — generate PRD from PMContext
+- `/pm-sketch` — generate sketches from PMContext
 
-After initialization, use the command Skills in `skills/prd-helper/prd-*/SKILL.md`:
-
-- `/prd-helper`
-- `/prd-start`
-- `/prd-stop`
-- `/prd-status`
-- `/prd-scan`
-- `/prd-import`
-- `/prd-refine`
-- `/prd-relate`
-- `/prd-generate`
-- `/prd-discuss`
-- `/prd-remove`
-
-The detailed workflow rules live in `skills/prd-helper/prd-helper/SKILL.md`, `modules/*/guide.md`, and `checks/guide.md`.
+The detailed workflow rules live in `CONTEXT.md` and each Skill's `SKILL.md`.
 
 ## Installer Note
-
-Because this root entry is not an installable Skill, normal `npx` installation should discover the complete command package:
 
 ```bash
 npx skills@latest add Wcof/PMSkill --all

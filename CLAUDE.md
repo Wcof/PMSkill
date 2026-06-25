@@ -1,15 +1,16 @@
 # PMSkill
 
-## Agent skills
+Skills are organized into bucket folders under `skills/`:
 
-### Issue tracker
+- `setup/` — 初始化配置
+- `discovery/` — 需求发现（collect + refine → PMContext）
+- `delivery/` — 交付（PRD 生成）
+- `visualization/` — 可视化（草图生成）
 
-GitHub Issues via `gh` CLI. See `docs/agents/issue-tracker.md`.
+Every skill must have a reference in the top-level `README.md`. Each bucket folder has a `README.md` that lists every skill with a one-line description, grouped into **User-invoked** and **Model-invoked**.
 
-### Triage labels
+Every `SKILL.md` is either user-invoked (`disable-model-invocation: true`, reachable only by the human) or model-invoked (model- or user-reachable). A user-invoked skill may invoke model-invoked skills, but never another user-invoked one.
 
-中英文混合标签：待评估/待补充/可自动处理/需人工处理/不处理。See `docs/agents/triage-labels.md`.
+## Domain docs
 
-### Domain docs
-
-Single-context: `CONTEXT.md` + `docs/adr/` at repo root. See `docs/agents/domain.md`.
+Single-context: `CONTEXT.md` + `docs/adr/` at repo root.

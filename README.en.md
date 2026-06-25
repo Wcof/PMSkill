@@ -1,164 +1,134 @@
-# PRD Helper
+# PMSkill
 
-[中文](README.md) | [English](README.en.md)
+A Skill toolkit for product managers working in Agents.
 
-![PRD Helper project overview](support/assets/prd-helper-project-overview.svg)
+From fuzzy ideas and user requests, distill clear PMContext, then derive deliverable PRD (for AI or human) and sketches (wireframe, IA, state machine, flowchart).
 
 ## One-line Value
 
-PRD Helper is a **PRD Context Compiler**: it turns product context scattered across meetings, chats, reviews, and legacy documents into traceable, checkable, reusable structured PRD assets and **Agent Context** engineering guidance.
-
-It follows one main chain: **Collect -> Refine -> Relate -> Generate**. Check is a horizontal **Soft Gate**, not a fifth stage. A Soft Gate does not hard-block user commands by default; it exposes missing sources, broken relation chains, and pending-confirmation risks.
-
-## What Problem It Solves
-
-Many teams do not lack requirement material. The problem is that the material is scattered, source evidence is unclear, and versions drift. PRD Helper keeps the workflow disciplined: collect raw input first, refine it, relate it, then generate PRD documents and Agent Context that guide humans or Agents through implementation instead of asking AI to guess from fragmented conversations.
-
-If the user skips prerequisite stages or checks do not pass, `/prd-generate` still runs, but the result is **Limited Generate**: missing sources, broken relation chains, pending questions, and prohibited implementation items must be explicit and cannot be presented as a complete deterministic PRD.
-
-Generated documents are **Views**, not an **Entity** type. Only objects that flow across stages, need references, need IDs, and participate in relation chains are domain entities. Traceability is also graded: content with `source_id + path + quote/paraphrase + locator` is **Strong Trace**; content without a locator is **Weak Trace** and cannot become a deterministic requirement.
-
-## Current Commands
-
-The authoritative command set is cross-checked against `scripts/lib/command_registry.py`, the root `SKILL.md`, `skills/prd-*/SKILL.md`, `commands/*.md`, and plugin manifests. The root `SKILL.md` is the natural-language fallback for direct local download/clone usage and intentionally has no installer frontmatter; `npx skills@latest add Wcof/PMSkill` discovers and installs these 11 command Skills:
-
-| Command | Stage/Type | Purpose | Main Outputs |
-|---|---|---|---|
-| `/prd-helper` | Setup entry | Initialize or repair project config, `docs/prd-helper/`, and Agent rules | Config, folders, Agent rules |
-| `/prd-start` | Collect | Start active capture for upcoming product discussion | `01-collect/active/`, `collect-state.md` |
-| `/prd-stop` | Collect | Stop active capture, clean hooks, and write summary/check output | `collect-summary.md`, `01-collect/check.md` |
-| `/prd-status` | Collect utility | Show capture state, session, write roots, and counts | Status summary |
-| `/prd-scan` | Collect utility | Scan historical Agent sessions into the capture pool | `01-collect/active/historical/`, `source-index.md` |
-| `/prd-import` | Collect utility | Import a third-party folder as passive material without rewriting raw content | `01-collect/passive/`, `source-index.md` |
-| `/prd-refine` | Refine | Extract facts, background, goals, decisions, constraints, conflicts, questions, and assumptions | `02-refine/` |
-| `/prd-relate` | Relate | Build upstream/downstream links across facts, pages, features, rules, data, and acceptance | `03-relate/` |
-| `/prd-generate` | Generate | Generate PRD docs and Agent context from refined and related outputs | `04-generate/` |
-| `/prd-discuss` | Auxiliary discussion | Ask one question at a time about contradictions, vague terms, and unresolved issues | Discussion summary, open questions |
-| `/prd-remove` | Uninstall | Clean project config, commands, hooks, and the full `prd-*` Skill command package while preserving generated docs by default | Cleanup result |
-
-Platform note: the `skills/` directory contains all 11 installer-discoverable Skills. `skills/prd-helper/` also packages the runtime scripts so the lightweight command Skills can locate the dispatcher. `COMMAND_NAMES` still contains the 10 commands after `/prd-helper` for project-level fallback commands and uninstall cleanup.
-
-Command Skills (`prd-start`, etc.) now include dispatcher self-discovery: even when only one command Skill is installed, it resolves `scripts/prd-command-dispatch.py` from the current Skill, `prd-helper`, or Codex local plugin paths before invoking the shared runtime.
-
-## Engineering Constraints
-
-PRD Helper keeps Python as the executor and static prompts/templates as the constraint layer:
-
-- Command facts live in `scripts/lib/command_registry.py`; `COMMAND_NAMES`, setup scripts, and consistency tests derive from it.
-- Business rules stay in `skills/prd-helper/SKILL.md`, `modules/*/guide.md`, and `commands/*.md`; Python does not act as the prompt source.
-- Output structures and checklists live in `modules/*/templates/`; scripts only fill state, counts, check results, and source details.
-
-Runtime rules are concentrated in deep modules so scripts do not duplicate hidden contracts:
-
-- `collect_writer` unifies Active Capture, historical Session, and Passive Source writes, indexing, deduplication, and counters.
-- `source_anchor` centralizes Strong Trace / Weak Trace evaluation; the minimum anchor remains `source_id + path + quote/paraphrase + locator`.
-- `relation_chain` parses Relation Chain data and reports located breaks instead of relying on text inclusion.
-- `generate_contract` defines expected Generate Views, Limited Generate risks, and the generation contract; `generate_manifest` remains as a compatibility wrapper.
-- `check_result` provides the shared Soft Gate result model.
-- `install_state`, `command_plan`, and `command_packaging` centralize install state, Atomic Command execution semantics, and command wrapper rules.
+PMSkill helps product managers working in Agents turn scattered product context — from conversations, meetings, feedback, and old docs — into traceable PMContext through clarifying questions, then derive deliverable PRD and sketches from it.
 
 ## Quick Start
 
-### 1. Install the Command Skills
-
-Default recommendation: install all `prd-*` Skills in one shot:
+### 1. Install
 
 ```bash
 npx skills@latest add Wcof/PMSkill --all
 ```
 
-If you prefer selecting Skills one-by-one, use interactive mode:
-
-```bash
-npx skills@latest add Wcof/PMSkill
-```
-
-The installer discovers `prd-helper`, `prd-start`, `prd-stop`, `prd-status`, `prd-scan`, `prd-import`, `prd-refine`, `prd-relate`, `prd-generate`, `prd-discuss`, and `prd-remove` from `skills/`. In interactive mode, select these Skills and the target Agent, such as Claude Code, Codex, or Trae.
-
-### 2. Initialize the Current Project
-
-Run this in your Agent session:
+### 2. Initialize
 
 ```text
-/prd-helper
+/pm-setup
 ```
 
-Initialization creates the default docs root `docs/prd-helper/` and repairs Agent rules, project-level fallback commands, and hook config. Follow-up commands are registered at install time; `/prd-helper` is not the gate for making them appear.
-
-### 3. Follow the Four Stages
+### 3. Follow the main flow
 
 ```text
-/prd-start    # Start active capture
-/prd-stop     # Stop active capture and write summary output
-/prd-scan     # Scan historical Agent sessions
-/prd-import   # Import a third-party folder as passive material
-/prd-refine   # Refine collected materials
-/prd-relate   # Build upstream/downstream relation chains
-/prd-generate # Generate PRD docs and Agent context
+/pm-need    # collect materials + refine through questions → produce PMContext
+/pm-prd     # generate PRD from PMContext (for AI + for human)
+/pm-sketch  # generate sketches from PMContext (wireframe/IA/state/flow)
 ```
 
-Use `/prd-status` to inspect state, `/prd-discuss` to clarify ambiguity, and `/prd-remove` to uninstall.
+## Core Model
 
-Active capture output goes to:
+**PMContext is the sole Entity (source). PRD and Sketch are its downstream Views.**
 
-```text
-docs/prd-helper/01-collect/active/
+- PMContext lands as a single self-contained file `pm-context.md`
+- PRD has two forms: for AI (with Agent Context) and for human (review-friendly)
+- Sketches use markdown-embedded Mermaid diagrams, readable by Agent
+- Risks are marked inline (`[待确认]`/`[假设]`/`[冲突]`), not in separate check reports
+
+## Main Flow
+
+```
+Fuzzy ideas / user requests
+        ↓
+  /pm-need (collect → refine)  →  PMContext (sole Entity)
+        ↓                           ↓
+  /pm-prd (ai + human)              /pm-sketch (wireframe + ia + state + flow)
+        ↓                           ↓
+  ai-prd.md + human-prd.md      sketch/*.md (Mermaid diagrams)
 ```
 
-Passive materials go to:
+## Skill List
 
-```text
-docs/prd-helper/01-collect/passive/
+### Setup — Initialization
+
+| Skill | Invocation | Purpose |
+|---|---|---|
+| `/pm-setup` | user-invoked | Configure project (directory/language/Agent rules) |
+
+### Discovery — Requirement Discovery
+
+| Skill | Invocation | Purpose |
+|---|---|---|
+| `/pm-need` | user-invoked | Main entry: collect → refine, produce PMContext |
+| `/pm-collect` | model-invoked | Collect materials (conversation-first + file import) |
+| `/pm-refine` | model-invoked | Clarify through questions (8 dimensions), distill PMContext |
+
+### Delivery — Delivery
+
+| Skill | Invocation | Purpose |
+|---|---|---|
+| `/pm-prd` | user-invoked | Output both PRD forms |
+| `/pm-aiprd` | model-invoked | Output AI-executable PRD (with Agent Context) |
+| `/pm-humanprd` | model-invoked | Output human-readable PRD (review-friendly) |
+
+### Visualization — Visualization
+
+| Skill | Invocation | Purpose |
+|---|---|---|
+| `/pm-sketch` | user-invoked | Output all four sketch types |
+| `/pm-wireframe` | model-invoked | Wireframe (Mermaid + table) |
+| `/pm-ia` | model-invoked | Information architecture (Mermaid graph) |
+| `/pm-state` | model-invoked | State machine (Mermaid stateDiagram) |
+| `/pm-flow` | model-invoked | Flowchart (Mermaid flowchart) |
+
+## /pm-refine Questioning Dimensions
+
+1. **User scenario**: Who uses it? In what scenario? For what purpose?
+2. **Boundary conditions**: What if X fails? What if user does Y simultaneously?
+3. **Priority**: Must-have vs nice-to-have? Where is the MVP boundary?
+4. **Conflict detection**: When sources contradict, which takes precedence?
+5. **Terminology clarification**: What exactly does X mean?
+6. **Workaround & friction**: What workaround do users currently use? What's the most painful point?
+7. **Tech & resource constraints**: Latency requirements? Token cost? Hardware limits?
+8. **Value validation metrics**: What metric proves we did it right? If unchanged, can we remove it?
+
+## Output Directory
+
+```
+docs/pm-context/
+  pm-context.md          ← Entity (sole)
+  collect/               ← /pm-collect organized materials
+  prd/
+    ai-prd.md            ← AI PRD
+    human-prd.md         ← Human PRD
+  sketch/
+    wireframe.md         ← Wireframe
+    ia.md                ← Information architecture
+    state.md             ← State machine
+    flow.md              ← Flowchart
 ```
 
-## Four-stage Workflow
+## Design Decisions
 
-| Stage | Directory | Does | Does Not |
-|---|---|---|---|
-| Collect | `modules/collect/` | Preserve raw materials, build indexes, record hashes, maintain capture state | Rewrite facts early or generate rules |
-| Refine | `modules/refine/` | Separate facts, background, goals, decisions, constraints, conflicts, questions, assumptions | Turn assumptions into facts or jump to PRD |
-| Relate | `modules/relate/` | Build `fact -> page/feature -> rule -> data/acceptance` chains | Leave facts, rules, data, or acceptance disconnected |
-| Generate | `modules/generate/` | Produce PRD, acceptance, data docs, and Agent context | Add unsourced or unrelated business rules |
+Key architectural decisions are recorded in `docs/adr/`:
 
-### How Generate Produces the Complete Set
-
-Generate now uses a contract-driven flow instead of relying only on an Agent following prompt text:
-
-1. **Generate Contract** derives the complete expected View set from `02-refine/` and `03-relate/`, including overview, pages, rules, data, acceptance, four Agent Context files, and `check.md`. The old Generate Manifest entry point remains as a compatibility wrapper.
-2. **Generate Runner** executes `manifest -> scaffold/generate -> check`, creates missing Views, preserves existing user-authored content, and reports created/existing/skipped/limited/failed outputs.
-3. **Quality Report** powers `04-generate/check.md` and checks coverage, template completeness, Traceability, Relation Chain, Agent Context Safety, and Limited Generate risk.
-
-Generate scripts support both dispatcher-based dynamic loading and direct execution with `python3 modules/generate/scripts/generate.py docs/prd-helper`; check scripts load shared libraries from the runtime `scripts/lib` path so installed Skill paths and local source paths resolve imports consistently.
-
-This means “all PRDs were generated” is judged against the Generate Contract, not only by inspecting files that already happen to exist.
-
-## Check Commands
-
-These are script-level quality gates, not slash commands:
-
-```bash
-python3 modules/collect/scripts/check-collect.py --root docs/prd-helper/01-collect
-python3 modules/refine/scripts/check-refine.py docs/prd-helper
-python3 modules/relate/scripts/check-relate.py docs/prd-helper
-python3 modules/generate/scripts/check-generated.py docs/prd-helper
-python3 scripts/check-structure.py docs/prd-helper
-```
+- **ADR 0004**: PMContext as the sole Entity; PRD and Sketch are Views
+- **ADR 0005**: Explicit inline markers replace Soft Gate
+- **ADR 0006**: Relate phase dispersed into all Skills
+- **ADR 0007**: Single-level traceability replaces Strong/Weak Trace
 
 ## FAQ
 
-Only `/prd-helper` appears, not `/prd-start`: this usually means only `prd-helper` was selected during installation, or the current Agent has not refreshed its Skill list. Prefer `npx skills@latest add Wcof/PMSkill --all` for one-shot installation; if you use interactive mode, confirm all `prd-*` Skills are selected. An already-open session may still need a restart. Even if the menu has not refreshed, typing `/prd-start` directly can still be handled by installed Skills or project-level fallback commands. Codex hooks are written by `/prd-start` and cleaned by `/prd-stop`.
+**Can PMContext be updated?** Yes. PMContext is a living document. Call `/pm-refine` again with new feedback; Agent only questions new parts and incrementally updates.
 
-No capture output: run `/prd-status` and confirm the state is `on`; then inspect `docs/prd-helper/01-collect/collect-state.md`.
+**Can I skip collect and go straight to refine?** Yes. `/pm-collect` and `/pm-refine` can both be called independently.
 
-Not sure whether to use `/prd-scan` or `/prd-import`: use `/prd-scan` for historical Agent sessions; use `/prd-import` or `01-collect/passive/` for third-party folders, meeting notes, legacy PRDs, and customer feedback.
+**Can I produce only one PRD form?** Yes. `/pm-aiprd` and `/pm-humanprd` can both be called independently.
 
-Want to uninstall: run `/prd-remove`. It cleans project config, commands, hooks, and the full `prd-*` Skill command package while keeping existing `docs/prd-helper/` documents by default.
+**Can I produce only one sketch type?** Yes. `/pm-wireframe`, `/pm-ia`, `/pm-state`, `/pm-flow` can all be called independently.
 
-## Open-source Governance
-
-- Contributing: `CONTRIBUTING.md`
-- Code of Conduct: `CODE_OF_CONDUCT.md`
-- Security Policy: `SECURITY.md`
-- Support: `SUPPORT.md`
-- Changelog: `CHANGELOG.md`
-- GitHub cover prompt guide: `docs/github-project-kit.md`
+**Do I need /pm-remove?** No. No hooks to clean up, Agent rules are a few lines to delete manually, output directory may have value so not auto-deleted, Skill uninstall is handled by the installer.

@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (updated 2026-05-10)
+Superseded by ADR 0004 (2026-06-24). The four-stage pipeline model has been replaced by PMContext as the sole Entity with Skills organized into setup/discovery/delivery/visualization buckets.
 
 ## Context
 

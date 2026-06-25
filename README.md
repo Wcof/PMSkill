@@ -1,164 +1,134 @@
-# PRD Helper
+# PMSkill
 
-[中文](README.md) | [English](README.en.md)
+产品经理在 Agent 里工作的 Skill 工具箱。
 
-![PRD Helper 项目介绍图](support/assets/prd-helper-project-overview.svg)
+从模糊想法/用户诉求出发，沉淀成清晰的 PMContext，再转成可交付的 PRD（给 AI 或给人）和草图（多种可视化形态）。
 
 ## 一句话价值
 
-PRD Helper 是一个 **PRD Context Compiler（PRD 上下文编译流程）**：把分散在会议、聊天、评审和旧文档里的产品上下文，沉淀成可追溯、可检查、可复用的结构化 PRD 资产和 **Agent Context** 工程指导文件。
-
-它坚持一条主链路：**采集（Collect）→ 精炼（Refine）→ 关联（Relate）→ 生成（Generate）**。检查（Check）是横向 **Soft Gate（软门禁）**，不是第五阶段；Soft Gate 不默认阻断用户命令，但会暴露来源缺失、断链和待确认风险。
-
-## 它解决什么问题
-
-很多团队不是没有需求资料，而是资料散、来源乱、版本多，最后 PRD 变成“谁记得就听谁的”。PRD Helper 的目标是让 Agent 和团队先保存原始材料，再精炼信息、建立关系，最后生成 PRD 和指导人或 Agent 实施的 Agent Context，避免直接让 AI 从碎片聊天里凭感觉写文档。
-
-如果用户跳过前置阶段或检查未通过，`/prd-generate` 仍可执行，但结果属于 **Limited Generate（受限生成）**：缺失来源、断链、待确认问题和禁止实施项必须显式标记，不能伪装成完整确定性 PRD。
-
-生成阶段的文档文件是 **View**，不是 **Entity**。只有跨阶段流转、需要被引用、需要 ID、需要参与关系链路的对象，才是领域实体。来源追溯也分级：具备 `source_id + path + quote/paraphrase + locator` 的内容是 **Strong Trace**；缺少 locator 的内容是 **Weak Trace**，不能进入确定性要求。
-
-## 当前指令清单
-
-当前权威指令集合来自 `scripts/lib/command_registry.py`、根 `SKILL.md`、`skills/prd-*/SKILL.md`、`commands/*.md` 和插件声明。根 `SKILL.md` 是本地直接下载/克隆后的自然语言兜底入口，不带安装器 frontmatter；`npx skills@latest add Wcof/PMSkill` 会发现并安装以下 11 个命令 Skill：
-
-| 指令 | 阶段/类型 | 作用 | 主要产物 |
-|---|---|---|---|
-| `/prd-helper` | 初始化入口 | 初始化或修复当前项目配置，创建 `docs/prd-helper/` 和 Agent 规则 | 配置、目录、Agent 规则 |
-| `/prd-start` | 采集 | 开启主动采集，后续产品讨论会写入采集区 | `01-collect/active/`、`collect-state.md` |
-| `/prd-stop` | 采集 | 停止主动采集，清理采集 Hook，并生成采集摘要和检查结果 | `collect-summary.md`、`01-collect/check.md` |
-| `/prd-status` | 采集工具 | 查看当前采集状态、session、写入目录和计数 | 状态摘要 |
-| `/prd-scan` | 采集工具 | 批量扫描历史 Agent 会话并导入采集池 | `01-collect/active/historical/`、`source-index.md` |
-| `/prd-import` | 采集工具 | 导入第三方文件夹作为被动材料，不提前清洗原文 | `01-collect/passive/`、`source-index.md` |
-| `/prd-refine` | 精炼 | 从采集材料中提炼事实、背景、目标、决策、约束、冲突、问题和推断 | `02-refine/` |
-| `/prd-relate` | 关联 | 建立事实、页面、功能、规则、数据、验收之间的上下游关系 | `03-relate/` |
-| `/prd-generate` | 生成 | 基于精炼与关联产物生成 PRD 文档和 Agent 上下文 | `04-generate/` |
-| `/prd-discuss` | 辅助研讨 | 在采集和精炼之间追问矛盾、模糊术语和未决问题，每次只追问一个问题 | 研讨摘要、待确认项 |
-| `/prd-remove` | 卸载 | 清理 PRD Helper 项目配置、命令、Hook 和完整 `prd-*` Skill 命令包，默认保留已生成文档 | 清理结果 |
-
-平台说明：`skills/` 目录包含上述 11 个安装器可发现的 Skill。`skills/prd-helper/` 还携带运行时脚本，供其它轻量命令 Skill 定位 dispatcher。`COMMAND_NAMES` 仍只记录除 `/prd-helper` 外的 10 个后续命令，用于项目级兜底命令和卸载清理。
-
-命令 Skill（`prd-start` 等）已内置 dispatcher 自定位逻辑：即使你只安装单个命令 Skill，它也会先在本 Skill 目录、`prd-helper` 目录和 Codex 本地插件目录中定位 `scripts/prd-command-dispatch.py`，再执行统一运行时。
-
-## 工程约束
-
-PRD Helper 遵循“Python 执行化，静态提示词约束化”：
-
-- 指令事实来自 `scripts/lib/command_registry.py`，`COMMAND_NAMES`、安装脚本和一致性测试都从这里派生。
-- 业务规则保留在 `skills/prd-helper/SKILL.md`、`modules/*/guide.md` 和 `commands/*.md`，Python 不承担提示词职责。
-- 产物结构和检查清单优先放在 `modules/*/templates/`，脚本只填入状态、计数、检查结果和来源信息。
-
-运行时规则收敛到一组深 Module，避免脚本之间重复维护隐性契约：
-
-- `collect_writer` 统一 Active Capture、历史 Session 和 Passive Source 的写入、索引、去重和计数。
-- `source_anchor` 统一 Strong Trace / Weak Trace 判断，最低锚点仍是 `source_id + path + quote/paraphrase + locator`。
-- `relation_chain` 解析 Relation Chain，并输出可定位断链，而不是只做文本包含检查。
-- `generate_contract` 定义 Generate 应输出的 View 清单、Limited Generate 风险和生成契约；`generate_manifest` 作为兼容入口保留。
-- `check_result` 统一 Soft Gate 结果模型，便于各阶段检查输出一致语义。
-- `install_state`、`command_plan`、`command_packaging` 分别收敛安装状态、命令执行语义和命令包装规则。
+PMSkill 帮助在 Agent 里工作的产品经理，把分散在脑中、对话、会议、反馈里的模糊产品上下文，通过追问澄清沉淀成可追溯的 PMContext，再从 PMContext 衍生出可交付的 PRD 和草图。
 
 ## 快速开始
 
-### 1. 安装命令 Skills
-
-默认推荐一键安装全部 `prd-*` Skill：
+### 1. 安装
 
 ```bash
 npx skills@latest add Wcof/PMSkill --all
 ```
 
-如果你想按需一个个选择（保留单选能力），使用交互安装：
-
-```bash
-npx skills@latest add Wcof/PMSkill
-```
-
-安装器会从 `skills/` 目录发现 `prd-helper`、`prd-start`、`prd-stop`、`prd-status`、`prd-scan`、`prd-import`、`prd-refine`、`prd-relate`、`prd-generate`、`prd-discuss`、`prd-remove`。交互模式里选择这些 Skill，并选择你要安装到的 Agent，例如 Claude Code、Codex 或 Trae。
-
-### 2. 初始化当前项目
-
-在 Agent 会话中输入：
+### 2. 初始化
 
 ```text
-/prd-helper
+/pm-setup
 ```
 
-初始化会创建默认目录 `docs/prd-helper/`，并补齐 Agent 规则、项目级兜底命令和 Hook 配置。后续命令已在安装时注册；`/prd-helper` 不是它们出现的前置条件。
-
-### 3. 按四阶段推进
+### 3. 按主链路推进
 
 ```text
-/prd-start    # 开启主动采集
-/prd-stop     # 停止主动采集并生成采集摘要
-/prd-scan     # 扫描历史 Agent 会话
-/prd-import   # 导入第三方文件夹作为被动材料
-/prd-refine   # 精炼采集材料
-/prd-relate   # 建立上下游关系链路
-/prd-generate # 生成 PRD 文档和 Agent 上下文
+/pm-need    # 收集材料 + 追问澄清 → 产出 PMContext
+/pm-prd     # 从 PMContext 生成 PRD（给 AI + 给人）
+/pm-sketch  # 从 PMContext 生成草图（线框/架构/状态机/流程图）
 ```
 
-需要查看状态时用 `/prd-status`，需要研讨模糊点时用 `/prd-discuss`，需要卸载时用 `/prd-remove`。
+## 核心主张
 
-主动采集内容会进入：
+**PMContext 是唯一 Entity（源），PRD 和草图都是它的下游 View。**
 
-```text
-docs/prd-helper/01-collect/active/
+- PMContext 落盘为单文件 `pm-context.md`，自包含，下游 Skill 读一个文件就知道全貌
+- PRD 有两种形态：给 AI 的（带 Agent Context，供 Agent 执行）和给人的（供人类阅读评审）
+- 草图以 markdown 内嵌 Mermaid 图表达，Agent 可直接读写
+- 风险信息用显式标记（`[待确认]`/`[假设]`/`[冲突]`）写在正文里，不需要独立检查报告
+
+## 主链路
+
+```
+模糊想法/用户诉求
+        ↓
+  /pm-need (collect → refine)  →  PMContext (唯一 Entity)
+        ↓                           ↓
+  /pm-prd (ai + human)              /pm-sketch (wireframe + ia + state + flow)
+        ↓                           ↓
+  ai-prd.md + human-prd.md      sketch/*.md (Mermaid 内嵌图)
 ```
 
-手动材料放入：
+## Skill 清单
 
-```text
-docs/prd-helper/01-collect/passive/
+### Setup — 初始化
+
+| Skill | 调用模型 | 作用 |
+|---|---|---|
+| `/pm-setup` | user-invoked | 首次配置项目（目录/语言/Agent 规则） |
+
+### Discovery — 需求发现
+
+| Skill | 调用模型 | 作用 |
+|---|---|---|
+| `/pm-need` | user-invoked | 主入口：collect → refine，产出 PMContext |
+| `/pm-collect` | model-invoked | 收集材料（对话优先 + 文件导入），整理到 collect/ |
+| `/pm-refine` | model-invoked | 追问澄清（8 个维度），沉淀成 PMContext |
+
+### Delivery — 交付
+
+| Skill | 调用模型 | 作用 |
+|---|---|---|
+| `/pm-prd` | user-invoked | 输出两种 PRD 形态 |
+| `/pm-aiprd` | model-invoked | 输出给 AI 的 PRD（带 Agent Context） |
+| `/pm-humanprd` | model-invoked | 输出给人的 PRD（评审友好） |
+
+### Visualization — 可视化
+
+| Skill | 调用模型 | 作用 |
+|---|---|---|
+| `/pm-sketch` | user-invoked | 输出全部四种草图 |
+| `/pm-wireframe` | model-invoked | 界面线框图（Mermaid + 表格） |
+| `/pm-ia` | model-invoked | 信息架构图（Mermaid graph） |
+| `/pm-state` | model-invoked | 状态机图（Mermaid stateDiagram） |
+| `/pm-flow` | model-invoked | 流程图（Mermaid flowchart） |
+
+## /pm-refine 追问维度
+
+1. **用户场景**：谁在什么场景下用？达到什么目的？
+2. **边界条件**：异常路径——如果 X 失败呢？
+3. **优先级**：必须做 vs 最好有，MVP 边界在哪？
+4. **冲突检测**：不同来源矛盾时以哪个为准？
+5. **术语澄清**：你说的 X 具体指什么？
+6. **现状平替与摩擦力**：用户目前用什么土办法凑合？最痛苦的点是什么？
+7. **技术与资源约束**：延迟要求？Token 成本？硬件限制？
+8. **价值验证度量**：上线后看哪个指标证明做对了？
+
+## 产物目录
+
+```
+docs/pm-context/
+  pm-context.md          ← Entity（唯一）
+  collect/               ← /pm-collect 整理后的材料
+  prd/
+    ai-prd.md            ← 给 AI 的 PRD
+    human-prd.md         ← 给人的 PRD
+  sketch/
+    wireframe.md         ← 界面线框图
+    ia.md                ← 信息架构图
+    state.md             ← 状态机图
+    flow.md              ← 流程图
 ```
 
-## 四阶段工作流
+## 设计决定
 
-| 阶段 | 目录 | 做什么 | 不做什么 |
-|---|---|---|---|
-| Collect 采集 | `modules/collect/` | 保存原始材料、建立索引、记录 hash、维护采集状态 | 不提前改写事实、不生成规则 |
-| Refine 精炼 | `modules/refine/` | 区分事实、背景、目标、决策、约束、冲突、问题、推断 | 不把推断写成事实、不跳到 PRD |
-| Relate 关联 | `modules/relate/` | 建立 `fact -> page/feature -> rule -> data/acceptance` 链路 | 不让事实、规则、数据、验收断链 |
-| Generate 生成 | `modules/generate/` | 生成 PRD、验收、数据说明和 Agent 上下文 | 不新增未来源化、未关联的业务规则 |
+关键架构决定记录在 `docs/adr/`：
 
-### Generate 如何保证一次性生成完整
-
-Generate 现在采用 contract-driven 流程，不再只依赖 Agent 按提示词手动补文件：
-
-1. **Generate Contract** 从 `02-refine/` 和 `03-relate/` 推导应输出的完整 View 清单，包括 overview、pages、rules、data、acceptance、4 份 Agent Context 和 `check.md`。旧的 Generate Manifest 入口继续保留，作为兼容包装。
-2. **Generate Runner** 执行 `manifest -> scaffold/generate -> check`，创建缺失 View，保留已有用户内容，并输出 created/existing/skipped/limited/failed 摘要。
-3. **Quality Report** 驱动 `04-generate/check.md`，检查覆盖率、模板完整性、Traceability、Relation Chain、Agent Context Safety 和 Limited Generate 风险。
-
-Generate 脚本支持通过 dispatcher 动态加载，也支持直接用 `python3 modules/generate/scripts/generate.py docs/prd-helper` 执行；检查脚本会从运行时 `scripts/lib` 加载共享库，避免安装后的 Skill 路径和本地源码路径出现导入差异。
-
-因此，“是否生成完所有 PRD”以 Generate Contract 为准，而不是只检查当前目录里已经存在的文件。
-
-## 检查命令
-
-这些是脚本级质量门禁，不是斜杠指令：
-
-```bash
-python3 modules/collect/scripts/check-collect.py --root docs/prd-helper/01-collect
-python3 modules/refine/scripts/check-refine.py docs/prd-helper
-python3 modules/relate/scripts/check-relate.py docs/prd-helper
-python3 modules/generate/scripts/check-generated.py docs/prd-helper
-python3 scripts/check-structure.py docs/prd-helper
-```
+- **ADR 0004**: PMContext 是唯一 Entity，PRD 和草图都是 View
+- **ADR 0005**: 显式标记替代 Soft Gate，风险写在正文里
+- **ADR 0006**: Relate 阶段分散进所有 Skill，关联是每个 Skill 的内置纪律
+- **ADR 0007**: 单级追溯（有来源/无来源）替代 Strong/Weak Trace 二级
 
 ## 常见问题
 
-只看到 `/prd-helper`，没有 `/prd-start`：这通常表示安装时只选择了 `prd-helper`，或当前 Agent 没刷新 Skill 列表。优先执行 `npx skills@latest add Wcof/PMSkill --all` 一键全装；如果你走交互安装，请确认已勾选全部 `prd-*` Skill。已打开的会话可能仍需重开。即使菜单未刷新，直接输入 `/prd-start` 也会由已安装 Skill 或项目级兜底命令执行。Codex 的 hooks 会在 `/prd-start` 写入 `.codex/hooks.json`，并在 `/prd-stop` 清理；若收尾脚本失败，只会生成 `.codex/prd-helper/hook-state/*-stop-error.json` 诊断文件，不会把会话打断成 `hook exited with code 1`。
+**PMContext 可以更新吗？** 可以。PMContext 是活文档，拿到新反馈后再次调用 `/pm-refine`，Agent 只追问新增部分，增量写入。
 
-采集没有写入：先运行 `/prd-status`，确认状态是 `on`；再检查 `docs/prd-helper/01-collect/collect-state.md`。
+**可以跳过 collect 直接 refine 吗？** 可以。`/pm-collect` 和 `/pm-refine` 都可以独立调用。如果 PM 手里已有材料，直接 `/pm-refine`。
 
-不知道先用 `/prd-scan` 还是 `/prd-import`：历史 Agent 会话用 `/prd-scan`；第三方文件夹、会议纪要、旧 PRD、客户反馈用 `/prd-import` 或直接放入 `01-collect/passive/`。
+**可以只出一种 PRD 吗？** 可以。`/pm-aiprd` 和 `/pm-humanprd` 都可以独立调用。
 
-不想继续使用：运行 `/prd-remove`，它会清理项目配置、命令、Hook，并卸载完整 `prd-*` Skill 命令包，但默认保留已经生成的 `docs/prd-helper/` 文档。
+**可以只出一种草图吗？** 可以。`/pm-wireframe`、`/pm-ia`、`/pm-state`、`/pm-flow` 都可以独立调用。
 
-## 开源协作
-
-- 贡献指南：`CONTRIBUTING.md`
-- 行为准则：`CODE_OF_CONDUCT.md`
-- 安全策略：`SECURITY.md`
-- 支持方式：`SUPPORT.md`
-- 版本记录：`CHANGELOG.md`
-- GitHub 介绍图 Prompt 指南：`docs/github-project-kit.md`
+**需要 /pm-remove 吗？** 不需要。不注册 hook 无需清理，Agent 规则几行手动删，产物目录可能有价值不自动删，Skill 卸载归安装器。

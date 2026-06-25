@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (updated 2026-05-10)
+Superseded (2026-06-24). The 11 `prd-*` atomic commands have been replaced by 12 `pm-*` Skills with user-invoked/model-invoked dual-axis invocation model. (updated 2026-05-10)
 
 ## Context
 

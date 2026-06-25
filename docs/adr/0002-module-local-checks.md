@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Superseded by ADR 0005 (2026-06-24). Module-local checks and Soft Gate mechanism have been replaced by explicit inline markers in PMContext.
 
 ## Context
 
