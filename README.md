@@ -48,7 +48,7 @@ npx skills@latest add Wcof/PMSkill --all
         ↓                           ↓
   /pm-prd (ai + human)              /pm-sketch (wireframe + ia + state + flow)
         ↓                           ↓
-  ai-prd.md + human-prd.md      sketch/*.md (Mermaid 内嵌图)
+  prd/ai-prd.md + prd/human-prd.md      sketch/*.md (Mermaid 内嵌图)
 ```
 
 ## Skill 清单
@@ -114,7 +114,7 @@ docs/pm-context/
 
 ## 设计决定
 
-关键架构决定记录在 `docs/adr/`：
+关键架构决定（记录在仓库 `docs/adr/`，本地开发可见，安装包不含）：
 
 - **ADR 0004**: PMContext 是唯一 Entity，PRD 和草图都是 View
 - **ADR 0005**: 显式标记替代 Soft Gate，风险写在正文里
