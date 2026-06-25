@@ -24,10 +24,17 @@ Desktop.ini
 .env
 .env.local
 
-# Outdated artifacts from previous Python-based architecture
-# (kept locally for reference, not tracked)
-.github/workflows/ci.yml
-docs/github-project-kit.md
+# Non-shipped local files (kept locally, not tracked)
+docs/
+.github/
+.codex-plugin/
+.claude-plugin/
+CHANGELOG.md
+CLAUDE.md
+CONTEXT.md
+CONTRIBUTING.md
+SECURITY.md
+SUPPORT.md
 OPTIMIZATION-LOG.md
 
 # AtomCode per-project state
