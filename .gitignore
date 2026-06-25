@@ -24,5 +24,11 @@ Desktop.ini
 .env
 .env.local
 
+# Outdated artifacts from previous Python-based architecture
+# (kept locally for reference, not tracked)
+.github/workflows/ci.yml
+docs/github-project-kit.md
+OPTIMIZATION-LOG.md
+
 # AtomCode per-project state
 .atomcode/
