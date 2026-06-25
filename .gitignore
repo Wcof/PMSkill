@@ -7,3 +7,22 @@ __pycache__/
 .agents/
 .claude/
 skills-lock.json
+
+# Editor / IDE local state
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS local files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Local logs & env
+*.log
+.env
+.env.local
+
+# AtomCode per-project state
+.atomcode/
