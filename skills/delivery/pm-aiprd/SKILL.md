@@ -133,12 +133,12 @@ As a 月付用户, I want to upgrade to 年付, so that 节省费用
 [7 条可执行规则...]
 ```
 
-## 延伸参考
+### Further Reading
 
 - [A Proven AI PRD Template - Miqdad Jaffer (OpenAI)](https://www.productcompass.pm/p/ai-prd-template)
 - [PM Compass create-prd skill](https://github.com/phuryn/pm-skills/blob/main/pm-execution/skills/create-prd/SKILL.md) — 8 节模板参考
 
-## 📝 实战提示
+### 实战提示
 
 - **[待确认] 大于 30% 标 🟡，大于 50% 标 🔴**：前者是草案，后者是不可执行
 - **每条规则必须是可执行的**："确保用户体验良好"不叫规则，"按钮不小于 44px"才叫规则

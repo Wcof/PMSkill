@@ -142,12 +142,12 @@ flowchart TD
 | 中间 | 会员横幅 | PMContext 会员定义 | 点击"立即续费"→ 续费页 |
 | 底部 | 快捷入口 | [假设] 推断 | 待 PM 补充 |
 
-## 延伸参考
+### Further Reading
 
 - [Mermaid flowchart docs](https://mermaid.js.org/syntax/flowchart.html)
 - [线框图设计指南 (NN Group)](https://www.nngroup.com/articles/wireflows/)
 
-## 📝 实战提示
+### 实战提示
 
 - **线框图 ≠ 高保真**：不要画颜色、字体、图标细节——留到 HTML 原型阶段
 - **每页独立表格**：多页面合并到一个表格会混淆组件归属

@@ -167,13 +167,13 @@ description: 从 PMContext 假设失败并倒推风险，产出 Tiger/Paper Tige
 - [假设: 用户续费率下降 12% 与定价有关，7/10] → 升级为 Tiger
 ```
 
-## 延伸参考
+### Further Reading
 
 - [How Meta and Instagram Use Pre-Mortems](https://www.productcompass.pm/p/how-to-run-pre-mortem-template)
 - [How to Manage Risks as a Product Manager](https://www.productcompass.pm/p/how-to-manage-risks-as-a-product-manager)
 - [PM Compass Pre-Mortem Template](https://github.com/phuryn/pm-skills/blob/main/pm-execution/skills/pre-mortem/SKILL.md)
 
-## 📝 实战提示
+### 实战提示
 
 - **Tiger 不超过 5 个**：再多行动计划不可执行。按紧急度排序，超出的降级为 Fast-Follow
 - **假设交叉检查是核心**：PMContext 中置信度 ≤ 5 的假设，最可能升级为 Tiger，优先处理

@@ -141,12 +141,12 @@ stateDiagram-v2
   end note
 ```
 
-## 延伸参考
+### Further Reading
 
 - [Mermaid stateDiagram-v2 docs](https://mermaid.js.org/syntax/stateDiagram.html)
 - [状态机设计模式 (UML)](https://en.wikipedia.org/wiki/UML_state_machine)
 
-## 📝 实战提示
+### 实战提示
 
 - **终态不能少**：每个实体必须有明确的终态（`[*]`），否则流程无法结束
 - **异常状态优先画**：失败/超时/取消比正常流转更能暴露设计缺陷

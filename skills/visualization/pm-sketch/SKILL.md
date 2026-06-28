@@ -173,12 +173,17 @@ Run 四个子 Skill（按依赖顺序）：
 | 反模式 | 为什么不要做 |
 |--------|------------|
 | 脱离 PMContext 凭感觉画图 | 图元无追溯，与需求脱节 |
-| 只出 Mermaid 不出 HTML（用户明确要原型时） | 交互设计只靠文字描述不够直观 |
-| 把 `[假设]` 图元画成确定性内容 | 误导团队以为这是确认过的设计 |
-| HTML 原型依赖外部 CDN 不兜底 | 断网环境无法预览 |
+| 把 `[假设]` 图元画成确定性内容 | 误导团队以为确认过 |
+| HTML 依赖外部 CDN | 断网环境无法预览 |
 | 草图嵌入 PRD 文件 | 草图是独立 View，不应嵌套 |
-| `--prototype` 不做质量清单 7 项检查 | HTML 原型质量无保证，用户拿到半成品 |
-| `--auto` 模式下子 skill 失败就全链路回滚 | 其他成功部分仍落盘，失败项单独标注 |
+| `--auto` 遇子 skill 失败就全链路回滚 | 其他成功部分仍落盘，失败项单独标注 |
+
+---
+
+### Further Reading
+
+- [Mermaid stateDiagram-v2 docs](https://mermaid.js.org/syntax/stateDiagram.html)
+- [Mermaid flowchart docs](https://mermaid.js.org/syntax/flowchart.html)
 
 ## 产出示例 · 延伸参考 · 实战提示
 

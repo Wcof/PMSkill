@@ -172,3 +172,10 @@ done
 | 忽略 git commit history | commit message 中蕴含了产品决策和演进 |
 | 扫描到 TODO/FIXME 但不标注其产品含义 | PM 需要知道这些标记对应的功能方向 |
 | 4 �源材料不去重导致 refine 重复推断 | 去重是 collect 的职责，重复材料增加 refine 成本 |
+
+---
+
+### Further Reading
+
+- [PM Compass - Product Discovery Guide](https://www.productcompass.pm/p/what-exactly-is-product-discovery)
+- [Opportunity Solution Tree](https://www.productcompass.pm/p/the-extended-opportunity-solution-tree)

@@ -133,12 +133,12 @@ graph TD
   order -.-> order_item["订单项(引用)"]
 ```
 
-## 延伸参考
+### Further Reading
 
 - [Mermaid graph docs](https://mermaid.js.org/syntax/flowchart.html)
 - [信息架构设计原则 (IA)](https://www.productcompass.pm/p/what-exactly-is-product-discovery)
 
-## 📝 实战提示
+### 实战提示
 
 - **节点 > 15 个必拆分**：用 `subgraph` 分组按业务域切，不要塞进一张图
 - **[假设] 节点虚线边 + 圆角框**：视觉上要一眼看得出哪些是推断的

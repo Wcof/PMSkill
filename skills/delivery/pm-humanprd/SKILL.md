@@ -115,12 +115,12 @@ description: 从 PMContext 生成给人阅读的 PRD。This skill should be used
 [关键决策...]
 ```
 
-## 延伸参考
+### Further Reading
 
 - [PM Compass PRD Template](https://www.productcompass.pm/p/prd-template)
 - [Human-readable PRD 最佳实践](https://www.productcompass.pm/p/how-to-write-user-stories)
 
-## 📝 实战提示
+### 实战提示
 
 - **覆盖评审者类型**：技术负责人关心规则和边界，业务方关心价值，设计师关心交互——各章节要有针对性
 - **[待确认] 占比 > 30% 时不要当正式 PRD 发**：标记为草案，等确认后再正式化

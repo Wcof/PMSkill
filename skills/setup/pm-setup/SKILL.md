@@ -157,3 +157,9 @@ Mention they can edit the `## PMSkill` block directly later — re-running `/pm-
 | 预判模板偏好 | pm-setup 只配置目录/语言/知识库路径，不配置 PRD 或 PMContext 的模板细节 |
 | 注册 hook | `/pm-collect` 从对话上下文 + 项目扫描 + 知识库搜索收集，不需要拦截 Agent 会话 |
 | 忽略项目扫描已存在的配置 | 先检查 `CLAUDE.md`/`AGENTS.md`/`.atomcode.md` 中是否已有 PMSkill 块，有则直接复用 |
+
+---
+
+### Further Reading
+
+- [Anthropic Agent Skills 规范](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)

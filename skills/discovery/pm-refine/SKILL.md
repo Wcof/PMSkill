@@ -121,13 +121,13 @@ Agent **必须**对每个维度尝试推断，不可跳过。**🔴 规则：若
 - 无自动提醒机制（← 项目扫描: 代码中无提醒模块）
 ```
 
-## 延伸参考
+### Further Reading
 
 - [PM Compass - Continuous Discovery](https://www.productcompass.pm/p/cpdm)
 - [Opportunity Score Framework (Dan Olsen)](https://www.productcompass.pm/p/the-extended-opportunity-solution-tree)
 - [Kano Model 应用指南](https://www.productcompass.pm/p/prd-template)
 
-## 📝 实战提示
+### 实战提示
 
 - **P0 三维必须有结论**：用户场景/边界条件/冲突检测是底线，材料不足也须标 `[待确认]`
 - **ICE/RICE 优先选一个**：用户规模差异大用 RICE，否则用 ICE 更简单

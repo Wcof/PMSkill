@@ -173,10 +173,15 @@ PM 可直接查看 HTML 原型预览，也可事后审计 PMContext 和 PRD。
 
 | 反模式 | 为什么不要做 |
 |--------|------------|
-| 在 collect 和 refine 之间插入人工确认 | 破坏全自动体验，违背零确认设计 |
-| 收集阶段直接提取事实改写原文 | 材料应原样整理，事实提取是 refine 的职责 |
-| 原始材料不整理就堆给 refine | 材料过于零散，refine 维度推断不准 |
-| 零确认模式不输出置信度分布 | PM 事后无法判断哪些区域需要复核 |
-| 私用 URL 抓取失败静默跳过 | 关键材料缺失会导致 PMContext 质量下降 |
-| 跳过源代码扫描 | 项目中可能已有技术约束、API 定义等关键信息 |
-| `--auto` 模式遇子 skill 失败就全链路回滚 | 已生成部分仍落盘，失败项单独标注 |
+| 在 collect 和 refine 之间插入人工确认 | 破坏全自动体验 |
+| collect 阶段提取事实改写原文 | 事实提取是 refine 的职责 |
+| 零确认模式不输出置信度分布 | PM 事后无法判断哪些需复核 |
+| URL 抓取失败静默跳过 | 关键材料缺失导致 PMContext 质量下降 |
+| `--auto` 遇子 skill 失败就全链路回滚 | 已生成部分仍落盘，失败项单独标注 |
+
+---
+
+### Further Reading
+
+- [PM Compass - Product Discovery Guide](https://www.productcompass.pm/p/what-exactly-is-product-discovery)
+- [Continuous Discovery Habits - Teresa Torres](https://www.productcompass.pm/p/cpdm)

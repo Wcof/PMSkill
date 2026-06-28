@@ -143,12 +143,12 @@ flowchart TD
   classDef active fill:#e1f5fe
 ```
 
-## 延伸参考
+### Further Reading
 
 - [Mermaid flowchart docs](https://mermaid.js.org/syntax/flowchart.html)
 - [BPMN 2.0 流程图规范 (OMG)](https://www.omg.org/spec/BPMN/2.0/)
 
-## 📝 实战提示
+### 实战提示
 
 - **判断必须画双向**：`yes` 和 `no` 都必须有出口，单向判断是 50% 的流程图
 - **异常路径用 subroutine 形状区分**：`[[异常节点]]` 让异常路径一目了然
