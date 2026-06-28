@@ -140,6 +140,27 @@ description: 从 PMContext 出发假设失败并倒推风险，产出 Tiger/Pape
 | 跳过假设清单交叉检查 | PMContext 中低置信度假设是最可能出问题的地方 |
 | 不输出摘要直接结束 | PM 不知道要关注哪类风险 |
 
+## 产出示例
+
+`/pm-premortem 会员体系重构` 产出摘要：
+
+```
+# Pre-Mortem: 会员体系重构
+
+### 🐯 Tigers (真实风险)
+| 风险 | 紧急度 | 缓解措施 | 负责人 | 截止 |
+|------|--------|---------|--------|------|
+| 年付定价不合理导致 LTV 下降 | Launch-Blocking | 做价格敏感度 A/B 测试 | PM | 上线前 2 周 |
+| 续费提醒 push 被 iOS 屏蔽 | Fast-Follow | 备选短信通道 | 后端 | 上线后 7 天 |
+| 订单表迁移导致历史数据丢失 | Launch-Blocking | 数据备份 + 回滚方案 | 后端 | 上线前 |
+
+### 🦍 Elephants (未被讨论)
+- 团队反映"年付退款政策还没定"——建议在定价确认前敲定退款策略
+
+### 假设交叉检查
+- [假设: 用户续费率下降 12% 与定价有关，7/10] → 升级为 Tiger
+```
+
 ## 延伸参考
 
 - [How Meta and Instagram Use Pre-Mortems](https://www.productcompass.pm/p/how-to-run-pre-mortem-template)
