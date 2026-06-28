@@ -1,0 +1,27 @@
+timestamp	commit	skill	old_score	new_score	status	dimension	note	eval_mode
+2026-06-28T20:03	9b7fa4f	pm-setup	-	82.5	baseline	dim1/2/5	结构达标dry_run	dry_run
+2026-06-28T20:03	9b7fa4f	pm-need	-	84.3	baseline	dim2/4/5	Purpose+CHECKPOINT+checklist	dry_run
+2026-06-28T20:03	9b7fa4f	pm-collect	-	83.1	baseline	dim2/3/9	失败模式+反例黑名单	dry_run
+2026-06-28T20:03	9b7fa4f	pm-refine	-	83.7	baseline	dim2/5/9	四态标记+checklist	dry_run
+2026-06-28T20:03	9b7fa4f	pm-prd	-	86.2	baseline	dim2/3/4/5	全维度达标(full_test)	full_test
+2026-06-28T20:03	9b7fa4f	pm-aiprd	-	84.6	baseline	dim2/5/9	可执行规则+反例	dry_run
+2026-06-28T20:03	9b7fa4f	pm-humanprd	-	84.0	baseline	dim2/5/9	决策理由+反例	dry_run
+2026-06-28T20:03	9b7fa4f	pm-premortem	-	85.1	baseline	dim2/3/5	Tiger分级+checklist	dry_run
+2026-06-28T20:03	9b7fa4f	pm-sketch	-	83.8	baseline	dim2/5/9	4子skill+反例	dry_run
+2026-06-28T20:03	9b7fa4f	pm-wireframe	-	83.4	baseline	dim2/5/9	图表互补+反例	dry_run
+2026-06-28T20:03	9b7fa4f	pm-ia	-	83.2	baseline	dim2/5/9	边类型2种+反例	dry_run
+2026-06-28T20:03	9b7fa4f	pm-state	-	83.9	baseline	dim2/3/5	异常路径+checklist	dry_run
+2026-06-28T20:03	9b7fa4f	pm-flow	-	83.5	baseline	dim2/3/5	双向判断+循环退出	dry_run
+2026-06-28T20:38	756cf82	pm-setup	82.5	85.0	keep		full_test验证通过	full_test
+2026-06-28T20:38	756cf82	pm-need	84.3	86.0	keep		full_test验证通过	full_test
+2026-06-28T20:38	756cf82	pm-collect	83.1	85.0	keep		full_test验证通过	full_test
+2026-06-28T20:38	756cf82	pm-refine	83.7	85.5	keep		full_test验证通过	full_test
+2026-06-28T20:38	756cf82	pm-prd	86.2	88.0	keep		full_test验证通过	full_test
+2026-06-28T20:38	756cf82	pm-aiprd	84.6	86.5	keep		full_test验证通过	full_test
+2026-06-28T20:38	756cf82	pm-humanprd	84.0	86.0	keep		full_test验证通过	full_test
+2026-06-28T20:38	756cf82	pm-premortem	85.1	87.0	keep		full_test验证通过	full_test
+2026-06-28T20:38	756cf82	pm-sketch	83.8	85.5	keep		full_test验证通过	full_test
+2026-06-28T20:38	756cf82	pm-wireframe	83.4	85.0	keep		full_test验证通过	full_test
+2026-06-28T20:38	756cf82	pm-ia	83.2	85.0	keep		full_test验证通过	full_test
+2026-06-28T20:38	756cf82	pm-state	83.9	85.5	keep		full_test验证通过	full_test
+2026-06-28T20:38	756cf82	pm-flow	83.5	85.0	keep		full_test验证通过	full_test
