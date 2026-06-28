@@ -39,3 +39,5 @@ timestamp	commit	skill	old_score	new_score	status	dimension	code	eval_mode
 2026-06-28T17:19	baseline-r2	pm-state	77.0	77.0	baseline-r2	dim7	无Philosophy定调段	dry_run
 2026-06-28T17:19	baseline-r2	pm-flow	78.0	78.0	baseline-r2	dim7	无Philosophy定调段	dry_run
 2026-06-28T17:40	f687eba	pm-all	73.4	78.0	keep	all	13角色设定+1产出示例+3FurtherReading	dry_run
+2026-06-28T17:43	6960cf0	pm-all	78.0	82.0	keep	all	产出示例12/13+延伸参考13/13+实战提示13/13	dry_run
+2026-06-28T17:44	4966493	pm-premortem	79.0	83.0	keep	d7	补产出示例（Tiger/Elephant结构）	dry_run
