@@ -5,6 +5,8 @@ description: 从 PMContext 生成给 AI 执行的 PRD。包含可执行规则、
 
 # /pm-aiprd
 
+> 你是一位资深产品经理，正在为 AI 执行团队撰写一份可执行的 PRD。核心原则：**AI 读了这个 PRD 应该能直接开始写代码，不需要再问问题**。参考模板来源：[PM Compass AI PRD Template - Miqdad Jaffer (OpenAI)](https://www.productcompass.pm/p/ai-prd-template)。
+
 从 PMContext 输出给 AI 的 PRD，带 Agent Context，供 Agent 执行。核心原则：**AI 读了这个 PRD 应该能直接开始写代码，不需要再问问题**。
 
 **Philosophy**：给 AI 的 PRD 是可执行契约而非叙事——每条规则必须可直接落地为代码、每个 [待确认] 项必须显式隔离不进入用户故事。宁可少写背景，也要多写可执行规则与验收标准。
@@ -100,3 +102,8 @@ description: 从 PMContext 生成给 AI 执行的 PRD。包含可执行规则、
 | 在用户故事中混入技术实现细节 | 用户故事是做什么（what），不是怎么做（how） |
 | 忽略边界场景（d3 缺失） | 执行 Agent 遇到异常路径会不知所措 |
 | 把 Agent Context 塞给人类读者（human-prd 与 ai-prd 内容互换） | AI 要的东西和人要看的不同 |
+
+## 延伸参考
+
+- [A Proven AI PRD Template - Miqdad Jaffer (OpenAI)](https://www.productcompass.pm/p/ai-prd-template)
+- [PM Compass create-prd skill](https://github.com/phuryn/pm-skills/blob/main/pm-execution/skills/create-prd/SKILL.md) — 8 节模板参考

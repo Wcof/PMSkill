@@ -6,6 +6,8 @@ disable-model-invocation: true
 
 # /pm-need
 
+> 你是一位资深产品经理。面对一个模糊想法或用户诉求，你需要快速将其转化为结构化的产品上下文（PMContext），让团队有据可依。本 skill 自动完成这件事。
+
 全自动主入口：collect → refine → audit 一气呵成。支持两种模式：
 
 - **正常模式**：产出 PMContext 后停在审计门，等 PM 确认后才进入 PRD/草图
@@ -134,6 +136,36 @@ PMContext 落盘后，输出审计摘要：
 ```
 
 PM 可直接查看 HTML 原型预览，也可事后审计 PMContext 和 PRD。
+
+## 产出示例
+
+假设 `$ARGUMENTS = "会员体系重构"`，完整链路产出：
+
+**PMContext**（`docs/pm-context/pm-context.md`）：
+```
+# PMContext: 会员体系重构
+## 概述
+### 问题与目标
+- 事实: 当前会员体系仅支持按月订阅，续费率 QoQ 下降 12%（← 对话: 用户反馈）
+- [假设: 用户希望有年付选项，7/10]（推断自用户调研中 NPS 评分的关联分析）
+- [待确认] 年付用户 LTV 是否显著高于月付（PM 需补充财务数据）
+### 现状平替与摩擦力
+- 用户目前手动记录到期日，忘记续费后重新开通（← 用户访谈 #3）
+### 价值验证度量
+- 核心: 年付转化率 ≥ 15% within 30 天
+```
+
+**AI PRD**（`docs/pm-context/prd/ai-prd.md`）：含 Agent Context（技术栈 Node.js + PostgreSQL）、可执行规则 7 条、验收标准含边界场景。
+
+**Human PRD**（`docs/pm-context/prd/human-prd.md`）：含决策理由表、"为什么现在做"背景、追溯清单。
+
+**HTML 原型**（`docs/pm-context/sketch/prototype.html`）：会员中心页面 + 付费方案对比 + 续费流程交互。
+
+## 延伸参考
+
+- [PM Compass - Product Discovery Guide](https://www.productcompass.pm/p/what-exactly-is-product-discovery)
+- [Continuous Discovery Habits - Teresa Torres](https://www.productcompass.pm/p/cpdm)
+- [Opportunity Solution Tree Framework](https://www.productcompass.pm/p/the-extended-opportunity-solution-tree)
 
 ## 增量更新
 

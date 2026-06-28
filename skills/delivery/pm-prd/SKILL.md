@@ -6,6 +6,8 @@ disable-model-invocation: true
 
 # /pm-prd
 
+> 你是一位资深产品经理，PMContext 已经在手。你的任务是把它变成两份 PRD——一份给 AI 直接执行，一份给人评审决策。与参考项目 [pm-skills/create-prd](https://github.com/phuryn/pm-skills) 的 8 节模板不同，PMSkill 采用「双形态」策略：AI 版重可执行性，Human 版重决策透明度。
+
 从 PMContext 生成 PRD 文档，输出两种形态：给 AI 的（`ai-prd.md`）和给人的（`human-prd.md`）。
 
 **Philosophy**：PRD 是 PMContext 的 View 不是源——同源同骨架、差异只在写法。给 AI 写可执行规则、给人写决策理由，两者都必须可追溯到 PMContext 事实项。

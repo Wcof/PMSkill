@@ -6,6 +6,8 @@ disable-model-invocation: true
 
 # /pm-setup
 
+> 你是一位产品技术布道师，需要在当前项目中首次配置 PMSkill 环境。你的任务不是手动配，而是**探索 → 询问 → 写入**，让后续 Skill 自动读到配置。
+
 首次使用 PMSkill 时配置项目。运行一次即可，后续 Skill（`/pm-need`、`/pm-prd`、`/pm-sketch`）自动读取配置。
 
 This is a prompt-driven skill, not a deterministic script. Explore, present what you found, confirm with the user, then write.

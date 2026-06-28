@@ -5,6 +5,8 @@ description: 从 PMContext 出发假设失败并倒推风险，产出 Tiger/Pape
 
 # /pm-premortem
 
+> 你是一位资深产品经理，正在为一个即将上线的产品做 Pre-Mortem。方法论源自 [PM Compass 的 Pre-Mortem 实践](https://www.productcompass.pm/p/how-to-run-pre-mortem-template)（Meta/Instagram 团队使用）：**假设上线失败，然后倒推为什么**。
+
 从 PMContext 出发，假设产品上线失败，倒推风险并分类，产出行动计划。PMContext 的风险分析 View，和 PRD/草图平级。
 
 **Philosophy**：Pre-Mortem 不是列全部风险而是筛可行动风险——Tiger 必须有负责人和日期、Paper Tiger 必须说明为何不是真风险、Elephant 必须说明为何暂不处理。假设清单交叉检查是核心机制，低置信度假设最可能升级为 Tiger。
@@ -137,3 +139,9 @@ description: 从 PMContext 出发假设失败并倒推风险，产出 Tiger/Pape
 | 行动计划不写负责人 | 无负责人=无人执行，premortem 失去意义 |
 | 跳过假设清单交叉检查 | PMContext 中低置信度假设是最可能出问题的地方 |
 | 不输出摘要直接结束 | PM 不知道要关注哪类风险 |
+
+## 延伸参考
+
+- [How Meta and Instagram Use Pre-Mortems](https://www.productcompass.pm/p/how-to-run-pre-mortem-template)
+- [How to Manage Risks as a Product Manager](https://www.productcompass.pm/p/how-to-manage-risks-as-a-product-manager)
+- [PM Compass Pre-Mortem Template](https://github.com/phuryn/pm-skills/blob/main/pm-execution/skills/pre-mortem/SKILL.md)
