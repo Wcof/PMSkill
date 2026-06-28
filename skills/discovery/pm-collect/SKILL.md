@@ -1,6 +1,6 @@
 ---
 name: pm-collect
-description: 主动深度扫描 URL、项目、知识库和对话上下文，收集零散想法、用户反馈、会议纪要、历史会话等材料。支持项目深扫描：代码目录结构、git commits、TODO/FIXME、配置文件全量扫描。This skill should be used when materials are needed before refining, or the user mentions feedback, meeting notes, or raw product context.
+description: 主动深度扫描 URL、项目、知识库和对话上下文，收集材料并按类型聚合。Use when materials are needed before refining, or the user mentions feedback, meeting notes, raw context.
 ---
 
 # /pm-collect

@@ -1,6 +1,6 @@
 ---
 name: pm-setup
-description: 首次使用 PMSkill 时配置项目（产物目录/语言/知识库路径/Agent 规则）。Run once before first use of the other PMSkill commands. This skill should be used when first configuring PMSkill, initializing PM project config, or setting up产物目录. 触发词：首次配置、初始化 PMSkill、setup PM config.
+description: 首次使用 PMSkill 时配置项目（产物目录/语言/知识库路径/Agent 规则）。Use when first configuring PMSkill, or the user mentions 初始化、setup PM config.
 disable-model-invocation: true
 ---
 

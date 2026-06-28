@@ -1,6 +1,6 @@
 ---
 name: pm-need
-description: 从模糊想法或用户诉求出发，全自动收集材料并推断澄清，沉淀成 PMContext，停在审计门等 PM 确认。支持 --auto 零确认模式：一键全链路直达 PRD + 原型。This skill should be used when starting from a vague idea or user request, or the user mentions需求发现、requirement discovery、needs collection. 触发词：需求发现、收集需求、发现需求、pm-need、discovery needs.
+description: 从模糊想法或用户诉求出发，全自动收集材料并推断澄清，沉淀成 PMContext。Use when starting from a vague idea or user request, or the user mentions 需求发现、collect needs、discovery.
 disable-model-invocation: true
 ---
 
