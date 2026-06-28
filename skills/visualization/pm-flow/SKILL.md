@@ -115,7 +115,7 @@ flowchart TD
 ## Mermaid 语法要点（生成时遵守）
 
 - 图类型用 `flowchart TD`（自上而下）或 `flowchart LR`（横向流程，适合长步骤序列）
-- 节点 id 必须唯一，建议 `<流程序号>_<语义名>`（如 `s1_request`、`s2_check`）
+- 节点 id 必须唯一，格式 `<流程序号>_<语义名>`（如 `s1_request`、`s2_check`）
 - 节点形状：操作用 `[]`、判断用 `{}`（菱形）、起止用 `([])`（ Stadium）、异常用 `[[]]`（subroutine）
 - 边 label 用 `-->|条件|` 标注（如 `s2 -->|是| s3`、`s2 -->|否| s4`）
 - 循环用 `loop N 次` 子图包裹回退边

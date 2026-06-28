@@ -113,7 +113,7 @@ stateDiagram-v2
 ## Mermaid 语法要点（生成时遵守）
 
 - 图类型固定 `stateDiagram-v2`（v2 支持 note 和复合状态）
-- 状态 id 必须唯一，建议 `<实体>_<状态名>`（如 `order_draft`、`user_verified`）
+- 状态 id 必须唯一，格式 `<实体>_<状态名>`（如 `order_draft`、`user_verified`）
 - 起止节点用 `[*]`（`[*] --> Draft` 表示开始，`Approved --> [*]` 表示终态）
 - 转移条件用冒号 `Draft --> Submitted: 用户点击提交`
 - `[假设]` 状态用 `state "[假设: 推断状态]" as假设_x` 别名形式视觉区分

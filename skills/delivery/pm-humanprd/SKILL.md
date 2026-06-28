@@ -64,7 +64,7 @@ description: 从 PMContext 生成给人阅读的 PRD。This skill should be used
 ## 风险项（Risks）
 - `[待确认]` 项 + 影响分析（如果确认不了的影响）
 - `[假设]` 项 + 置信度 + 如果错了怎么办
-- `[冲突]` 项 + 建议决策方向
+- `[冲突]` 项 + 决策方向
 
 ## 超出范围（Out of Scope）
 列表 + 排除理由。写明"本次不做，因为……"。
@@ -103,7 +103,7 @@ description: 从 PMContext 生成给人阅读的 PRD。This skill should be used
 |---------|---------|-----------|
 | `docs/pm-context/pm-context.md` 不存在 | **🔴 STOP**：输出"未找到 PMContext，先运行 `/pm-need <需求>`" | 不阻塞，提示后退出 |
 | PMContext `[待确认]` 占比 > 40% | 输出 PRD 草案并在顶部加 🟡 警示横幅"含 N 项待确认，非正式 PRD" | 标记为 `human-prd.draft.md`，不覆盖已有正式 PRD |
-| PMContext `[待确认]` 占比 > 70% | 输出大纲但顶部加 🔴 警示"信息严重不足，不建议评审" | 不生成正文，只输出信息缺口清单 |
+| PMContext `[待确认]` 占比 > 70% | 输出大纲但顶部加 🔴 警示"信息严重不足，不宜评审" | 不生成正文，只输出信息缺口清单 |
 | human-prd 与 ai-prd 同源项出现分歧 | 以 PMContext 为准修正 human-prd，标注修正项 `← 修正: PMContext` | 仍不一致则 git diff 记录分歧供 PM 审计 |
 | 评审者非中文用户 | 检测 `$ARGUMENTS` 中的语言标记（`--en`/`--zh`/`-- bilingual`），输出对应语言版本 | 无标记则按 pm-setup 配置的语言偏好 |
 | 决策日志为空（PMContext 无决策记录） | 在"决策日志摘要"章节标注"PMContext 未记录关键决策" | 不臆造决策理由，提示 PM 补充决策日志 |
