@@ -1,20 +1,55 @@
 ---
 name: pm-ia
-description: 从 PMContext 生成信息架构图。Use when the user asks for information architecture or entity relationships.
+description: 从 PMContext 生成信息架构图（Mermaid graph）。展示实体/页面间导航与包含关系。Use when the user asks for information architecture or entity relationships.
 ---
 
 # /pm-ia
 
-从 PMContext 输出信息架构图。
+从 PMContext 输出信息架构图。节点为实体/页面，边为导航/包含关系。
 
-## 产物
+**Philosophy**：信息架构图只表达实体/页面间关系不画页面内组件（那是 wireframe 的职责）——边类型严格 2 种（实线导航/虚线引用）禁止混用，关系稀疏时不强行补边。
 
-写入 `docs/pm-context/sketch/ia.md`。
+## 流程
 
-产出格式：Mermaid graph/flowchart，节点为实体/页面，边为导航/包含关系。
+### Step 1: 读取 PMContext
+
+读取 `docs/pm-context/pm-context.md`，提取：
+- 所有 `<页面/功能名>` heading → 候选节点
+- 全局约束中的实体定义 → 候选节点
+- 数据模型中的实体关系 → 候选边
+- 决策日志中的实体引用 → 补充节点
+
+若 PMContext 不存在 → **🔴 STOP**：提示先运行 `/pm-need`。
+
+### Step 2: 构建节点清单
+
+按业务领域分组，每组列节点：
+```
+- 认证域: User, Session, Role
+- 业务域: Order, Product, OrderItem
+- 配置域: Setting, Preference
+```
+
+无明确依据的节点标 `[假设]`。
+
+### Step 3: 构建边清单
+
+边类型仅 2 种，禁止混用：
+- `-->` 实线：导航/包含关系（用户可达）
+- `-.->` 虚线：引用关系（数据关联但用户不直接访问）
+
+### Step 4: 写入产物
+
+写入 `docs/pm-context/sketch/ia.md`，格式：
 
 ```markdown
 # 信息架构图
+
+> 来源: PMContext <需求名>
+> 节点: N 个 | 边: M 条 | [假设] 节点: K 个
+
+## 架构图
+
 ​```mermaid
 graph TD
   App[应用] --> Auth[认证模块]
@@ -23,10 +58,59 @@ graph TD
   Auth --> Session[会话]
   Core --> Order[订单]
   Core --> Product[商品]
-  Order --> OrderItem[订单项]
+  Order -.-> OrderItem[订单项]
 ​```
+
+## 节点清单
+
+| 节点 | 业务域 | 类型 | 来源 |
+|------|--------|------|------|
+| App | 顶层 | 页面 | PMContext 概述 |
+| User | 认证 | 实体 | PMContext 用户场景 |
+| OrderItem | 业务 | 实体 | [假设] 推断自 Order |
+
+## 边清单
+
+| 起点 | 终点 | 类型 | 含义 |
+|------|------|------|------|
+| App | Auth | 导航 | 用户从首页进入认证 |
+| Order | OrderItem | 引用 | 订单包含订单项（数据关联） |
 ```
+
+**🔴 CHECKPOINT** — 输出产物路径 + 节点/边数量 + `[假设]` 节点数。等待 PM 确认或自动进入下一步（`--auto` 模式）。
 
 ## 关联增强
 
-确保每个图元都对应 PMContext 中的实体/关系，无法对应的图元标 `[假设]`。
+每个节点和边都必须对应 PMContext 中的具体项，在"节点清单"和"边清单"的"来源"列标注。无来源的标 `[假设]`。
+
+## 失败模式
+
+| 触发条件 | 一线修复 | 仍失败兜底 |
+|---------|---------|-----------|
+| `docs/pm-context/pm-context.md` 不存在 | **🔴 STOP**：输出"未找到 PMContext，先运行 `/pm-need <需求>`" | 不阻塞，提示后退出 |
+| PMContext 存在但无实体定义且无页面定义 | **🔴 STOP**：输出"PMContext 中没有实体或页面定义，无法生成信息架构图。" | 不臆造节点，提示 PM 补充后重跑 |
+| 实体定义稀疏（节点 < 3 或边 < 2） | 只画有明确关系的节点，顶部加 `⚠️ 关系稀疏，仅供参考` | 不强行补边；输出节点清单但图区标 `待补充` |
+| 实体间关系含 `[冲突]` 标记 | 画成并行双向边并在线 label 标 `[冲突]`，不强行单向 | 在边清单"含义"列注明冲突来源 |
+| 实体名含特殊字符（`/`、空格、中英混排） | 节点 id 用 sanitized 名（`_` 替换），label 保留原名 | 用引号包裹 label `["原名/带斜杠"]` |
+| Mermaid 渲染失败（节点 id 重复） | 节点 id 加业务域前缀 `auth_` `biz_` `cfg_` 保证唯一 | 退化用 markdown bullet 列关系 |
+| 节点 > 30 个图过于复杂 | 按业务域拆分多张子图 `subgraph` 分组 | 仍过大则拆为多个 ia.md 分文件 |
+
+## Mermaid 语法要点（生成时遵守）
+
+- 图类型固定 `graph TD`（自上而下表达层次）
+- 节点 id 必须唯一，建议 `<业务域>_<语义名>`（如 `auth_user`、`biz_order`）
+- 节点形状：实体用 `[]`、页面用 `()`、外部系统用 `{{}}`（双花括号）
+- 边类型严格 2 种：实线 `-->`（导航/包含，用户可达）、虚线 `-.->`（引用，数据关联）
+- `[假设]` 节点用虚线边 `auth_session([假设: 会话实体])` 视觉区分
+- 业务域分组用 `subgraph 业务域` 包裹同域节点
+- Mermaid 块用三反引号 + `mermaid` 标识，不要用 `​```` 零宽字符包裹
+
+## 不要做什么（反例黑名单）
+
+| 反模式 | 为什么不要做 |
+|--------|------------|
+| 不基于 PMContext 中的实体/关系定义 | 架构图与需求脱节 |
+| 为填充节点强行补关系边 | 误导团队以为有隐含的关联关系 |
+| 把图元画得太细（包含页面内组件） | 信息架构图只表达实体/页面间关系，组件属线框职责 |
+| 边类型混用（导航和引用不分） | 团队无法判断哪些是用户路径、哪些是数据关联 |
+| 节点清单省略"来源"列 | 追溯链断裂，PM 无法验证节点合理性 |

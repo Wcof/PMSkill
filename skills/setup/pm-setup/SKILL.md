@@ -1,6 +1,6 @@
 ---
 name: pm-setup
-description: 首次使用 PMSkill 时配置项目（产物目录/语言/Agent 规则/PMContext 落盘点）。Run once before first use of the other PMSkill commands.
+description: 首次使用 PMSkill 时配置项目（产物目录/语言/知识库路径/Agent 规则）。Run once before first use of the other PMSkill commands. Use when first configuring PMSkill, initializing PM project config, or setting up产物目录. 触发词：首次配置、初始化 PMSkill、setup PM config.
 disable-model-invocation: true
 ---
 
@@ -9,6 +9,8 @@ disable-model-invocation: true
 首次使用 PMSkill 时配置项目。运行一次即可，后续 Skill（`/pm-need`、`/pm-prd`、`/pm-sketch`）自动读取配置。
 
 This is a prompt-driven skill, not a deterministic script. Explore, present what you found, confirm with the user, then write.
+
+**Philosophy**：配置不是一次性脚本，而是项目契约——只写一次、所有下游 skill 共享、不替用户决定 Agent 文件落点。宁可问用户三句话，也不臆造配置导致后续 skill 读不到。
 
 ## Process
 
@@ -49,11 +51,27 @@ Choices:
 - **英文**
 - **双语** — 每个产物产出中英两份
 
-**Section C — Agent 规则落点.**
+**Section C — 知识库路径.**
+
+> Explainer: PMSkill 的 `/pm-collect` 除了扫描当前项目，还会从你指定的知识库中提取材料。知识库是项目外部的文档集合（竞品分析、用户调研、行业报告、历史 PRD 等），`/pm-collect` 会按需搜索其中与当前需求相关的内容。如果不指定，collect 只扫描当前项目。
+
+Choices:
+
+- **跳过**（不配置知识库，collect 仅扫描当前项目）
+- **一个或多个路径** — 本地目录路径，用逗号分隔。如：`~/docs/pm-kb, ~/docs/competitor-research`
+
+Default: 跳过。若用户指定路径，验证路径存在后再记录。
+
+**Section D — Agent 规则落点.**
 
 > Explainer: PMSkill 需要在项目的 Agent 指令文件里写一小段规则，告诉后续 Agent "PMContext 是唯一源、下游 View 都从它读、风险用显式标记"。规则只写一次，所有 PMSkill 命令共享。落在 `CLAUDE.md` 还是 `AGENTS.md` 取决于你用哪个 Agent。
 
 Default posture: 若 `CLAUDE.md` 存在，写入它；否则若 `AGENTS.md` 存在，写入它；若都不存在，问用户要创建哪个 —— 不要替用户决定。Never create `AGENTS.md` when `CLAUDE.md` already exists (or vice versa) — always edit the one that's already there.
+
+**冲突处理（扩展）**：若 `CLAUDE.md` 和 `AGENTS.md` 同时存在：
+1. 检测当前 Agent 类型（从会话环境推断：Claude Code → CLAUDE.md，Codex → AGENTS.md 等）
+2. 若无法推断，问用户要用哪个
+3. 只编辑被选中的那个，不要同时编辑两个文件
 
 ### 3. Confirm and edit
 
@@ -63,6 +81,8 @@ Show the user a draft of:
 - The `docs/pm-context/` directory layout
 
 Let them edit before writing.
+
+**🔴 CHECKPOINT** — Confirm with user before writing to disk.
 
 ### 4. Write
 
@@ -84,7 +104,8 @@ The block:
 - PMContext（唯一 Entity）：docs/pm-context/pm-context.md
 - 下游 View：PRD（`prd/ai-prd.md` / `prd/human-prd.md`）、草图（`sketch/*.md`）均从 PMContext 派生
 - 风险标记：[待确认] / [假设] / [冲突] 写在正文里，无需独立检查报告
-- 无 hook：/pm-collect 从对话上下文直接收集，不拦截 Agent 会话
+- 知识库：<用户指定路径，或"无">
+- 无 hook：/pm-collect 从对话上下文 + 项目扫描 + 知识库搜索收集，不拦截 Agent 会话
 - 语言：<用户选择>
 ```
 
@@ -98,6 +119,31 @@ Tell the user setup is complete and which PMSkill commands will now read from th
 
 - `/pm-need` → 写入 `docs/pm-context/pm-context.md`
 - `/pm-prd` → 从 PMContext 生成 `prd/ai-prd.md` / `prd/human-prd.md`
-- `/pm-sketch` → 从 PMContext 生成 `sketch/*.md`（wireframe/ia/state/flow）
+- `/pm-sketch` → 从 PMContext 生成 `sketch/*.md`（wireframe/ia/state/flow）+ HTML 原型（`--prototype`）
+- 零确认模式：`/pm-need <需求描述> --auto` 可一键全自动完成收集 → PMContext → PRD → 原型
 
 Mention they can edit the `## PMSkill` block directly later — re-running `/pm-setup` is only necessary if they want to switch产物目录、改语言、或换 Agent 规则落点。
+
+## 失败模式
+
+| 触发条件 | 一线修复 | 仍失败兜底 |
+|---------|---------|-----------|
+| 非 git 仓库（`git remote -v` 失败） | 跳过 git 元数据收集，提示"PMSkill 在非 git 仓库中运行，部分扫描能力受限" | 不阻塞，继续配置 |
+| `CLAUDE.md` 和 `AGENTS.md` 同时存在 | 检测当前 Agent 类型推断落点；无法推断则问用户 | 只编辑被选中的那个，绝不同时编辑两个 |
+| `CLAUDE.md`/`AGENTS.md` 已含 `## PMSkill` 块 | 原位更新内容，不追加重复块 | 不覆盖用户对其他章节的编辑 |
+| 用户指定知识库路径不存在 | 当场提示"路径不存在"，要求重新输入或跳过 | 不写入错误路径，跳过知识库配置 |
+| 用户指定产物目录在 gitignore 中（如 `docs/`） | 明示"该目录会被 git 局蔽，PMSkill 产物不会进版本库" | 问用户接受现状 / 改路径 / 改 gitignore 三选一 |
+| 产物目录已存在且含旧 PMContext | 不覆盖，提示"已有 PMSkill 产物，是否复用？" | 复用则跳过目录创建；不复用则备份后重建 |
+| Agent 类型无法从会话环境推断 | 问用户当前 Agent 类型（Claude Code/Codex/Trae） | 不臆造，落点改为问用户选择 CLAUDE.md 或 AGENTS.md |
+| 用户中途放弃（连续 3 次无回应） | 保存已收集配置到 `.pmskill-setup.tmp`，提示"可下次 `/pm-setup --resume` 继续" | 不写入部分配置到 Agent 文件 |
+
+## 不要做什么（反例黑名单）
+
+| 反模式 | 为什么不要做 |
+|--------|------------|
+| 替用户决定创建 `CLAUDE.md` 还是 `AGENTS.md` | 不同 Agent 绑定不同文件名，替用户决定可能导致后续 Skill 无法读取配置 |
+| 两个 Agent 文件同时写入 | 只编辑被选中的那个；两个文件都写会导致配置冲突 |
+| 重复注册 PMSkill 块 | 若 `## PMSkill` 已存在，覆盖更新而非追加 |
+| 预判模板偏好 | pm-setup 只配置目录/语言/知识库路径，不配置 PRD 或 PMContext 的模板细节 |
+| 注册 hook | `/pm-collect` 从对话上下文 + 项目扫描 + 知识库搜索收集，不需要拦截 Agent 会话 |
+| 忽略项目扫描已存在的配置 | 先检查 `CLAUDE.md`/`AGENTS.md`/`.atomcode.md` 中是否已有 PMSkill 块，有则直接复用 |
