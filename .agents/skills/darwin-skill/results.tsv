@@ -25,3 +25,16 @@ timestamp	commit	skill	old_score	new_score	status	dimension	note	eval_mode
 2026-06-28T20:38	756cf82	pm-ia	83.2	85.0	keep		full_test验证通过	full_test
 2026-06-28T20:38	756cf82	pm-state	83.9	85.5	keep		full_test验证通过	full_test
 2026-06-28T20:38	756cf82	pm-flow	83.5	85.0	keep		full_test验证通过	full_test
+2026-06-28T21:13	6d43cd5	pm-setup	85.0	86.0	keep	dim1/5	desc精简+软化措辞清理	full_test
+2026-06-28T21:13	6d43cd5	pm-need	86.0	87.0	keep	dim1/5	desc精简+软化措辞清理	full_test
+2026-06-28T21:13	6d43cd5	pm-collect	85.0	86.0	keep	dim1/5	desc精简+软化措辞清理	full_test
+2026-06-28T21:13	6d43cd5	pm-refine	85.5	87.5	keep	dim1/5	desc精简+软化措辞清理	full_test
+2026-06-28T21:13	6d43cd5	pm-prd	88.0	89.0	keep	dim1/5	desc精简+软化措辞清理	full_test
+2026-06-28T21:13	6d43cd5	pm-aiprd	86.5	87.5	keep	dim1/5	desc精简+软化措辞清理	full_test
+2026-06-28T21:13	6d43cd5	pm-humanprd	86.0	87.5	keep	dim1/5	desc精简+软化措辞清理	full_test
+2026-06-28T21:13	6d43cd5	pm-premortem	87.0	88.5	keep	dim1/5	desc精简+软化措辞清理	full_test
+2026-06-28T21:13	6d43cd5	pm-sketch	85.5	86.5	keep	dim1/5	desc精简+软化措辞清理	full_test
+2026-06-28T21:13	6d43cd5	pm-wireframe	85.0	86.0	keep	dim1/5	desc精简+软化措辞清理	full_test
+2026-06-28T21:13	6d43cd5	pm-ia	85.0	86.0	keep	dim1/5	desc精简+软化措辞清理	full_test
+2026-06-28T21:13	6d43cd5	pm-state	85.5	86.5	keep	dim1/5	desc精简+软化措辞清理	full_test
+2026-06-28T21:13	6d43cd5	pm-flow	85.0	86.0	keep	dim1/5	desc精简+软化措辞清理	full_test
