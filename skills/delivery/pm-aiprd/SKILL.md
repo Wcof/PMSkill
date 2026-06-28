@@ -103,7 +103,37 @@ description: 从 PMContext 生成给 AI 执行的 PRD。包含可执行规则、
 | 忽略边界场景（d3 缺失） | 执行 Agent 遇到异常路径会不知所措 |
 | 把 Agent Context 塞给人类读者（human-prd 与 ai-prd 内容互换） | AI 要的东西和人要看的不同 |
 
+## 产出示例
+
+`/pm-prd --skip-human 会员体系重构` → `prd/ai-prd.md` 概要：
+
+```
+# 会员体系重构 AI PRD
+
+## Agent Context
+- 技术栈: Node.js 18 + PostgreSQL 15 + Redis 7
+- 目录: app/controllers/member*, app/models/member.rb
+- 关键模块: MemberService (续费逻辑)、NotificationService (提醒推送)
+
+## 用户故事
+### US-1: 年付方案选择
+As a 月付用户, I want to upgrade to 年付, so that 节省费用
+- **验收标准**：
+  1. 月付用户可在"续费页"切换年/月付 tab
+  2. 年付价格必须 ≤ 月付 × 10
+  3. 切换后已付月费按比例抵扣 ← [假设: 财务支持比例退款，8/10]
+
+## 实施规则
+[7 条可执行规则...]
+```
+
 ## 延伸参考
 
 - [A Proven AI PRD Template - Miqdad Jaffer (OpenAI)](https://www.productcompass.pm/p/ai-prd-template)
 - [PM Compass create-prd skill](https://github.com/phuryn/pm-skills/blob/main/pm-execution/skills/create-prd/SKILL.md) — 8 节模板参考
+
+## 📝 实战提示
+
+- **[待确认] 大于 30% 标 🟡，大于 50% 标 🔴**：前者是草案，后者是不可执行
+- **每条规则必须是可执行的**："确保用户体验良好"不叫规则，"按钮不小于 44px"才叫规则
+- **Agent Context 不可省略**：技术栈/目录结构/关键模块位置是 AI 执行的前提

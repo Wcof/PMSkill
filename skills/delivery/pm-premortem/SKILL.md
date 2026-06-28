@@ -145,3 +145,10 @@ description: 从 PMContext 出发假设失败并倒推风险，产出 Tiger/Pape
 - [How Meta and Instagram Use Pre-Mortems](https://www.productcompass.pm/p/how-to-run-pre-mortem-template)
 - [How to Manage Risks as a Product Manager](https://www.productcompass.pm/p/how-to-manage-risks-as-a-product-manager)
 - [PM Compass Pre-Mortem Template](https://github.com/phuryn/pm-skills/blob/main/pm-execution/skills/pre-mortem/SKILL.md)
+
+## 📝 实战提示
+
+- **Tiger 不超过 5 个**：再多行动计划不可执行。按紧急度排序，超出的降级为 Fast-Follow
+- **假设交叉检查是核心**：PMContext 中置信度 ≤ 5 的假设，最可能升级为 Tiger，优先处理
+- **Paper Tiger 也要有解释**："这是个假问题，因为…"——光说"不担心"不解决问题
+- **Pre-Mortem 不是走形式**：如果所有风险都是 Paper Tiger，说明你没认真想失败

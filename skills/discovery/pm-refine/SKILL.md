@@ -99,6 +99,35 @@ Agent **必须**对每个维度尝试推断，不可跳过。**🔴 规则：若
 - <维度>：<缺什么，建议 PM 补充什么>
 ```
 
+## 产出示例
+
+基于上述会员中心材料的 PMContext 摘要：
+
+```
+# PMContext: 会员中心
+## 概述
+### 问题与目标
+- 事实: 会员续费流程需重新填信息（← 对话: 用户反馈）
+- [假设: 用户流失与续费流程负相关，8/10]（推断自续费率下降数据）
+- [待确认] 当前续费转化率基线数据（PM 需补充分析）
+### 现状平替与摩擦力
+- 用户手动记录到期日（← 用户反馈）
+- 无自动提醒机制（← 项目扫描: 代码中无提醒模块）
+```
+
+## 延伸参考
+
+- [PM Compass - Continuous Discovery](https://www.productcompass.pm/p/cpdm)
+- [Opportunity Score Framework (Dan Olsen)](https://www.productcompass.pm/p/the-extended-opportunity-solution-tree)
+- [Kano Model 应用指南](https://www.productcompass.pm/p/prd-template)
+
+## 📝 实战提示
+
+- **P0 三维必须有结论**：用户场景/边界条件/冲突检测是底线，材料不足也须标 `[待确认]`
+- **ICE/RICE 优先选一个**：用户规模差异大用 RICE，否则用 ICE 更简单
+- **假设置信度 ≤ 5 必须进信息缺口**：不要留在正文里冒充事实
+- **增量更新时读旧 PMContext 做 diff**：不要让新材料覆盖旧事实
+
 ## 标记规则
 
 - `[待确认]` — 材料完全缺失，Agent 无法推断

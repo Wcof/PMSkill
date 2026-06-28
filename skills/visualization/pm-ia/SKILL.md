@@ -107,7 +107,36 @@ graph TD
 - 业务域分组用 `subgraph 业务域` 包裹同域节点
 - Mermaid 块用三反引号 + `mermaid` 标识，不要用 `​```` 零宽字符包裹
 
-## 不要做什么（反例黑名单）
+## 产出示例
+
+会员中心信息架构图效果：
+
+```mermaid
+graph TD
+  subgraph 会员域
+    member([会员中心])
+    profile[个人信息]
+    points[积分]
+  end
+  subgraph 订单域
+    order[订单列表]
+  end
+  member --> profile
+  member --> points
+  member --> order
+  order -.-> order_item["订单项(引用)"]
+```
+
+## 延伸参考
+
+- [Mermaid graph docs](https://mermaid.js.org/syntax/flowchart.html)
+- [信息架构设计原则 (IA)](https://www.productcompass.pm/p/what-exactly-is-product-discovery)
+
+## 📝 实战提示
+
+- **节点 > 15 个必拆分**：用 `subgraph` 分组按业务域切，不要塞进一张图
+- **[假设] 节点虚线边 + 圆角框**：视觉上要一眼看得出哪些是推断的
+- **边只有 2 种**：实线导航/包含、虚线引用——禁止第三种边类型
 
 | 反模式 | 为什么不要做 |
 |--------|------------|

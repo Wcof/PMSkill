@@ -167,6 +167,13 @@ PM 可直接查看 HTML 原型预览，也可事后审计 PMContext 和 PRD。
 - [Continuous Discovery Habits - Teresa Torres](https://www.productcompass.pm/p/cpdm)
 - [Opportunity Solution Tree Framework](https://www.productcompass.pm/p/the-extended-opportunity-solution-tree)
 
+## 📝 实战提示
+
+- **`--auto` 是默认姿势**：零确认模式省掉 PM 等待，适合大多数场景
+- **`--collect-only` 用于调研阶段**：先扫一圈看有什么材料，再决定要不要 refine
+- **增量更新别忘 `--incremental`**：忘了会导致旧 PMContext 被覆盖丢失历史推断
+- **一站式报告中的置信度分布是审计入口**：[待确认] > 30% 建议 PM 先审再决策
+
 ## 增量更新
 
 若 `pm-context.md` 已存在，且未指定 `--incremental` 时：
