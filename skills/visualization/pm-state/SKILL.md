@@ -146,6 +146,10 @@ stateDiagram-v2
 - [Mermaid stateDiagram-v2 docs](https://mermaid.js.org/syntax/stateDiagram.html)
 - [状态机设计模式 (UML)](https://en.wikipedia.org/wiki/UML_state_machine)
 
+## 产出示例 · 延伸参考 · 实战提示
+
+详见 [references/examples-and-tips.md](references/examples-and-tips.md)。
+
 ### 实战提示
 
 - **终态不能少**：每个实体必须有明确的终态（`[*]`），否则流程无法结束

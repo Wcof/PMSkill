@@ -147,6 +147,10 @@ flowchart TD
 - [Mermaid flowchart docs](https://mermaid.js.org/syntax/flowchart.html)
 - [线框图设计指南 (NN Group)](https://www.nngroup.com/articles/wireflows/)
 
+## 产出示例 · 延伸参考 · 实战提示
+
+详见 [references/examples-and-tips.md](references/examples-and-tips.md)。
+
 ### 实战提示
 
 - **线框图 ≠ 高保真**：不要画颜色、字体、图标细节——留到 HTML 原型阶段

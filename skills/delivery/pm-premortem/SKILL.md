@@ -173,6 +173,10 @@ description: 从 PMContext 假设失败并倒推风险，产出 Tiger/Paper Tige
 - [How to Manage Risks as a Product Manager](https://www.productcompass.pm/p/how-to-manage-risks-as-a-product-manager)
 - [PM Compass Pre-Mortem Template](https://github.com/phuryn/pm-skills/blob/main/pm-execution/skills/pre-mortem/SKILL.md)
 
+## 产出示例 · 延伸参考 · 实战提示
+
+详见 [references/examples-and-tips.md](references/examples-and-tips.md)。
+
 ### 实战提示
 
 - **Tiger 不超过 5 个**：再多行动计划不可执行。按紧急度排序，超出的降级为 Fast-Follow

@@ -148,6 +148,10 @@ flowchart TD
 - [Mermaid flowchart docs](https://mermaid.js.org/syntax/flowchart.html)
 - [BPMN 2.0 流程图规范 (OMG)](https://www.omg.org/spec/BPMN/2.0/)
 
+## 产出示例 · 延伸参考 · 实战提示
+
+详见 [references/examples-and-tips.md](references/examples-and-tips.md)。
+
 ### 实战提示
 
 - **判断必须画双向**：`yes` 和 `no` 都必须有出口，单向判断是 50% 的流程图

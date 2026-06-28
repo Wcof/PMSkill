@@ -144,3 +144,7 @@ description: 从 PMContext 生成给人阅读的 PRD。This skill should be used
 | 把 `[待确认]` 写成确定性要求 | 评审者误以为已确认 |
 | 表格超过 5 行关键信息 | 人眼对长表格的阅读效率低于列表 |
 | 省略决策理由只给结论 | 评审者不知道"为什么这么定"，无法提有效反馈 |
+
+## 产出示例 · 延伸参考 · 实战提示
+
+详见 [references/examples-and-tips.md](references/examples-and-tips.md)。

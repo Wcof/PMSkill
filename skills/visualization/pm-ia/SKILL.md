@@ -152,3 +152,7 @@ graph TD
 | 强行补关系边 | 误导团队以为有隐含关联 |
 | 画页面内组件 | 组件属线框职责 |
 | 边类型混用 | 团队无法判断哪些是用户路径、哪些是数据关联 |
+
+## 产出示例 · 延伸参考 · 实战提示
+
+详见 [references/examples-and-tips.md](references/examples-and-tips.md)。

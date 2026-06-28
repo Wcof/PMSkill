@@ -88,6 +88,10 @@ Run `/pm-humanprd` — 生成 `docs/pm-context/prd/human-prd.md`
 - [AI PRD Template - Miqdad Jaffer (OpenAI)](https://www.productcompass.pm/p/ai-prd-template)
 - [PM Skill: create-prd](https://github.com/phuryn/pm-skills/blob/main/pm-execution/skills/create-prd/SKILL.md)
 
+## 产出示例 · 延伸参考 · 实战提示
+
+详见 [references/examples-and-tips.md](references/examples-and-tips.md)。
+
 ### 实战提示
 
 - **优先跑 `--auto`**：PMContext 不存在时自动链路远比手动快

@@ -157,3 +157,7 @@ PMContext 是活文档。若 `pm-context.md` 已存在，Agent 读现有 PMConte
 | 置信度 7 的推断不标 `[假设]` | 置信度 8 以下按规则必须标 `[假设]`，否则 PM 会误认为事实 |
 | 无来源的项不自动标 `[假设]` | 每项必须有来源。无来源=假设，这是追溯纪律的底线 |
 | 忽略来源标注使下游无法追溯 | ai-prd 和 human-prd 都依赖 PMContext 中的来源标记做追溯 |
+
+## 产出示例 · 延伸参考 · 实战提示
+
+详见 [references/examples-and-tips.md](references/examples-and-tips.md)。
