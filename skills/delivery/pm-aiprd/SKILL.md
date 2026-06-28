@@ -21,6 +21,13 @@ PMContext 已沉淀事实/假设/冲突/待确认。AI PRD 的职责是将这些
 
 读取 `docs/pm-context/pm-context.md`。若不存在 → 🔴 STOP：提示先运行 `/pm-need`。
 
+- [ ] PMContext 已读取且非空
+- [ ] 概述/页面定义/全局约束/假设清单/风险项/信息缺口全部提取
+- [ ] Agent Context（技术栈/目录结构/关键模块）已确认
+- [ ] [待确认] 项隔离不进入用户故事
+- [ ] 每条用户故事和规则后追加 `← PMContext: <章节>` 追溯标记
+- [ ] 输出生成摘要：用户故事数/规则数 + [待确认]占比+警示
+
 ## 产物
 
 写入 `docs/pm-context/prd/ai-prd.md`，结构如下：

@@ -22,6 +22,16 @@ This is a prompt-driven skill, not a deterministic script. Explore, present what
 
 ## Instructions
 
+- [ ] Explore 阶段：git remote/AGENTS.md/CLAUDE.md/CONTEXT.md/docs/pm-context/ 全扫描
+- [ ] 当前 Agent 类型已推断（不直接问用户）
+- [ ] Section A 产物目录确认（default: docs/pm-context/）
+- [ ] Section B 语言偏好确认（中文/英文/双语）
+- [ ] Section C 知识库路径确认或跳过
+- [ ] Section D Agent 规则落点确认（CLAUDE.md 优先，不替用户决定）
+- [ ] 冲突处理：CLAUDE.md 和 AGENTS.md 同时存在时只编辑被选中的那个
+- [ ] 🔴 CHECKPOINT 确认后再写入磁盘
+- [ ] ## PMSkill 块已存在则覆盖更新而非追加
+
 ### 1. Explore
 
 Look at the current repo to understand its starting state. Read whatever exists; don't assume:

@@ -21,6 +21,15 @@ description: 从 PMContext 假设失败并倒推风险，产出 Tiger/Paper Tige
 
 读取 `docs/pm-context/pm-context.md`。若不存在，提示先运行 `/pm-need`。
 
+- [ ] PMContext 已读取且非空
+- [ ] 假设清单和风险项全部提取
+- [ ] 假设「上线 14 天后失败」并倒推原因
+- [ ] Tiger 有负责人+截止日期+行动
+- [ ] Paper Tiger 说明为何不是真风险
+- [ ] Elephant 说明为何暂不处理
+- [ ] 低置信度假设（≤5）交叉检查升级为 Tiger
+- [ ] Tiger 不超过 5 个，超出的降级为 Fast-Follow
+
 ## 流程
 
 ### 1. 读取 PMContext

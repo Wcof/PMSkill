@@ -21,6 +21,14 @@ description: 从 PMContext 生成给人阅读的 PRD。This skill should be used
 
 读取 `docs/pm-context/pm-context.md`。若不存在 → 🔴 STOP：提示先运行 `/pm-need`。
 
+- [ ] PMContext 已读取且非空
+- [ ] 概述/页面定义/全局约束/假设清单/风险项/信息缺口全部提取
+- [ ] 每条规则配决策理由（`> **为什么**` 引用块）
+- [ ] 用户故事用自然叙事（非 As-an 英文模板）
+- [ ] [待确认] 项显式标注不写成确定性要求
+- [ ] 表格 ≤ 5 行，超过的拆为列表
+- [ ] 输出生成摘要：用户故事数/规则数 + 格式纪律检查
+
 ## 产物
 
 写入 `docs/pm-context/prd/human-prd.md`，与 ai-prd.md 同源同骨架，但写法针对人类读者调整。
