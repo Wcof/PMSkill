@@ -38,3 +38,16 @@ timestamp	commit	skill	old_score	new_score	status	dimension	note	eval_mode
 2026-06-28T21:13	6d43cd5	pm-ia	85.0	86.0	keep	dim1/5	desc精简+软化措辞清理	full_test
 2026-06-28T21:13	6d43cd5	pm-state	85.5	86.5	keep	dim1/5	desc精简+软化措辞清理	full_test
 2026-06-28T21:13	6d43cd5	pm-flow	85.0	86.0	keep	dim1/5	desc精简+软化措辞清理	full_test
+2026-06-28T23:40	e75f0f6	pm-setup	86.0	88.0	keep	dim1	user-invoked去触发词+human-facing	full_test
+2026-06-28T23:40	e75f0f6	pm-need	87.0	89.0	keep	dim1	user-invoked去触发词+human-facing	full_test
+2026-06-28T23:40	e75f0f6	pm-collect	86.0	88.0	keep	dim1	model-invoked补强中英文触发词	full_test
+2026-06-28T23:40	e75f0f6	pm-refine	87.5	89.0	keep	dim1	model-invoked补强中英文触发词	full_test
+2026-06-28T23:40	e75f0f6	pm-prd	89.0	90.5	keep	dim1	user-invoked去触发词+human-facing	full_test
+2026-06-28T23:40	e75f0f6	pm-aiprd	87.5	89.0	keep	dim1	model-invoked补强中英文触发词+Agent Context显式化	full_test
+2026-06-28T23:40	e75f0f6	pm-humanprd	87.5	89.0	keep	dim1	model-invoked补强中英文触发词	full_test
+2026-06-28T23:40	e75f0f6	pm-premortem	88.5	90.0	keep	dim1	model-invoked补强中英文触发词+三分定义显式化	full_test
+2026-06-28T23:40	e75f0f6	pm-sketch	86.5	88.5	keep	dim1	user-invoked去触发词+human-facing	full_test
+2026-06-28T23:40	e75f0f6	pm-wireframe	86.0	88.0	keep	dim1	model-invoked补强中英文触发词	full_test
+2026-06-28T23:40	e75f0f6	pm-ia	86.0	88.0	keep	dim1	model-invoked补强中英文触发词	full_test
+2026-06-28T23:40	e75f0f6	pm-state	86.5	88.5	keep	dim1	model-invoked补强中英文触发词+终态显式化	full_test
+2026-06-28T23:40	e75f0f6	pm-flow	86.0	88.0	keep	dim1	model-invoked补强中英文触发词+循环退出条件显式化	full_test
