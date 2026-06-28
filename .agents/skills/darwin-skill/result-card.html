@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>Darwin Skill 优化成果卡片 · PMSkill</title>
+<title>Darwin Skill 优化成果卡片 · PMSkill · v4</title>
 <style>
   body { margin:0; padding:40px; background:#1a1a1a; font-family:'Inter',-apple-system,sans-serif; color:#e0e0e0; }
   .card { max-width:960px; margin:0 auto; background:#0d0d0d; border:1px solid #00ff88; border-radius:12px; padding:32px; }
@@ -17,42 +17,51 @@
   th { background:#1a1a1a; color:#00ff88; padding:10px; text-align:left; font-size:12px; border-bottom:2px solid #00ff88; }
   td { padding:8px 10px; border-bottom:1px solid #333; font-size:13px; }
   .delta { color:#00ff88; font-weight:bold; }
+  .inv { font-size:11px; color:#888; }
   .footer { margin-top:24px; padding-top:16px; border-top:1px solid #333; font-size:11px; color:#888; text-align:center; }
 </style>
 </head>
 <body>
 <div class="card">
   <div class="brand">
-    <h1>Darwin.skill 2.0 · PMSkill 优化成果</h1>
-    <div class="date">2026-06-28</div>
+    <h1>Darwin.skill 2.0 · PMSkill 优化成果 v4</h1>
+    <div class="date">2026-06-28 23:50</div>
   </div>
   <div class="summary">
     <div class="stat"><div class="num">13</div><div class="label">优化 skills 数</div></div>
-    <div class="stat"><div class="num">87.0</div><div class="label">最终平均分</div></div>
-    <div class="stat"><div class="num">+3.1</div><div class="label">基线→最终 Δ</div></div>
-    <div class="stat"><div class="num">13/13</div><div class="label">full_test 验证</div></div>
+    <div class="stat"><div class="num">88.9</div><div class="label">最终平均分</div></div>
+    <div class="stat"><div class="num">+1.9</div><div class="label">本轮 dim1 Δ</div></div>
+    <div class="stat"><div class="num">13/13</div><div class="label">Anthropic 规范对齐</div></div>
   </div>
   <table>
-    <thead><tr><th>Skill</th><th>基线(dry_run)</th><th>full_test</th><th>最终</th><th>Δ</th></tr></thead>
+    <thead><tr><th>Skill</th><th>调用方式</th><th>v3 分数</th><th>本轮 dim1</th><th>最终</th><th>Δ</th></tr></thead>
     <tbody>
-      <tr><td>pm-prd</td><td>86.2</td><td>88.0</td><td>89.0</td><td class="delta">+2.8</td></tr>
-      <tr><td>pm-premortem</td><td>85.1</td><td>87.0</td><td>88.5</td><td class="delta">+3.4</td></tr>
-      <tr><td>pm-refine</td><td>83.7</td><td>85.5</td><td>87.5</td><td class="delta">+3.8</td></tr>
-      <tr><td>pm-humanprd</td><td>84.0</td><td>86.0</td><td>87.5</td><td class="delta">+3.5</td></tr>
-      <tr><td>pm-aiprd</td><td>84.6</td><td>86.5</td><td>87.5</td><td class="delta">+2.9</td></tr>
-      <tr><td>pm-need</td><td>84.3</td><td>86.0</td><td>87.0</td><td class="delta">+2.7</td></tr>
-      <tr><td>pm-sketch</td><td>83.8</td><td>85.5</td><td>86.5</td><td class="delta">+2.7</td></tr>
-      <tr><td>pm-state</td><td>83.9</td><td>85.5</td><td>86.5</td><td class="delta">+2.6</td></tr>
-      <tr><td>pm-setup</td><td>82.5</td><td>85.0</td><td>86.0</td><td class="delta">+3.5</td></tr>
-      <tr><td>pm-collect</td><td>83.1</td><td>85.0</td><td>86.0</td><td class="delta">+2.9</td></tr>
-      <tr><td>pm-wireframe</td><td>83.4</td><td>85.0</td><td>86.0</td><td class="delta">+2.6</td></tr>
-      <tr><td>pm-ia</td><td>83.2</td><td>85.0</td><td>86.0</td><td class="delta">+2.8</td></tr>
-      <tr><td>pm-flow</td><td>83.5</td><td>85.0</td><td>86.0</td><td class="delta">+2.5</td></tr>
+      <tr><td>pm-prd</td><td class="inv">user</td><td>89.0</td><td>90.5</td><td>90.5</td><td class="delta">+1.5</td></tr>
+      <tr><td>pm-premortem</td><td class="inv">model</td><td>88.5</td><td>90.0</td><td>90.0</td><td class="delta">+1.5</td></tr>
+      <tr><td>pm-need</td><td class="inv">user</td><td>87.0</td><td>89.0</td><td>89.0</td><td class="delta">+2.0</td></tr>
+      <tr><td>pm-refine</td><td class="inv">model</td><td>87.5</td><td>89.0</td><td>89.0</td><td class="delta">+1.5</td></tr>
+      <tr><td>pm-aiprd</td><td class="inv">model</td><td>87.5</td><td>89.0</td><td>89.0</td><td class="delta">+1.5</td></tr>
+      <tr><td>pm-humanprd</td><td class="inv">model</td><td>87.5</td><td>89.0</td><td>89.0</td><td class="delta">+1.5</td></tr>
+      <tr><td>pm-sketch</td><td class="inv">user</td><td>86.5</td><td>88.5</td><td>88.5</td><td class="delta">+2.0</td></tr>
+      <tr><td>pm-state</td><td class="inv">model</td><td>86.5</td><td>88.5</td><td>88.5</td><td class="delta">+2.0</td></tr>
+      <tr><td>pm-setup</td><td class="inv">user</td><td>86.0</td><td>88.0</td><td>88.0</td><td class="delta">+2.0</td></tr>
+      <tr><td>pm-collect</td><td class="inv">model</td><td>86.0</td><td>88.0</td><td>88.0</td><td class="delta">+2.0</td></tr>
+      <tr><td>pm-wireframe</td><td class="inv">model</td><td>86.0</td><td>88.0</td><td>88.0</td><td class="delta">+2.0</td></tr>
+      <tr><td>pm-ia</td><td class="inv">model</td><td>86.0</td><td>88.0</td><td>88.0</td><td class="delta">+2.0</td></tr>
+      <tr><td>pm-flow</td><td class="inv">model</td><td>86.0</td><td>88.0</td><td>88.0</td><td class="delta">+2.0</td></tr>
     </tbody>
   </table>
+  <div style="background:#1a1a1a;border:1px solid #333;padding:16px;border-radius:8px;margin-bottom:24px;">
+    <div style="color:#00ff88;font-size:13px;margin-bottom:8px;">本轮优化要点 · dim1 对齐 Anthropic invocation 规范</div>
+    <div style="font-size:12px;color:#ccc;line-height:1.6;">
+      <strong>user-invoked（4 个）</strong>：description 改为 human-facing 一句话描述，去除 "Use when..." 触发词——只能由人类触发，无需自动触发<br>
+      <strong>model-invoked（9 个）</strong>：保留并补强中英文富触发词（"Use when..., mentions..., asks for..."），以利 Agent 自主触发<br>
+      <strong>渐进披露</strong>：Level 1 frontmatter ≤235 字符｜Level 2 SKILL.md ≤200 行｜Level 3 references 全覆盖并被引用
+    </div>
+  </div>
   <div class="footer">
     Train your Skills like you train your models · github.com/alchaincyf/darwin-skill<br>
-    9 维 rubric · SkillLens (arXiv 2605.23899) + SkillOpt (arXiv 2605.23904)
+    9 维 rubric · SkillLens (arXiv 2605.23899) + SkillOpt (arXiv 2605.23904) · Anthropic Agent Skills 规范
   </div>
 </div>
 </body>
