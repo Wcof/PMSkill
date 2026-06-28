@@ -1,6 +1,6 @@
 ---
 name: pm-humanprd
-description: 从 PMContext 生成给人阅读的 PRD。This skill should be used when the user asks for a human-readable PRD or review document.
+description: 从 PMContext 生成给人阅读评审的 PRD——决策理由 + 自然语言叙事 + 追溯清单，评审友好。Use when the user asks for a human-readable PRD or review document, mentions 给人的 PRD、评审、review、决策理由、human-prd、产品评审会、 stakeholder review、业务方反馈.
 ---
 
 # /pm-humanprd
@@ -155,4 +155,4 @@ description: 从 PMContext 生成给人阅读的 PRD。This skill should be used
 
 ## 产出示例 · 延伸参考 · 实战提示
 
-详见 [references/examples-and-tips.md](references/examples-and-tips.md)。
+详见 [references/human-prd-example.md](references/human-prd-example.md)（给人的 PRD 片段示例与评审友好叙事技巧）。

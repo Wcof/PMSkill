@@ -1,0 +1,36 @@
+[
+  {
+    "id": 1,
+    "skills": ["pm-wireframe"],
+    "query": "画会员中心页线框",
+    "files": ["fixtures/pm-context.md"],
+    "expected_behavior": [
+      "Mermaid flowchart 画页面间导航关系",
+      "markdown 表格画每页组件布局（区域 | 组件 | 数据来源 | 交互）",
+      "图与表互补：图擅长导航流，表擅长布局细节",
+      "组件对应 PMContext 中的页面/功能定义"
+    ]
+  },
+  {
+    "id": 2,
+    "skills": ["pm-wireframe"],
+    "query": "某组件在 PMContext 中无数据来源",
+    "files": ["fixtures/pm-context.md"],
+    "expected_behavior": [
+      "标注 [假设] 不臆造数据来源",
+      "记入信息缺口清单",
+      "不静默忽略缺失项"
+    ]
+  },
+  {
+    "id": 3,
+    "skills": ["pm-wireframe"],
+    "query": "只用 Mermaid 画页面布局不用表格",
+    "files": ["fixtures/pm-context.md"],
+    "expected_behavior": [
+      "🔴 反例：Mermaid 表达布局细节能力不足",
+      "强制使用 markdown 表格补充组件布局",
+      "图与表双维度不可缺一"
+    ]
+  }
+]

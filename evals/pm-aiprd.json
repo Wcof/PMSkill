@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "skills": ["pm-aiprd"],
+    "query": "基于 PMContext 生成 AI 可执行的 PRD",
+    "files": ["fixtures/pm-context.md"],
+    "expected_behavior": [
+      "输出含 Overview/Agent Context/User Stories/Rules/Data/Acceptance/Risks/Out of Scope 八段骨架",
+      "Rules 为可执行规则（非模糊描述），含数据模型字段定义",
+      "每条 User Story 附验收标准",
+      "[待确认] 项隔离在 Risks 段不进入 User Stories"
+    ]
+  },
+  {
+    "id": 3,
+    "skills": ["pm-aiprd"],
+    "query": "PMContext 中有 4 个 [待确认] 项怎么处理",
+    "files": ["fixtures/pm-context-with-gaps.md"],
+    "expected_behavior": [
+      "[待确认] 项全部归入 Risks 段",
+      "不写成确定性要求",
+      "占比 > 30% 时输出 🟡 警示提示 PM 复核",
+      "Agent Context 段不含 [待确认] 项"
+    ]
+  },
+  {
+    "id": 4,
+    "skills": ["pm-aiprd"],
+    "query": "跳过 PMContext 直接从聊天生成 AI PRD",
+    "files": [],
+    "expected_behavior": [
+      "🔴 STOP：提示需先有 PMContext",
+      "不凭聊天上下文臆造需求",
+      "指引调用 /pm-need 先沉淀 PMContext"
+    ]
+  }
+]

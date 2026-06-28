@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "skills": ["pm-state"],
+    "query": "画订单状态机",
+    "files": ["fixtures/pm-context.md"],
+    "expected_behavior": [
+      "Mermaid stateDiagram-v2 输出",
+      "状态节点 + 转移边 + 条件标注齐全",
+      "异常路径（失败/超时/取消）必画",
+      "明确终态 [*] 或显式标注无终态设计",
+      "状态/转移对应 PMContext 中的定义"
+    ]
+  },
+  {
+    "id": 2,
+    "skills": ["pm-state"],
+    "query": "订单是否需要终态？",
+    "files": ["fixtures/pm-context.md"],
+    "expected_behavior": [
+      "明确画出 [*] 终态（如已完成/已取消）",
+      "或显式标注「本状态机无终态设计」并说明原因",
+      "不模棱两可"
+    ]
+  },
+  {
+    "id": 3,
+    "skills": ["pm-state"],
+    "query": "脱离 PMContext 凭经验画状态机",
+    "files": [],
+    "expected_behavior": [
+      "🔴 STOP：提示需基于 PMContext 状态/转移定义",
+      "不凭直觉生成状态",
+      "指引先调用 /pm-need 沉淀 PMContext"
+    ]
+  }
+]

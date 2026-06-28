@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "skills": ["pm-humanprd"],
+    "query": "生成给业务方评审的 PRD",
+    "files": ["fixtures/pm-context.md"],
+    "expected_behavior": [
+      "输出含 Overview/User Stories/Rules/Data/Acceptance/Risks/Out of Scope 七段骨架",
+      "User Stories 用自然语言叙事附业务价值说明",
+      "Rules 段含决策表 + 「为什么这样决定」理由",
+      "不塞入 Agent Context 等机器可读内容",
+      "表格行数 ≤ 5 行避免信息过载"
+    ]
+  },
+  {
+    "id": 2,
+    "skills": ["pm-humanprd"],
+    "query": "评审者问为什么选 A 不选 B",
+    "files": ["fixtures/pm-context.md"],
+    "expected_behavior": [
+      "每条 Rules 配 > **为什么** 引用块说明决策理由",
+      "引用 PMContext 中的决策日志条目",
+      "若决策理由缺失则标 [待确认] 不臆造"
+    ]
+  },
+  {
+    "id": 3,
+    "skills": ["pm-humanprd"],
+    "query": "把 Agent Context 段塞进 human-prd",
+    "files": ["fixtures/pm-context.md"],
+    "expected_behavior": [
+      "🔴 反例：拒绝写入 Agent Context/技术栈/目录结构等机器可读内容",
+      "提示这些属于 ai-prd.md 而非 human-prd.md",
+      "保持 human-prd.md 的人类评审友好叙事风格"
+    ]
+  }
+]

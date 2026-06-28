@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "skills": ["pm-sketch"],
+    "query": "/pm-sketch --auto",
+    "files": ["fixtures/pm-context.md"],
+    "expected_behavior": [
+      "调用 /pm-wireframe /pm-ia /pm-state /pm-flow 四个子 skill",
+      "四个草图均落盘到 docs/pm-context/sketch/",
+      "--auto 下不暂停直接产出全部",
+      "每个图元对应 PMContext 实体/关系，无法对应的标 [假设]"
+    ]
+  },
+  {
+    "id": 2,
+    "skills": ["pm-sketch"],
+    "query": "/pm-sketch --prototype",
+    "files": ["fixtures/pm-context.md"],
+    "expected_behavior": [
+      "生成 HTML 可交互原型 prototype.html",
+      "HTML 单页无外部 CDN 依赖，断网可预览",
+      "通过 9 项质量检查（语义化标签/响应式/可访问性等）",
+      "草图与 HTML 原型平级，HTML 不替代 Mermaid"
+    ]
+  },
+  {
+    "id": 3,
+    "skills": ["pm-sketch"],
+    "query": "脱离 PMContext 凭感觉画图",
+    "files": [],
+    "expected_behavior": [
+      "🔴 STOP：提示需基于 PMContext 实体/关系定义画图",
+      "不凭直觉生成图元",
+      "指引先调用 /pm-need 沉淀 PMContext"
+    ]
+  }
+]

@@ -1,0 +1,36 @@
+[
+  {
+    "id": 1,
+    "skills": ["pm-prd"],
+    "query": "/pm-prd --auto",
+    "files": ["fixtures/pm-context.md"],
+    "expected_behavior": [
+      "读取 PMContext 而非从聊天直接生成 PRD",
+      "调用 /pm-aiprd 与 /pm-humanprd 产出双形态 PRD",
+      "审计门跳过，直接落盘 prd/ai-prd.md 与 prd/human-prd.md",
+      "每条需求追溯到 PMContext 具体项，无来源标 [待确认]"
+    ]
+  },
+  {
+    "id": 2,
+    "skills": ["pm-prd"],
+    "query": "/pm-prd",
+    "files": [],
+    "expected_behavior": [
+      "检测 PMContext 不存在",
+      "🔴 STOP：提示先运行 /pm-need",
+      "不臆造需求直接生成 PRD"
+    ]
+  },
+  {
+    "id": 3,
+    "skills": ["pm-prd"],
+    "query": "/pm-prd --skip-human",
+    "files": ["fixtures/pm-context.md"],
+    "expected_behavior": [
+      "只调用 /pm-aiprd 生成 ai-prd.md",
+      "不生成 human-prd.md",
+      "落盘后输出跳过原因说明"
+    ]
+  }
+]

@@ -1,6 +1,6 @@
 ---
 name: pm-sketch
-description: 从 PMContext 生成全部草图（线框/信息架构/状态机/流程图）+ HTML 可交互原型。Use when generating sketches or prototype, or the user mentions 画草图、wireframe、prototype、可视化.
+description: 从 PMContext 生成全部草图（线框/信息架构/状态机/流程图）+ HTML 可交互原型（--prototype）。支持 --auto 零确认模式与单图模式（--wireframe/--ia/--state/--flow）。
 disable-model-invocation: true
 ---
 
@@ -197,4 +197,4 @@ Run 四个子 Skill（按依赖顺序）：
 
 ## 产出示例 · 延伸参考 · 实战提示
 
-详见 [references/examples-and-tips.md](references/examples-and-tips.md)。
+详见 [references/sketch-prototype-example.md](references/sketch-prototype-example.md)（草图 + HTML 原型联动产出示例与 9 项质量检查技巧）。

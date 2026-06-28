@@ -1,6 +1,6 @@
 ---
 name: pm-refine
-description: 对已收集材料自主推断澄清，沉淀成 PMContext。无需 PM 逐个确认，Agent 自主推断并标记置信度。Use when materials exist and need clarification, or the user wants to sharpen requirements.
+description: 对已收集材料自主推断澄清，区分事实/假设/冲突/待确认并标记置信度，沉淀成 PMContext 单文件，无需 PM 逐个确认。Use when materials exist and need clarification, or the user wants to sharpen requirements, mentions 推断、refine、澄清、需求梳理、8 维推断、结构化、PMContext、置信度、信息缺口.
 ---
 
 # /pm-refine
@@ -168,4 +168,4 @@ PMContext 是活文档。若 `pm-context.md` 已存在，Agent 读现有 PMConte
 
 ## 产出示例 · 延伸参考 · 实战提示
 
-详见 [references/examples-and-tips.md](references/examples-and-tips.md)。
+详见 [references/inference-dimensions.md](references/inference-dimensions.md)（8 维推断产出示例与置信度标注技巧）。

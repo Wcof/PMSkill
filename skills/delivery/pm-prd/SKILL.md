@@ -1,6 +1,6 @@
 ---
 name: pm-prd
-description: 从 PMContext 生成 PRD 文档（给 AI 和给人两种形态），支持 --auto 零确认。Use when generating PRD from PMContext, or the user mentions 写 PRD、generate spec、product requirement.
+description: 从 PMContext 生成 PRD 文档——给 AI 的可执行规则版和给人的评审叙事版两种形态。支持 --auto 零确认、--skip-ai / --skip-human 单形态输出。
 disable-model-invocation: true
 ---
 
@@ -90,7 +90,7 @@ Run `/pm-humanprd` — 生成 `docs/pm-context/prd/human-prd.md`
 
 ## 产出示例 · 延伸参考 · 实战提示
 
-详见 [references/examples-and-tips.md](references/examples-and-tips.md)。
+详见 [references/dual-form-example.md](references/dual-form-example.md)（双形态 PRD 同源骨架对比示例）。
 
 ### 实战提示
 

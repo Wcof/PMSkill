@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "skills": ["pm-need"],
+    "query": "/pm-need 我想做个会员体系重构 --auto",
+    "files": [],
+    "expected_behavior": [
+      "解析 $ARGUMENTS 得到需求描述「会员体系重构」和 --auto 标志",
+      "依次调用 /pm-collect → /pm-refine 完成 PMContext 沉淀",
+      "审计门不暂停，自动推进到 /pm-prd --auto → /pm-sketch --prototype --auto",
+      "最终输出一站式报告含置信度分布 + 信息缺口清单 + 产出物清单",
+      "子 skill 失败不回滚已落盘部分，失败项单独标注"
+    ]
+  },
+  {
+    "id": 2,
+    "skills": ["pm-need"],
+    "query": "/pm-need 做个数据大屏，参考 https://example.com/spec",
+    "files": [],
+    "expected_behavior": [
+      "从 $ARGUMENTS 提取 URL 并抓取",
+      "collect 阶段同时覆盖 URL/对话/项目扫描/知识库四源",
+      "refine 完成 8 维推断并标记四态（事实/[假设]/[待确认]/[冲突]）",
+      "PMContext 落盘后停在审计门输出置信度分布与信息缺口",
+      "不主动推进到 PRD（未指定 --auto）"
+    ]
+  },
+  {
+    "id": 3,
+    "skills": ["pm-need"],
+    "query": "/pm-need",
+    "files": [],
+    "expected_behavior": [
+      "🔴 STOP：提示「请提供需求描述: /pm-need <需求>」",
+      "不臆造需求主题，不阻塞退出",
+      "不进入 collect/refine 流程"
+    ]
+  },
+  {
+    "id": 4,
+    "skills": ["pm-need"],
+    "query": "/pm-need 会员体系 --collect-only --refine-only",
+    "files": [],
+    "expected_behavior": [
+      "识别两个模式标志冲突",
+      "🔴 STOP：输出「两个模式冲突，只能选一个」",
+      "退化为默认全流程而非强制选择"
+    ]
+  }
+]

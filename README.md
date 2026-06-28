@@ -200,7 +200,13 @@ PMSkill/
 │       ├── pm-state/SKILL.md
 │       └── pm-flow/SKILL.md
 └── docs/
-    └── adr/                      ← 架构决定记录
+    ├── pm-context/            ← PMSkill 产物目录（运行后生成）
+    └── adr/                   ← 架构决定记录
+
+evals/                          ← 评估集（≥3 场景/skill + rubric）
+├── README.md                   ← 评估方法说明
+├── pm-*.json                   ← 13 个 skill 的评估场景
+└── fixtures/                   ← 评估夹具（PMContext 样本/矛盾材料等）
 ```
 
 ## 渐进披露
@@ -212,6 +218,12 @@ PMSkill/
 | Level 1: Metadata | 始终（启动时） | ~100 tokens/skill | YAML frontmatter `name` + `description` |
 | Level 2: Instructions | Skill 被触发时 | < 5k tokens | SKILL.md body（流程/失败模式/反例黑名单） |
 | Level 3: Resources | 按需引用 | 无上限 | `references/` 下的产出示例、延伸参考、实战提示 |
+
+每个 skill 的 references 文件按内容语义命名（如 `scan-recipes.md`/`inference-dimensions.md`/`flow-example.md`），便于 Claude 按需精准定位而非千篇一律的 `examples-and-tips.md`。
+
+## 评估集
+
+遵循 [Anthropic「先建评估再写文档」原则](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices#evaluation-and-iteration)，每个 skill 在 `evals/` 下有 ≥3 个评估场景与可判定 rubric，夹具样本在 `evals/fixtures/`。详见 [evals/README.md](evals/README.md)。
 
 ## 延伸参考
 

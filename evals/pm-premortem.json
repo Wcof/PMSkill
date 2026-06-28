@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "skills": ["pm-premortem"],
+    "query": "产品下周上线，做 Pre-Mortem",
+    "files": ["fixtures/pm-context.md"],
+    "expected_behavior": [
+      "假设 14 天后上线失败，倒推可能原因",
+      "风险分类为 Tiger（真实风险）/Paper Tiger（过虑）/Elephant（未讨论）三类",
+      "Tiger 按紧急度分为 Launch-Blocking/Fast-Follow/Track",
+      "为 Launch-Blocking Tiger 制定行动计划",
+      "与 PMContext 假设清单交叉检查，置信度 ≤ 5 的假设失败风险升级为 Tiger"
+    ]
+  },
+  {
+    "id": 2,
+    "skills": ["pm-premortem"],
+    "query": "发现 8 个 Tiger 怎么办",
+    "files": ["fixtures/pm-context.md"],
+    "expected_behavior": [
+      "按紧急度排序，超出 5 个的降级为 Fast-Follow",
+      "Launch-Blocking Tiger 严格控制在 ≤ 5 个",
+      "降级项标注降级理由",
+      "行动计划只针对 Launch-Blocking Tiger"
+    ]
+  },
+  {
+    "id": 3,
+    "skills": ["pm-premortem"],
+    "query": "脱离 PMContext 凭经验列风险",
+    "files": [],
+    "expected_behavior": [
+      "🔴 STOP：提示需基于 PMContext 推导",
+      "不凭空列通用风险清单",
+      "指引先调用 /pm-need 沉淀 PMContext"
+    ]
+  }
+]

@@ -1,6 +1,6 @@
 ---
 name: pm-collect
-description: 主动深度扫描 URL、项目、知识库和对话上下文，收集材料并按类型聚合。Use when materials are needed before refining, or the user mentions feedback, meeting notes, raw context.
+description: 主动深度扫描 URL、项目源码、git 历史、知识库和对话上下文，收集材料按类型聚合去重落盘，只整理不改写。Use when materials are needed before refining, or the user mentions 收集材料、collect feedback、扫描项目、调研、meeting notes、raw context、竞品分析、用户反馈、抓取 URL.
 ---
 
 # /pm-collect
@@ -155,7 +155,7 @@ done
 
 ## 产出示例 · 延伸参考 · 实战提示
 
-详见 [references/examples-and-tips.md](references/examples-and-tips.md)。
+详见 [references/scan-recipes.md](references/scan-recipes.md)（4 源扫描实战示例与配置技巧）。
 
 ## 失败模式
 

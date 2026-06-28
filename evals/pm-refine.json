@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "skills": ["pm-refine"],
+    "query": "把这 3 条材料推断成 PMContext",
+    "files": ["fixtures/collect-sample.md"],
+    "expected_behavior": [
+      "完整覆盖 8 个推断维度（用户场景/边界/优先级/冲突/术语/摩擦力/技术约束/度量）",
+      "有明确依据写为事实并标注来源；推断写为 [假设] 附置信度(1-10)；缺失标 [待确认]；矛盾标 [冲突]",
+      "建立事实/规则/页面/验收之间的关联，无孤立项",
+      "PMContext 落盘为单文件 docs/pm-context/pm-context.md"
+    ]
+  },
+  {
+    "id": 2,
+    "skills": ["pm-refine"],
+    "query": "两份材料对「是否支持年付」说法矛盾",
+    "files": ["fixtures/conflicting-materials.md"],
+    "expected_behavior": [
+      "标记为 [冲突] 不单方面裁决",
+      "保留双方来源，标注更可信一方并附理由",
+      "记入信息缺口清单提示 PM 补充",
+      "下游 View 不把冲突项写成确定性要求"
+    ]
+  },
+  {
+    "id": 3,
+    "skills": ["pm-refine"],
+    "query": "已有 pm-context.md，做增量推断",
+    "files": ["fixtures/pm-context.md"],
+    "expected_behavior": [
+      "读取现有 PMContext 与新材料",
+      "只推断新增部分，不重写已有事实",
+      "增量写入保留历史推断",
+      "输出新增条目数与置信度变化"
+    ]
+  }
+]

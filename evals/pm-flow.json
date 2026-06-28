@@ -1,0 +1,36 @@
+[
+  {
+    "id": 1,
+    "skills": ["pm-flow"],
+    "query": "画支付流程",
+    "files": ["fixtures/pm-context.md"],
+    "expected_behavior": [
+      "Mermaid flowchart 输出",
+      "步骤节点 + 判断分支（yes/no 双向）+ 异常路径齐全",
+      "循环结构配明确退出条件",
+      "步骤/顺序对应 PMContext 中的定义"
+    ]
+  },
+  {
+    "id": 2,
+    "skills": ["pm-flow"],
+    "query": "步骤描述含「等待用户操作」",
+    "files": ["fixtures/pm-context.md"],
+    "expected_behavior": [
+      "🔴 反例：含「等」的描述不可执行",
+      "改为具体触发条件（如「用户点击支付按钮」而非「等待用户支付」）",
+      "所有步骤可被 Agent 直接执行"
+    ]
+  },
+  {
+    "id": 3,
+    "skills": ["pm-flow"],
+    "query": "脱离 PMContext 凭经验画流程",
+    "files": [],
+    "expected_behavior": [
+      "🔴 STOP：提示需基于 PMContext 步骤/顺序定义",
+      "不凭直觉生成流程节点",
+      "指引先调用 /pm-need 沉淀 PMContext"
+    ]
+  }
+]

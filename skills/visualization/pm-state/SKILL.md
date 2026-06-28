@@ -1,6 +1,6 @@
 ---
 name: pm-state
-description: 从 PMContext 生成状态机图（Mermaid stateDiagram-v2）。展示实体状态与转移条件。This skill should be used when the user asks for state machine or state transitions.
+description: 从 PMContext 生成状态机图——Mermaid stateDiagram-v2，状态 + 转移条件 + 异常路径 + 终态，按实体分组。Use when the user asks for state machine or state transitions, mentions 状态机、state machine、状态转移、生命周期、stateDiagram、实体状态、异常路径.
 ---
 
 # /pm-state
@@ -158,7 +158,7 @@ stateDiagram-v2
 
 ## 产出示例 · 延伸参考 · 实战提示
 
-详见 [references/examples-and-tips.md](references/examples-and-tips.md)。
+详见 [references/state-example.md](references/state-example.md)（状态机图含异常路径与终态标注示例）。
 
 ### 实战提示
 

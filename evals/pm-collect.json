@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "skills": ["pm-collect"],
+    "query": "从这段对话收集材料：用户反馈续费率 QoQ 下降 12%，NPS 从 32 跌到 18",
+    "files": ["fixtures/mock-project/"],
+    "expected_behavior": [
+      "从对话上下文提取两条用户反馈材料",
+      "扫描 fixtures/mock-project/ 的 README/docs/git/TODO/配置文件",
+      "4 源材料按类型聚合为单个 md 文件落到 docs/pm-context/collect/",
+      "建立材料间关联（如多条反馈是否指向同一主题）",
+      "输出「收集了 N 条材料（来源：URL U 条 / 对话 M 条 / 项目扫描 K 条 / 知识库 L 条）」"
+    ]
+  },
+  {
+    "id": 2,
+    "skills": ["pm-collect"],
+    "query": "抓 https://example.com/dead-link 这个 URL",
+    "files": [],
+    "expected_behavior": [
+      "URL 抓取失败后重试 1 次",
+      "仍失败则显式标注「[待确认]」并记录原始 URL，不静默跳过",
+      "把失败项写入信息缺口清单",
+      "不阻塞后续来源扫描与 refine 流程"
+    ]
+  },
+  {
+    "id": 3,
+    "skills": ["pm-collect"],
+    "query": "扫一个非 git 仓库的目录",
+    "files": ["fixtures/non-git-project/"],
+    "expected_behavior": [
+      "git remote -v / git log 失败时标注「非 git 仓库，跳过 git 元数据」",
+      "不阻塞，继续其他子项扫描（README/docs/配置/TODO）",
+      "材料总量 < 5 条时触发 🟡 WARNING + 🔴 CHECKPOINT 提示 PM"
+    ]
+  }
+]

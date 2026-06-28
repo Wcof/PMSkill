@@ -1,6 +1,6 @@
 ---
 name: pm-setup
-description: 首次使用 PMSkill 时配置项目（产物目录/语言/知识库路径/Agent 规则）。Use when first configuring PMSkill, or the user mentions 初始化、setup PM config.
+description: 首次使用 PMSkill 时配置项目——产物目录、语言偏好、知识库路径、Agent 规则落点。运行一次即可，后续所有 PMSkill 命令自动读取配置。
 disable-model-invocation: true
 ---
 
@@ -167,7 +167,7 @@ Mention they can edit the `## PMSkill` block directly later — re-running `/pm-
 
 ## 产出示例 · 延伸参考 · 实战提示
 
-详见 [references/examples-and-tips.md](references/examples-and-tips.md)。
+详见 [references/setup-walkthrough.md](references/setup-walkthrough.md)（一次典型配置流程示例与避坑提示）。
 
 ---
 

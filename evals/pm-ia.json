@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "skills": ["pm-ia"],
+    "query": "画信息架构图",
+    "files": ["fixtures/pm-context.md"],
+    "expected_behavior": [
+      "Mermaid graph/flowchart 输出",
+      "节点为实体/页面，边为导航/包含关系",
+      "边类型限定为 2 种（实线导航/虚线引用）",
+      "节点对应 PMContext 中的实体/关系定义"
+    ]
+  },
+  {
+    "id": 2,
+    "skills": ["pm-ia"],
+    "query": "实体超过 15 个一张图画不下",
+    "files": ["fixtures/pm-context-large.md"],
+    "expected_behavior": [
+      "使用 subgraph 按业务域分组",
+      "不把所有节点塞进一张图导致可读性崩溃",
+      "每个 subgraph 标注业务域名称",
+      "subgraph 间用边表达跨域引用关系"
+    ]
+  },
+  {
+    "id": 3,
+    "skills": ["pm-ia"],
+    "query": "脱离 PMContext 凭经验画 IA",
+    "files": [],
+    "expected_behavior": [
+      "🔴 STOP：提示需基于 PMContext 实体/关系定义",
+      "不凭直觉生成节点",
+      "指引先调用 /pm-need 沉淀 PMContext"
+    ]
+  }
+]

@@ -1,6 +1,6 @@
 ---
 name: pm-ia
-description: 从 PMContext 生成信息架构图（Mermaid graph）。展示实体/页面间导航与包含关系。This skill should be used when the user asks for information architecture or entity relationships.
+description: 从 PMContext 生成信息架构图——Mermaid graph，节点为实体/页面，边为导航/包含/引用关系，按业务域 subgraph 分组。Use when the user asks for information architecture or entity relationships, mentions 信息架构、IA、entity relationship、实体关系、数据结构、站点地图、sitemap.
 ---
 
 # /pm-ia
@@ -164,4 +164,4 @@ graph TD
 
 ## 产出示例 · 延伸参考 · 实战提示
 
-详见 [references/examples-and-tips.md](references/examples-and-tips.md)。
+详见 [references/ia-example.md](references/ia-example.md)（信息架构图节点/边类型示例与 subgraph 分组技巧）。

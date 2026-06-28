@@ -1,6 +1,6 @@
 ---
 name: pm-aiprd
-description: 从 PMContext 生成给 AI 执行的 PRD。包含可执行规则、数据模型、验收标准、风险项。This skill should be used when another skill needs Agent-executable PRD, or the user asks for AI-ready PRD.
+description: 从 PMContext 生成给 AI 执行的 PRD——可执行规则 + 数据模型 + Agent Context + 验收标准 + 风险项，每条需求附 PMContext 追溯标记。Use when another skill needs Agent-executable PRD, or the user asks for AI-ready PRD, mentions 给 AI 的 PRD、可执行规则、Agent Context、ai-prd、自动化执行、技术契约.
 ---
 
 # /pm-aiprd
@@ -149,7 +149,7 @@ As a 月付用户, I want to upgrade to 年付, so that 节省费用
 
 ## 产出示例 · 延伸参考 · 实战提示
 
-详见 [references/examples-and-tips.md](references/examples-and-tips.md)。
+详见 [references/agent-prd-example.md](references/agent-prd-example.md)（给 AI 的 PRD 片段示例与可执行规则书写技巧）。
 
 ### 实战提示
 

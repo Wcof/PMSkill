@@ -1,6 +1,6 @@
 ---
 name: pm-need
-description: 从模糊想法或用户诉求出发，全自动收集材料并推断澄清，沉淀成 PMContext。Use when starting from a vague idea or user request, or the user mentions 需求发现、collect needs、discovery.
+description: 从模糊想法或用户诉求出发，全自动收集材料并推断澄清，沉淀成 PMContext，停在审计门等 PM 确认。支持 --auto 零确认模式一键全链路直达 PRD 与原型。
 disable-model-invocation: true
 ---
 
@@ -153,7 +153,7 @@ PM 可直接查看 HTML 原型预览，也可事后审计 PMContext 和 PRD。
 
 ## 产出示例 · 延伸参考 · 实战提示
 
-详见 [references/examples-and-tips.md](references/examples-and-tips.md)。
+详见 [references/pipeline-example.md](references/pipeline-example.md)（一键全链路产出示例与实战提示）。
 
 ## 增量更新
 

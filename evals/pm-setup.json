@@ -1,0 +1,40 @@
+[
+  {
+    "id": 1,
+    "skills": ["pm-setup"],
+    "query": "我要开始用 PMSkill，帮我配置",
+    "files": [],
+    "expected_behavior": [
+      "先执行 Explore：扫描 git remote、AGENTS.md/CLAUDE.md/CONTEXT.md、docs/pm-context/ 是否存在",
+      "从会话环境推断当前 Agent 类型，不直接问用户",
+      "逐一（非一次性）确认产物目录、语言、知识库、Agent 规则落点四个配置项",
+      "每项配置前给出简短 explainer 说明它是什么、为什么需要、改了会怎样",
+      "🔴 CHECKPOINT：展示要写入的 ## PMSkill 块草稿，经用户确认后才落盘"
+    ]
+  },
+  {
+    "id": 2,
+    "skills": ["pm-setup"],
+    "query": "我的项目里 CLAUDE.md 和 AGENTS.md 同时存在，配置写哪个？",
+    "files": [],
+    "expected_behavior": [
+      "检测到两个文件同时存在，进入冲突处理流程",
+      "尝试从会话环境推断 Agent 类型（Claude Code → CLAUDE.md，Codex → AGENTS.md）",
+      "若无法推断则问用户，不替用户决定",
+      "只编辑被选中的那个文件，绝不同时编辑两个",
+      "若目标文件已有 ## PMSkill 块则原位更新而非追加重复块"
+    ]
+  },
+  {
+    "id": 3,
+    "skills": ["pm-setup"],
+    "query": "把知识库设成 /nonexistent/path",
+    "files": [],
+    "expected_behavior": [
+      "当场提示路径不存在，要求重新输入或跳过",
+      "不把无效路径写入 Agent 规则文件",
+      "退化为跳过知识库配置，不阻塞后续流程",
+      "落盘的 ## PMSkill 块中知识库字段标为「无」"
+    ]
+  }
+]
