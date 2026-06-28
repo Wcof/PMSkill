@@ -6,61 +6,41 @@ disable-model-invocation: true
 
 # /pm-prd
 
-> 你是一位资深产品经理，PMContext 已经在手。你的任务是把它变成两份 PRD——一份给 AI 直接执行，一份给人评审决策。与参考项目 [pm-skills/create-prd](https://github.com/phuryn/pm-skills) 的 8 节模板不同，PMSkill 采用「双形态」策略：AI 版重可执行性，Human 版重决策透明度。
+## Purpose
 
-从 PMContext 生成 PRD 文档，输出两种形态：给 AI 的（`ai-prd.md`）和给人的（`human-prd.md`）。
+从 PMContext 生成两份 PRD——一份给 AI 直接执行（可执行规则+验收标准），一份给人评审决策（决策理由+自然叙事）。PRD 是 PMContext 的 View，同源同骨架，差异只在写法。
 
-**Philosophy**：PRD 是 PMContext 的 View 不是源——同源同骨架、差异只在写法。给 AI 写可执行规则、给人写决策理由，两者都必须可追溯到 PMContext 事实项。
+## Context
 
-## 前置条件
+PMContext 已沉淀了事实/假设/冲突/待确认的结构化上下文。PRD 的职责是将这些转化为两种受众可用的形态。
 
-读取 `docs/pm-context/pm-context.md`。若不存在：
-- 如果有 `$ARGUMENTS` → 直接调用 `/pm-need $ARGUMENTS`（自动模式），流程结束后自动回到 PRD 生成
-- 如果没有 → 提示用户先运行 `/pm-need <需求描述>`
+## Instructions
 
-## 启动模式
+### 1. 读取 PMContext
 
-```
-/pm-prd                         → 正常模式：生成后停在审计门
-/pm-prd <需求描述>               → 自动模式：pm-need → pm-refine → PMContext → PRD 一气呵成
-/pm-prd --auto                  → 零确认模式：直接按已有 PMContext 生成 PRD，不暂停
-/pm-prd --skip-human            → 只出 ai-prd，跳过 human-prd
-/pm-prd --skip-ai               → 只出 human-prd，跳过 ai-prd
-```
+从 `docs/pm-context/pm-context.md` 读取。若不存在：
+- 有 `$ARGUMENTS` → 调用 `/pm-need $ARGUMENTS`，完成后回到本流程
+- 无 `$ARGUMENTS` → 🔴 STOP：输出"未找到 PMContext，先运行 `/pm-need <需求>`"
 
-## 流程
-
-### 1. 读取 PMContext（必须）
-
-从 `docs/pm-context/pm-context.md` 读取：
-- 概述（问题与目标、现状平替与摩擦力、价值验证度量）
-- 所有页面/功能定义（事实、规则、验收）
-- 全局约束、决策日志、假设清单、风险项、信息缺口
-- 若 PMContext 不存在且无自动链路可用 → 🔴 STOP：提示先运行 `/pm-need`
+- [ ] PMContext 已读取且非空
+- [ ] 概述/页面定义/全局约束/假设清单/风险项/信息缺口全部提取
 
 ### 2. 生成两种 PRD
 
-Run `/pm-aiprd` — 生成给 AI 的 PRD（`docs/pm-context/prd/ai-prd.md`）
-- 带 Agent Context（技术栈、目录结构、关键模块位置）
-- 用户故事 + 验收标准 + 数据模型
-- 风险项忠实反映 `[待确认]`/`[假设]`/`[冲突]` 标记
+Run `/pm-aiprd` — 生成 `docs/pm-context/prd/ai-prd.md`
+Run `/pm-humanprd` — 生成 `docs/pm-context/prd/human-prd.md`
 
-Run `/pm-humanprd` — 生成给人的 PRD（`docs/pm-context/prd/human-prd.md`）
-- 完整背景 + 决策理由
-- 自然语言用户故事 + 业务价值说明
-- 决策表 + "为什么这样决定"
+- [ ] ai-prd.md 已落盘
+- [ ] human-prd.md 已落盘
 
-### 3. 审计（仅非自动模式）
+### 3. 审计（仅非 --auto 模式）
 
-展示 PRD 生成摘要：
-- `ai-prd.md` — N 个用户故事，M 条规则
-- `human-prd.md` — N 条，含决策理由
-- PMContext 中未覆盖的风险项清单
+展示摘要：ai-prd N 个用户故事 M 条规则 / human-prd N 条含决策理由 / 未覆盖风险项。
 
 **🔴 CHECKPOINT** — 等用户确认。
-- 用户说"通过" → 完成
-- 用户说"修改" → 修改对应内容
-- 用户说"继续" → 直接进入 `/pm-premortem`
+
+- [ ] 审计摘要已输出
+- [ ] 用户已确认（或 --auto 跳过）
 
 ## 零确认模式（--auto）
 
