@@ -12,9 +12,15 @@ disable-model-invocation: true
 
 This is a prompt-driven skill, not a deterministic script. Explore, present what you found, confirm with the user, then write.
 
-**Philosophy**：配置不是一次性脚本，而是项目契约——只写一次、所有下游 skill 共享、不替用户决定 Agent 文件落点。宁可问用户三句话，也不臆造配置导致后续 skill 读不到。
+## Purpose
 
-## Process
+首次使用 PMSkill 时配置项目。运行一次即可，后续 Skill 自动读取配置。配置是项目契约——只写一次、所有下游 skill 共享。
+
+## Context
+
+项目可能已有 CLAUDE.md/AGENTS.md，可能已有 docs/pm-context/。本 skill 探索项目现状，逐一确认配置项，写入 Agent 规则文件。
+
+## Instructions
 
 ### 1. Explore
 

@@ -12,9 +12,15 @@ disable-model-invocation: true
 - **Mermaid 草图** — 线框、信息架构、状态机、流程图，写入 `sketch/*.md`
 - **HTML 可交互原型**（`--prototype`）— 单页 HTML 高保真原型，可直接在浏览器打开
 
-**Philosophy**：草图是 PMContext 的 View 不是凭感觉画图——每个图元必须可追溯到 PMContext 事实项，[假设] 图元必须显式标注不伪装为确认设计。HTML 原型必须零外部依赖可离线预览。
+## Purpose
 
-## 前置条件
+从 PMContext 生成全部可视化物：Mermaid 草图 + HTML 可交互原型。草图是 PMContext 的 View——每个图元必须可追溯到 PMContext 事实项。
+
+## Context
+
+PMContext 已沉淀页面定义、状态转移、流程步骤。本 skill 将这些转化为看得见的草图。
+
+## Instructions
 
 读取 `docs/pm-context/pm-context.md`。若不存在：
 - 如果有 `$ARGUMENTS` → 自动调用 `/pm-need $ARGUMENTS` 全链路后回到草图生成

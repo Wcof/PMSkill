@@ -9,9 +9,15 @@ description: 从 PMContext 生成界面线框图（Mermaid 导航图 + 表格布
 
 从 PMContext 输出界面线框图。两个维度互补——Mermaid 图擅长页面间导航流，markdown 表格擅长页面内组件布局细节。
 
-**Philosophy**：线框只表现交互和布局不表达实现——图擅长导航、表擅长布局细节，两者互补缺一不可。每个组件必须标注数据来源追溯到 PMContext，无来源的标 [假设] 不臆造。
+## Purpose
 
-## 流程
+从 PMContext 输出界面线框图。两个维度互补——Mermaid 图擅长页面间导航流，markdown 表格擅长页面内组件布局细节。
+
+## Context
+
+PMContext 中有页面/功能定义。本 skill 将页面定义转化为导航图+布局表格。
+
+## Instructions
 
 ### Step 1: 读取 PMContext
 

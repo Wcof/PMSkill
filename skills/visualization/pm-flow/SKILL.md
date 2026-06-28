@@ -9,9 +9,15 @@ description: 从 PMContext 生成流程图（Mermaid flowchart）。展示步骤
 
 从 PMContext 输出流程图。步骤节点 + 判断分支 + 异常路径。
 
-**Philosophy**：流程图应同时表达"流程正常走完"和"某步失败后怎么兜底"——只画正向路径不画异常路径是设计缺陷。判断节点必须双向（yes/no），循环必须配退出条件，步骤描述含"等"即不可执行。
+## Purpose
 
-## 流程
+从 PMContext 输出流程图。只画正向路径不画异常路径的流程图不是好流程图。判断节点必须双向（yes/no），循环必须配退出条件。
+
+## Context
+
+PMContext 中有流程/步骤定义。本 skill 提取步骤和分支，画流程图。
+
+## Instructions
 
 ### Step 1: 读取 PMContext
 

@@ -9,9 +9,15 @@ description: 从 PMContext 生成状态机图（Mermaid stateDiagram-v2）。展
 
 从 PMContext 输出状态机图。状态节点 + 转移边 + 条件标注。
 
-**Philosophy**：状态机最重要的价值是表达异常路径——漏掉失败/超时/取消等异常状态是设计错误。每个状态必须可追溯到 PMContext 规则，推断状态标 [假设] 不伪装为确认设计，状态机必须有终态或显式标注无终态设计。
+## Purpose
 
-## 流程
+从 PMContext 输出状态机图。状态机最重要的价值是表达异常路径——漏掉失败/超时/取消等异常状态是设计错误。
+
+## Context
+
+PMContext 中有状态/规则定义。本 skill 提取状态和转移，画状态机图。
+
+## Instructions
 
 ### Step 1: 读取 PMContext
 

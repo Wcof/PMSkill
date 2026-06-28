@@ -13,9 +13,15 @@ disable-model-invocation: true
 - **正常模式**：产出 PMContext 后停在审计门，等 PM 确认后才进入 PRD/草图
 - **零确认模式**（`--auto`）：一气呵成走完 collect → refine → PRD → 原型，不等待
 
-**Philosophy**：PM 的唯一干预点是审计门——能扫到的绝不问、能推断的绝不等、能落盘的绝不只在对话里。一句话触发全链路，而非逐个追问。
+## Purpose
 
-## 启动模式
+全自动主入口：collect → refine → audit 一气呵成。PM 的唯一干预点是审计门——能扫到的绝不问、能推断的绝不等。
+
+## Context
+
+PM 面对模糊想法或用户诉求，需要快速转化为结构化产品上下文。本 skill 自动完成收集、推断、沉淀三步。
+
+## Instructions
 
 ```
 /pm-need <需求描述>                    → 正常模式：collect → refine → 🛑 审计门

@@ -9,9 +9,15 @@ description: 从 PMContext 生成给 AI 执行的 PRD。包含可执行规则、
 
 从 PMContext 输出给 AI 的 PRD，带 Agent Context，供 Agent 执行。核心原则：**AI 读了这个 PRD 应该能直接开始写代码，不需要再问问题**。
 
-**Philosophy**：给 AI 的 PRD 是可执行契约而非叙事——每条规则必须可直接落地为代码、每个 [待确认] 项必须显式隔离不进入用户故事。宁可少写背景，也要多写可执行规则与验收标准。
+## Purpose
 
-## 前置条件
+从 PMContext 输出给 AI 的 PRD，带 Agent Context，供 Agent 直接执行。AI 读了这个 PRD 应该能直接开始写代码，不需要再问问题。
+
+## Context
+
+PMContext 已沉淀事实/假设/冲突/待确认。AI PRD 的职责是将这些转化为可执行契约——每条规则可直接落地为代码，[待确认] 项显式隔离不进入用户故事。
+
+## Instructions
 
 读取 `docs/pm-context/pm-context.md`。若不存在 → 🔴 STOP：提示先运行 `/pm-need`。
 

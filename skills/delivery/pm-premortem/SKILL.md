@@ -9,9 +9,15 @@ description: 从 PMContext 假设失败并倒推风险，产出 Tiger/Paper Tige
 
 从 PMContext 出发，假设产品上线失败，倒推风险并分类，产出行动计划。PMContext 的风险分析 View，和 PRD/草图平级。
 
-**Philosophy**：Pre-Mortem 不是列全部风险而是筛可行动风险——Tiger 必须有负责人和日期、Paper Tiger 必须说明为何不是真风险、Elephant 必须说明为何暂不处理。假设清单交叉检查是核心机制，低置信度假设最可能升级为 Tiger。
+## Purpose
 
-## 前置条件
+从 PMContext 出发，假设产品上线失败，倒推风险并分类，产出行动计划。Pre-Mortem 不是列全部风险而是筛可行动风险。
+
+## Context
+
+产品即将上线。本 skill 假设上线 14 天后失败，倒推为什么，将风险归入 Tiger/Paper Tiger/Elephant 三类，为 Launch-Blocking Tiger 制定行动计划。
+
+## Instructions
 
 读取 `docs/pm-context/pm-context.md`。若不存在，提示先运行 `/pm-need`。
 
