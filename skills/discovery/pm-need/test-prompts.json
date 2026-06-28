@@ -1,0 +1,1 @@
+[{"id":1,"prompt":"/pm-need 我想做个会员体系重构 --auto","expected":"全自动collect→refine→PRD→原型链路不停顿"},{"id":2,"prompt":"/pm-need 做个数据大屏，参考 https://example.com/spec","expected":"抓取URL+扫描项目+对话上下文，沉淀PMContext停审计门"}]

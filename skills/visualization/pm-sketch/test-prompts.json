@@ -1,0 +1,1 @@
+[{"id":1,"prompt":"/pm-sketch --auto","expected":"调4个子skill生成草图+HTML原型零外部依赖"},{"id":2,"prompt":"断网环境预览原型","expected":"HTML无CDN依赖可离线打开"}]

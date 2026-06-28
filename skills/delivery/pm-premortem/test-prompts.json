@@ -1,0 +1,1 @@
+[{"id":1,"prompt":"产品下周上线，做Pre-Mortem","expected":"假设14天后失败→倒推→Tiger/PaperTiger/Elephant分类+行动计划"},{"id":2,"prompt":"发现8个Tiger怎么办","expected":"按紧急度排序，超出5个降级为Fast-Follow"}]

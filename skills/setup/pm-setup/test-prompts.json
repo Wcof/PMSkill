@@ -1,0 +1,1 @@
+[{"id":1,"prompt":"我要开始用 PMSkill，帮我配置","expected":"扫描项目现状，逐一确认产物目录/语言/知识库/Agent落点，写入Agent规则文件"},{"id":2,"prompt":"我的项目已经有 CLAUDE.md 和 AGENTS.md 两个文件，怎么办","expected":"检测冲突，推断当前Agent类型，只编辑被选中的那个不同时编辑两个"}]

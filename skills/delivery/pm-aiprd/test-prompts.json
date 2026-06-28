@@ -1,0 +1,1 @@
+[{"id":1,"prompt":"基于PMContext生成AI可执行的PRD","expected":"Agent Context+可执行规则+验收标准+[待确认]隔离"},{"id":2,"prompt":"有3个[待确认]项怎么处理","expected":"隔离不进入用户故事，占比>30%标🟡警示"}]
