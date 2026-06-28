@@ -145,18 +145,19 @@ Mention they can edit the `## PMSkill` block directly later — re-running `/pm-
 | Agent 类型无法从会话环境推断 | 问用户当前 Agent 类型（Claude Code/Codex/Trae） | 不臆造，落点改为问用户选择 CLAUDE.md 或 AGENTS.md |
 | 用户中途放弃（连续 3 次无回应） | 保存已收集配置到 `.pmskill-setup.tmp`，提示"可下次 `/pm-setup --resume` 继续" | 不写入部分配置到 Agent 文件 |
 
-## 产出示例 · 延伸参考 · 实战提示
-
-详见 [references/examples-and-tips.md](references/examples-and-tips.md)。
+## 不要做什么（反例黑名单）
 
 | 反模式 | 为什么不要做 |
 |--------|------------|
-| 替用户决定创建 `CLAUDE.md` 还是 `AGENTS.md` | 不同 Agent 绑定不同文件名，替用户决定可能导致后续 Skill 无法读取配置 |
-| 两个 Agent 文件同时写入 | 只编辑被选中的那个；两个文件都写会导致配置冲突 |
-| 重复注册 PMSkill 块 | 若 `## PMSkill` 已存在，覆盖更新而非追加 |
-| 预判模板偏好 | pm-setup 只配置目录/语言/知识库路径，不配置 PRD 或 PMContext 的模板细节 |
-| 注册 hook | `/pm-collect` 从对话上下文 + 项目扫描 + 知识库搜索收集，不需要拦截 Agent 会话 |
-| 忽略项目扫描已存在的配置 | 先检查 `CLAUDE.md`/`AGENTS.md`/`.atomcode.md` 中是否已有 PMSkill 块，有则直接复用 |
+| 替用户决定创建 CLAUDE.md 还是 AGENTS.md | 不同 Agent 绑定不同文件名 |
+| 两个 Agent 文件同时写入 | 会导致配置冲突 |
+| 重复注册 PMSkill 块 | 已存在则覆盖更新而非追加 |
+| 预判模板偏好 | pm-setup 只配置目录/语言/知识库路径 |
+| 注册 hook | /pm-collect 从对话+扫描+知识库收集，不需要拦截 |
+
+## 产出示例 · 延伸参考 · 实战提示
+
+详见 [references/examples-and-tips.md](references/examples-and-tips.md)。
 
 ---
 
