@@ -1,6 +1,6 @@
 ---
 name: pm-prd
-description: 从 PMContext 生成 PRD 文档（给 AI 和给人两种形态），支持一键自动模式：零确认全链路走通。Use when generating PRD from PMContext, or the user mentions写 PRD、generate spec、PRD document、product requirement. 触发词：写 PRD、生成 PRD、需求文档、pm-prd、generate PRD.
+description: 从 PMContext 生成 PRD 文档（给 AI 和给人两种形态），支持一键自动模式：零确认全链路走通。This skill should be used when generating PRD from PMContext, or the user mentions写 PRD、generate spec、PRD document、product requirement. 触发词：写 PRD、生成 PRD、需求文档、pm-prd、generate PRD.
 disable-model-invocation: true
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: pm-humanprd
-description: 从 PMContext 生成给人阅读的 PRD。Use when the user asks for a human-readable PRD or review document.
+description: 从 PMContext 生成给人阅读的 PRD。This skill should be used when the user asks for a human-readable PRD or review document.
 ---
 
 # /pm-humanprd

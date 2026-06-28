@@ -2,9 +2,9 @@
 
 产品经理在 Agent 里工作的 Skill 工具箱。
 
-从模糊想法/用户诉求出发，**一键全链路**沉淀成 PMContext → 转成 PRD（给 AI + 给人）→ 生成可视化草图 + HTML 可交互原型。
+从模糊想法/用户诉求出发，**一键全链路**沉淀成 PMContext → 衍生出 PRD（给 AI + 给人）→ 生成可视化草图 + HTML 可交互原型。
 
-> 经过 darwin-skill 9 轮结构化优化 + 参考 [pm-skills (PM Compass)](https://github.com/phuryn/pm-skills) 最佳实践，13 个 SKILL.md 全量覆盖角色设定、产出示例、延伸参考与实战提示。[查看优化报告](results.tsv)
+> 经过 darwin-skill 9 轮结构化优化 + 参考 [pm-skills (PM Compass)](https://github.com/phuryn/pm-skills) 最佳实践，13 个 SKILL.md 全量覆盖角色设定、产出示例、延伸参考与实战提示。符合 [Anthropic Agent Skills 规范](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)：YAML frontmatter 渐进披露、第三人称触发描述、Level 3 references 按需加载。
 
 ## 一句话价值
 
@@ -37,7 +37,7 @@ npx skills@latest add Wcof/PMSkill --all
 ### 4. 分步执行
 
 ```text
-/pm-need              # 收集材料 + 追问澄清 → 产出 PMContext
+/pm-need              # 全自动收集材料 + 推断澄清 → 产出 PMContext，停在审计门
 /pm-prd               # 从 PMContext 生成 PRD（给 AI + 给人）
 /pm-prd --auto        # 零确认模式：直接出 PRD，不暂停
 /pm-sketch            # 从 PMContext 生成全部草图
@@ -73,21 +73,21 @@ prd/*.md   premortem.md      sketch/*.md       prototype.html
 
 ### Setup — 初始化
 
-| Skill | 调用模型 | 作用 |
+| Skill | 调用方式 | 作用 |
 |---|---|---|
 | `/pm-setup` | user-invoked | 首次配置项目（产物目录/语言/知识库/Agent 规则） |
 
 ### Discovery — 需求发现
 
-| Skill | 调用模型 | 作用 |
+| Skill | 调用方式 | 作用 |
 |---|---|---|
-| `/pm-need` | user-invoked | 🏆 主入口：collect → refine → audit 一次完成。`--auto` 零确认直达 PRD+原型 |
+| `/pm-need` | user-invoked | 🏆 主入口：collect → refine → audit 全自动完成。`--auto` 零确认直达 PRD+原型 |
 | `/pm-collect` | model-invoked | 主动深扫描（代码/git/URL/知识库），4 源去重，**不筛选只整理** |
 | `/pm-refine` | model-invoked | 8 维度自主推断（P0 用户场景/边界/冲突 → P1 优先级/术语/摩擦力 → P2 技术约束/度量），标记置信度 |
 
 ### Delivery — 交付
 
-| Skill | 调用模型 | 作用 |
+| Skill | 调用方式 | 作用 |
 |---|---|---|
 | `/pm-prd` | user-invoked | 编排输出双形态 PRD。`--auto` 零确认，`--skip-ai`/`--skip-human` 可选 |
 | `/pm-aiprd` | model-invoked | 给 AI 的 PRD：可执行规则 + 数据模型 + Agent Context + 验收标准 + 风险项 |
@@ -96,13 +96,19 @@ prd/*.md   premortem.md      sketch/*.md       prototype.html
 
 ### Visualization — 可视化
 
-| Skill | 调用模型 | 作用 |
+| Skill | 调用方式 | 作用 |
 |---|---|---|
 | `/pm-sketch` | user-invoked | 🏆 主入口：输出全部四类草图 + HTML 原型（`--prototype`）。`--auto` 零确认 |
 | `/pm-wireframe` | model-invoked | 界面线框图：Mermaid 页面导航 + Markdown 表格组件布局 |
 | `/pm-ia` | model-invoked | 信息架构图：Mermaid graph，实体/页面 + 导航/包含/引用三类边 |
 | `/pm-state` | model-invoked | 状态机图：Mermaid stateDiagram-v2，状态 + 转移条件 + 异常路径 |
 | `/pm-flow` | model-invoked | 流程图：Mermaid flowchart，步骤 + 判断 + 异常，循环配退出条件 |
+
+## Skill 调用规则
+
+- **user-invoked**：只能由人类触发（`disable-model-invocation: true`），可调用 model-invoked 子 skill
+- **model-invoked**：可由 Agent 自主触发或由 user-invoked 编排调用
+- user-invoked **不可**调用另一个 user-invoked skill
 
 ## 零确认模式（--auto）
 
@@ -119,7 +125,7 @@ prd/*.md   premortem.md      sketch/*.md       prototype.html
 - 子 skill 失败不阻塞全链路，失败项单独标注
 - 输出一站式报告含置信度分布 + 信息缺口，供 PM 事后审计
 
-## /pm-refine 追问维度（8 维全覆盖）
+## /pm-refine 推断维度（8 维全覆盖）
 
 ```
 P0（必须先推断）：
@@ -159,6 +165,54 @@ docs/pm-context/
     prototype.html       ← HTML 可交互原型（--prototype 模式）
 ```
 
+## 项目结构
+
+```
+PMSkill/
+├── INSTALL.md                    ← 本地直接安装入口（非 Skill，无 frontmatter）
+├── CLAUDE.md                     ← Agent 指令 + 项目级 Skill 规则
+├── CONTEXT.md                    ← 领域术语表
+├── README.md                     ← 本文件
+├── .claude-plugin/plugin.json    ← Claude Code 插件清单
+├── .codex-plugin/plugin.json     ← Codex 插件清单
+├── skills/
+│   ├── setup/
+│   │   ├── README.md             ← bucket 导航
+│   │   └── pm-setup/
+│   │       ├── SKILL.md          ← Level 1+2 渐进披露
+│   │       └── references/       ← Level 3 按需加载
+│   ├── discovery/
+│   │   ├── README.md
+│   │   ├── pm-need/SKILL.md + references/
+│   │   ├── pm-collect/SKILL.md + references/
+│   │   └── pm-refine/SKILL.md
+│   ├── delivery/
+│   │   ├── README.md
+│   │   ├── pm-prd/SKILL.md
+│   │   ├── pm-aiprd/SKILL.md
+│   │   ├── pm-humanprd/SKILL.md
+│   │   └── pm-premortem/SKILL.md
+│   └── visualization/
+│       ├── README.md
+│       ├── pm-sketch/SKILL.md + references/
+│       ├── pm-wireframe/SKILL.md
+│       ├── pm-ia/SKILL.md
+│       ├── pm-state/SKILL.md
+│       └── pm-flow/SKILL.md
+└── docs/
+    └── adr/                      ← 架构决定记录
+```
+
+## 渐进披露
+
+本项目遵循 [Anthropic Agent Skills 三层渐进披露规范](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)：
+
+| 层级 | 加载时机 | Token 开销 | 内容 |
+|---|---|---|---|
+| Level 1: Metadata | 始终（启动时） | ~100 tokens/skill | YAML frontmatter `name` + `description` |
+| Level 2: Instructions | Skill 被触发时 | < 5k tokens | SKILL.md body（流程/失败模式/反例黑名单） |
+| Level 3: Resources | 按需引用 | 无上限 | `references/` 下的产出示例、延伸参考、实战提示 |
+
 ## 延伸参考
 
 本项目受以下资源启发：
@@ -169,6 +223,7 @@ docs/pm-context/
 - [A Proven AI PRD Template - Miqdad Jaffer (OpenAI)](https://www.productcompass.pm/p/ai-prd-template)
 - [Mermaid 官方文档](https://mermaid.js.org/)
 - [Pre-Mortem: Meta/Instagram 实践](https://www.productcompass.pm/p/how-to-run-pre-mortem-template)
+- [Anthropic Agent Skills 规范](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)
 
 ## 设计决定
 
@@ -181,12 +236,14 @@ docs/pm-context/
 
 ## 常见问题
 
-**PMContext 可以更新吗？** 可以。PMContext 是活文档，拿到新反馈后再次调用 `/pm-refine`，Agent 只追问新增部分，增量写入。
+**PMContext 可以更新吗？** 可以。PMContext 是活文档，拿到新反馈后再次调用 `/pm-refine`，Agent 只推断新增部分，增量写入。
 
 **可以跳过 collect 直接 refine 吗？** 可以。`/pm-collect` 和 `/pm-refine` 都可以独立调用。
 
 **可以只出一种 PRD / 一种草图吗？** 可以。各子 skill 均可独立调用。
 
-**--auto 模式和正常模式有什么区别？** 正常模式每一步产出后停在审计门等 PM 确认；`--auto` 模式不等待，一气呵成全部落盘，事后出具一站式报告供审计。
+**--auto 模式和正常模式有什么区别？** 正常模式产出 PMContext 后停在审计门等 PM 确认；`--auto` 模式不等待，一气呵成全部落盘，事后出具一站式报告供审计。
 
 **需要 /pm-remove 吗？** 不需要。不注册 hook 无需清理，Agent 规则手动删，产物目录可能有价值不自动删。
+
+**支持哪些 Agent？** 所有 skills-compatible runtime：Claude Code、Codex、Cursor、Trae、OpenClaw、Hermes 等。安装命令自动适配，无需手动指定路径。

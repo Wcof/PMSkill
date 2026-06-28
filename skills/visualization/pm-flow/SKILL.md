@@ -1,6 +1,6 @@
 ---
 name: pm-flow
-description: 从 PMContext 生成流程图（Mermaid flowchart）。展示步骤、判断分支与异常路径。Use when the user asks for flowchart or process flow.
+description: 从 PMContext 生成流程图（Mermaid flowchart）。展示步骤、判断分支与异常路径。This skill should be used when the user asks for flowchart or process flow.
 ---
 
 # /pm-flow

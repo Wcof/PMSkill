@@ -1,6 +1,6 @@
 ---
 name: pm-setup
-description: 首次使用 PMSkill 时配置项目（产物目录/语言/知识库路径/Agent 规则）。Run once before first use of the other PMSkill commands. Use when first configuring PMSkill, initializing PM project config, or setting up产物目录. 触发词：首次配置、初始化 PMSkill、setup PM config.
+description: 首次使用 PMSkill 时配置项目（产物目录/语言/知识库路径/Agent 规则）。Run once before first use of the other PMSkill commands. This skill should be used when first configuring PMSkill, initializing PM project config, or setting up产物目录. 触发词：首次配置、初始化 PMSkill、setup PM config.
 disable-model-invocation: true
 ---
 
@@ -139,33 +139,9 @@ Mention they can edit the `## PMSkill` block directly later — re-running `/pm-
 | Agent 类型无法从会话环境推断 | 问用户当前 Agent 类型（Claude Code/Codex/Trae） | 不臆造，落点改为问用户选择 CLAUDE.md 或 AGENTS.md |
 | 用户中途放弃（连续 3 次无回应） | 保存已收集配置到 `.pmskill-setup.tmp`，提示"可下次 `/pm-setup --resume` 继续" | 不写入部分配置到 Agent 文件 |
 
-## 产出示例
+## 产出示例 · 延伸参考 · 实战提示
 
-一次典型配置流程：
-
-```
-Step 1: 发现 CLAUDE.md 已存在 → 追加 PMSkill 块
-Step 2: 用户选 "docs/pm-context/" 为产物目录
-Step 3: 用户选 "中文" 为语言
-Step 4: 用户跳过了知识库配置
-Step 5: 写入后确认
-
-写入到 CLAUDE.md:
-## PMSkill
-- 产物目录：docs/pm-context/
-- 语言：中文
-- 知识库：无
-```
-
-## 延伸参考
-
-- [AtomCode 多 Agent 配置指南](https://atomcode.dev/docs/agents)
-- [PMSkill 架构文档](CONTEXT.md)
-
-## 📝 实战提示
-
-- **运行一次就够了**：`/pm-setup` 是唯一需要手动配置的 skill，后续全自动
-- **产物目录不改也行**：`docs/pm-context/` 是大多数项目的最佳选择
+详见 [references/examples-and-tips.md](references/examples-and-tips.md)。
 
 | 反模式 | 为什么不要做 |
 |--------|------------|

@@ -1,6 +1,6 @@
 ---
 name: pm-premortem
-description: 从 PMContext 出发假设失败并倒推风险，产出 Tiger/Paper Tiger/Elephant 三类风险 + 紧急度分级 + 行动计划。Use when preparing for launch, stress-testing a product plan, or identifying what could go wrong. 触发词：Pre-Mortem、风险分析、假设失败、stress test plan、风险倒推、pm-premortem.
+description: 从 PMContext 出发假设失败并倒推风险，产出 Tiger/Paper Tiger/Elephant 三类风险 + 紧急度分级 + 行动计划。This skill should be used when preparing for launch, stress-testing a product plan, or identifying what could go wrong. 触发词：Pre-Mortem、风险分析、假设失败、stress test plan、风险倒推、pm-premortem.
 ---
 
 # /pm-premortem

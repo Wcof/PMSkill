@@ -1,6 +1,6 @@
 ---
 name: pm-wireframe
-description: 从 PMContext 生成界面线框图（Mermaid 导航图 + 表格布局）。展示页面间导航与每页组件布局。Use when the user asks for wireframe or page layout.
+description: 从 PMContext 生成界面线框图（Mermaid 导航图 + 表格布局）。展示页面间导航与每页组件布局。This skill should be used when the user asks for wireframe or page layout.
 ---
 
 # /pm-wireframe

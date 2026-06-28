@@ -1,6 +1,6 @@
 ---
 name: pm-refine
-description: 对已收集材料自主推断澄清，沉淀成 PMContext。无需 PM 逐个确认，Agent 自主推断并标记置信度。Use when collected materials exist and need clarification, or when the user wants to sharpen requirements.
+description: 对已收集材料自主推断澄清，沉淀成 PMContext。无需 PM 逐个确认，Agent 自主推断并标记置信度。This skill should be used when collected materials exist and need clarification, or when the user wants to sharpen requirements.
 ---
 
 # /pm-refine
