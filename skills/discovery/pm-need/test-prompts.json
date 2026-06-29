@@ -1,1 +1,5 @@
-[{"id":1,"prompt":"/pm-need 我想做个会员体系重构 --auto","expected":"全自动collect→refine→PRD→原型链路不停顿"},{"id":2,"prompt":"/pm-need 做个数据大屏，参考 https://example.com/spec","expected":"抓取URL+扫描项目+对话上下文，沉淀PMContext停审计门"}]
+[
+  {"id":1,"prompt":"/pm-need 我想做个会员体系重构 --auto","expected":"全自动collect→refine→premortem→PRD→原型链路不停顿，一站式报告含风险摘要"},
+  {"id":2,"prompt":"/pm-need 做个数据大屏，参考 https://example.com/spec","expected":"抓取URL+扫描项目+对话上下文，沉淀PMContext停审计门"},
+  {"id":3,"prompt":"/pm-need 做个支付流程 --incremental","expected":"不清空.loop/，增量推断新材料，不覆盖旧事实"}
+]

@@ -39,3 +39,6 @@ OPTIMIZATION-LOG.md
 
 # AtomCode per-project state
 .atomcode/
+
+# PMSkill 流程链中间工件（构建快照，PMContext 成熟后可清理）
+docs/pm-context/.loop/

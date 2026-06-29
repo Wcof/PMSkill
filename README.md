@@ -26,7 +26,7 @@ npx skills@latest add Wcof/PMSkill --all
 
 ### 3. 一键全链路（推荐）
 
-一句话触发 collect → refine → PRD → 原型，零确认：
+一句话触发 collect → refine → premortem → PRD → 原型，零确认：
 
 ```text
 /pm-need <需求描述> --auto
@@ -92,7 +92,7 @@ prd/*.md   premortem.md      sketch/*.md       prototype.html
 | `/pm-prd` | user-invoked | 编排输出双形态 PRD。`--auto` 零确认，`--skip-ai`/`--skip-human` 可选 |
 | `/pm-aiprd` | model-invoked | 给 AI 的 PRD：可执行规则 + 数据模型 + Agent Context + 验收标准 + 风险项 |
 | `/pm-humanprd` | model-invoked | 给人的 PRD：决策理由 + 自然语言叙事 + 追溯清单，评审友好 |
-| `/pm-premortem` | model-invoked | Pre-Mortem 风险分析：Tiger（真实风险）/Paper Tiger（过虑）/Elephant（未讨论）三分 + 行动计划 |
+| `/pm-premortem` | model-invoked | Pre-Mortem 风险分析：8 域风险覆盖（Value→Team），Tiger/Paper Tiger/Elephant 三分 + 行动计划 + 假设交叉检查 |
 
 ### Visualization — 可视化
 
@@ -115,7 +115,7 @@ prd/*.md   premortem.md      sketch/*.md       prototype.html
 所有 user-invoked 技能均支持 `--auto` 参数：
 
 ```text
-/pm-need <需求> --auto        # 全链路：collect → refine → PRD → 原型，零确认
+/pm-need <需求> --auto        # 全链路：collect → refine → premortem → PRD → 原型，零确认
 /pm-prd --auto                # 直接按已有 PMContext 生成 PRD，不暂停
 /pm-sketch --auto             # 直接生成全部草图 + HTML 原型
 ```
@@ -132,7 +132,7 @@ P0（必须先推断）：
 1. 用户场景    2. 边界条件    3. 冲突检测
 
 P1（决定质量上限）：
-4. 优先级（ICE/RICE/Kano）    5. 术语澄清    6. 现状平替与摩擦力
+4. 优先级（ICE/RICE/Kano/MoSCoW/OST）    5. 术语澄清    6. 现状平替与摩擦力
 
 P2（增量增强）：
 7. 技术与资源约束    8. 价值验证度量
@@ -154,6 +154,7 @@ P2（增量增强）：
 docs/pm-context/
   pm-context.md          ← 唯一 Entity（源）
   collect/               ← /pm-collect 整理后的原始材料
+  .loop/                 ← 流程链中间工件（构建快照，PMContext 成熟后可清理）
   prd/
     ai-prd.md            ← 给 AI 的 PRD（Agent 可执行）
     human-prd.md         ← 给人的 PRD（评审友好）
@@ -245,6 +246,7 @@ evals/                          ← 评估集（≥3 场景/skill + rubric）
 - **ADR 0005**: 显式标记替代 Soft Gate，风险写在正文里
 - **ADR 0006**: Relate 阶段分散进所有 Skill，关联是每个 Skill 的内置纪律
 - **ADR 0007**: 单级追溯（有来源/无来源）替代 Strong/Weak Trace 二级
+- **ADR 0008**: PM Thinking Loop 双层注入（心智链+流程链），6 步漏斗+审计三元组+自愈机制
 
 ## 常见问题
 

@@ -1,1 +1,5 @@
-[{"id":1,"prompt":"/pm-sketch --auto","expected":"调4个子skill生成草图+HTML原型零外部依赖"},{"id":2,"prompt":"断网环境预览原型","expected":"HTML无CDN依赖可离线打开"}]
+[
+  {"id":1,"prompt":"/pm-sketch --auto","expected":"调4个子skill生成草图+HTML原型零外部依赖，产出交付物清单"},
+  {"id":2,"prompt":"断网环境预览原型","expected":"HTML无CDN依赖可离线打开"},
+  {"id":3,"prompt":"PMContext中无页面定义但有实体","expected":"跳过wireframe，只生成ia/state/flow，标注跳过原因"}
+]

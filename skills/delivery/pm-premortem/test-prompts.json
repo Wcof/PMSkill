@@ -1,1 +1,5 @@
-[{"id":1,"prompt":"产品下周上线，做Pre-Mortem","expected":"假设14天后失败→倒推→Tiger/PaperTiger/Elephant分类+行动计划"},{"id":2,"prompt":"发现8个Tiger怎么办","expected":"按紧急度排序，超出5个降级为Fast-Follow"}]
+[
+  {"id":1,"prompt":"产品下周上线，做Pre-Mortem","expected":"假设14天后失败→5-Why根因分析→Tiger/PaperTiger/Elephant分类+行动计划+假设交叉检查"},
+  {"id":2,"prompt":"发现8个Tiger怎么办","expected":"按紧急度排序，超出5个降级为Fast-Follow，摘要说明降级"},
+  {"id":3,"prompt":"PMContext中假设置信度≤5有3条","expected":"3条假设逐一交叉检查，假设失败可能导致上线失败的升级为Tiger"}
+]

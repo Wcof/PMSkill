@@ -1,6 +1,6 @@
 ---
 name: pm-sketch
-description: 从 PMContext 生成全部草图（线框/信息架构/状态机/流程图）+ HTML 可交互原型（--prototype）。支持 --auto 零确认模式与单图模式（--wireframe/--ia/--state/--flow）。
+description: 从 PMContext 生成全部草图（线框/信息架构/状态机/流程图）+ HTML 可交互原型（--prototype）。支持 --auto 零确认模式与单图模式（--wireframe/--ia/--state/--flow）。Use when generating sketches or prototypes from PMContext, or the user mentions 草图、sketch、线框、原型、可视化、prototype、交互原型、Mermaid.
 disable-model-invocation: true
 ---
 
@@ -36,12 +36,30 @@ PMContext 已沉淀页面定义、状态转移、流程步骤。本 skill 将这
 - [ ] [假设] 图元显式标注不伪装为确认设计
 - [ ] 每个图元可追溯到 PMContext 事实项
 
+## Thinking Protocol
+
+本 Skill 承载 PM Thinking Loop 的步骤 6（交付）的草图编排职责：
+
+| 步骤 | 本 Skill 的职责 | 产出（是否回灌 PMContext） |
+|------|---------------|--------------------------|
+| 6. 交付（草图） | 编排 4 个子 Skill 生成全部草图，确保每个图元追溯到 PMContext 实体/关系 | 不回灌（产出 View） |
+
+执行时依次调用 /pm-ia → /pm-state → /pm-flow → /pm-wireframe。子 Skill 各自写入 `.loop/` 中间工件。
+
+**产出约束**：
+- 每个图元必须对应 PMContext 中的实体/关系，无法对应的标 `[假设]`
+- 步骤 5 的 Launch-Blocking Tiger 涉及的实体必须在草图中有对应图元
+- 必须产出**草图交付物清单**：4 个 Mermaid 文件路径 + [假设] 图元数 + 未覆盖 Tiger 实体数
+- HTML 原型（--prototype）必须零外部依赖、< 200KB、响应式
+
+**依赖检查**：是否有未追溯到 PMContext 的图元？步骤 5 的 Tiger 实体是否在草图中覆盖？HTML 原型是否通过质量清单？
+
 ## 启动模式
 
 ```
 /pm-sketch                         → 正常模式：出全部四种 Mermaid 草图，停在审计门
 /pm-sketch --prototype             → 高质量 HTML 可交互原型（含所有视图）
-/pm-sketch --prototype --auto      → 自动模式：pm-need → PRD → 原型 零确认一气呵成
+/pm-sketch --prototype --auto      → 自动模式：pm-need → premortem → PRD → 原型 零确认一气呵成
 /pm-sketch --wireframe             → 只出线框图
 /pm-sketch --ia                    → 只出信息架构图
 /pm-sketch --state                 → 只出状态机图
@@ -187,6 +205,9 @@ Run 四个子 Skill（按依赖顺序）：
 | HTML 依赖外部 CDN | 断网环境无法预览 |
 | 草图嵌入 PRD 文件 | 草图是独立 View，不应嵌套 |
 | `--auto` 遇子 skill 失败就全链路回滚 | 其他成功部分仍落盘，失败项单独标注 |
+| 审计三元组转换操作写"将 A 转换为 A'" | 同义反复，无推理密度，判定为 Failure（ADR 0008 §11） |
+| 审计三元组转换操作写"基于上述依据产出" | 空话，未阐明具体推导逻辑，判定为 Failure（ADR 0008 §11） |
+| 审计三元组转换操作写"经过分析得到" | 空话，必须写明是同义词推导/多对多实体映射/边界隔离分析之一（ADR 0008 §11） |
 
 ---
 

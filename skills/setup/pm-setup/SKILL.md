@@ -1,6 +1,6 @@
 ---
 name: pm-setup
-description: 首次使用 PMSkill 时配置项目——产物目录、语言偏好、知识库路径、Agent 规则落点。运行一次即可，后续所有 PMSkill 命令自动读取配置。
+description: 首次使用 PMSkill 时配置项目——产物目录、语言偏好、知识库路径、Agent 规则落点。运行一次即可，后续所有 PMSkill 命令自动读取配置。Use when setting up PMSkill for the first time, or the user mentions 初始化PMSkill、pm-setup、配置项目、安装PMSkill、首次配置.
 disable-model-invocation: true
 ---
 
@@ -31,6 +31,10 @@ This is a prompt-driven skill, not a deterministic script. Explore, present what
 - [ ] 冲突处理：CLAUDE.md 和 AGENTS.md 同时存在时只编辑被选中的那个
 - [ ] 🔴 CHECKPOINT 确认后再写入磁盘
 - [ ] ## PMSkill 块已存在则覆盖更新而非追加
+
+## Thinking Protocol
+
+本 Skill 不承载 PM Thinking Loop 的任何步骤。/pm-setup 是一次性配置 Skill，不参与需求推断链路。
 
 ### 1. Explore
 
@@ -164,6 +168,9 @@ Mention they can edit the `## PMSkill` block directly later — re-running `/pm-
 | 重复注册 PMSkill 块 | 已存在则覆盖更新而非追加 |
 | 预判模板偏好 | pm-setup 只配置目录/语言/知识库路径 |
 | 注册 hook | /pm-collect 从对话+扫描+知识库收集，不需要拦截 |
+| 审计三元组转换操作写"将 A 转换为 A'" | 同义反复，无推理密度，判定为 Failure（ADR 0008 §11） |
+| 审计三元组转换操作写"基于上述依据产出" | 空话，未阐明具体推导逻辑，判定为 Failure（ADR 0008 §11） |
+| 审计三元组转换操作写"经过分析得到" | 空话，必须写明是同义词推导/多对多实体映射/边界隔离分析之一（ADR 0008 §11） |
 
 ## 产出示例 · 延伸参考 · 实战提示
 

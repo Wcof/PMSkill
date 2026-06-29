@@ -1,1 +1,5 @@
-[{"id":1,"prompt":"/pm-prd --auto","expected":"读PMContext→调pm-aiprd+pm-humanprd→跳过审计门"},{"id":2,"prompt":"PMContext不存在且无参数","expected":"🔴 STOP提示先运行/pm-need"}]
+[
+  {"id":1,"prompt":"/pm-prd --auto","expected":"读PMContext→调pm-aiprd+pm-humanprd→跳过审计门，双形态PRD同源同骨架"},
+  {"id":2,"prompt":"PMContext不存在且无参数","expected":"🔴 STOP提示先运行/pm-need"},
+  {"id":3,"prompt":"ai-prd和human-prd同源项出现分歧","expected":"以PMContext为准修正，标注修正项"}
+]

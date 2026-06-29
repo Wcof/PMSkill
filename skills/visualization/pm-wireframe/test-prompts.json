@@ -1,1 +1,5 @@
-[{"id":1,"prompt":"画会员中心页线框","expected":"Mermaid导航流+表格布局(区域/组件/数据来源/交互)"},{"id":2,"prompt":"某组件无数据来源","expected":"标[假设]不臆造"}]
+[
+  {"id":1,"prompt":"画会员中心页线框","expected":"Mermaid导航流+表格布局(区域/组件/数据来源/交互)"},
+  {"id":2,"prompt":"某组件无数据来源","expected":"标[假设]不臆造"},
+  {"id":3,"prompt":"PMContext有3个页面定义","expected":"3个页面各独立表格，页面间用Mermaid flowchart画导航关系"}
+]

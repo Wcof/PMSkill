@@ -1,6 +1,6 @@
 ---
 name: pm-prd
-description: 从 PMContext 生成 PRD 文档——给 AI 的可执行规则版和给人的评审叙事版两种形态。支持 --auto 零确认、--skip-ai / --skip-human 单形态输出。
+description: 从 PMContext 生成 PRD 文档——给 AI 的可执行规则版和给人的评审叙事版两种形态。支持 --auto 零确认、--skip-ai / --skip-human 单形态输出。Use when generating PRD from PMContext, or the user mentions 生成PRD、prd、需求文档、产品规格、ai-prd、human-prd、双形态PRD.
 disable-model-invocation: true
 ---
 
@@ -42,6 +42,25 @@ Run `/pm-humanprd` — 生成 `docs/pm-context/prd/human-prd.md`
 - [ ] 审计摘要已输出
 - [ ] 用户已确认（或 --auto 跳过）
 
+## Thinking Protocol
+
+本 Skill 承载 PM Thinking Loop 的步骤 6（交付）的编排职责：
+
+| 步骤 | 本 Skill 的职责 | 产出（是否回灌 PMContext） |
+|------|---------------|--------------------------|
+| 6. 交付（编排） | 编排 /pm-aiprd 和 /pm-humanprd 生成双形态 PRD，确保两种 PRD 同源同骨架 | 不回灌（产出 View） |
+
+执行时依次调用 /pm-aiprd → /pm-humanprd。子 Skill 各自写入 `.loop/` 中间工件。
+达阈值的关键信息自动回灌到 PMContext 对应 heading（不开新 heading、走现有标记体系）。
+
+**产出约束**：
+- ai-prd 和 human-prd 必须同源同骨架——同一条需求在两种 PRD 中表述不同但追溯的 PMContext 项相同
+- 同源项出现分歧时以 PMContext 为准修正，标注修正项
+- 必须产出**双形态 PRD 交付物清单**：ai-prd 含 N 个用户故事 + M 条可执行规则 + K 条验收标准；human-prd 含 N 条含决策理由规则 + 格式纪律检查结果
+- [待确认] 占比 > 50% 时 ai-prd 标 🔴 不可执行、human-prd 只输出信息缺口清单
+
+**依赖检查**：ai-prd 和 human-prd 的同源项是否一致？[待确认] 占比是否超阈值？
+
 ## 零确认模式（--auto）
 
 当通过 `/pm-prd <需求描述>` 或 `/pm-need --auto` 调用时：
@@ -72,6 +91,9 @@ Run `/pm-humanprd` — 生成 `docs/pm-context/prd/human-prd.md`
 | 在 human-prd 中塞 Agent Context | 人类读者看不懂技术细节 |
 | 自动模式不输出置信度分布 | PM 事后无法判断哪些部分需要复核 |
 | `--auto` 模式遇到子 skill 失败就全链路回滚 | 其他成功部分仍落盘，失败项单独标注 |
+| 审计三元组转换操作写"将 A 转换为 A'" | 同义反复，无推理密度，判定为 Failure（ADR 0008 §11） |
+| 审计三元组转换操作写"基于上述依据产出" | 空话，未阐明具体推导逻辑，判定为 Failure（ADR 0008 §11） |
+| 审计三元组转换操作写"经过分析得到" | 空话，必须写明是同义词推导/多对多实体映射/边界隔离分析之一（ADR 0008 §11） |
 
 ## 产出示例
 
