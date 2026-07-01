@@ -108,7 +108,7 @@ Run `/pm-humanprd` — 生成 `docs/pm-context/prd/human-prd.md`
 
 - [PM Compass 8-section PRD Template](https://www.productcompass.pm/p/prd-template)
 - [AI PRD Template - Miqdad Jaffer (OpenAI)](https://www.productcompass.pm/p/ai-prd-template)
-- [PM Skill: create-prd](https://github.com/phuryn/pm-skills/blob/main/pm-execution/skills/create-prd/SKILL.md)
+- [An Introduction to the Product Trio](https://www.productcompass.pm/p/product-trio)
 
 ## 产出示例 · 延伸参考 · 实战提示
 

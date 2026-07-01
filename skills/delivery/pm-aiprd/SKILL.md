@@ -179,7 +179,7 @@ As a 月付用户, I want to upgrade to 年付, so that 节省费用
 ### Further Reading
 
 - [A Proven AI PRD Template - Miqdad Jaffer (OpenAI)](https://www.productcompass.pm/p/ai-prd-template)
-- [PM Compass create-prd skill](https://github.com/phuryn/pm-skills/blob/main/pm-execution/skills/create-prd/SKILL.md) — 8 节模板参考
+- [How to Write a Product Requirements Document? The Best PRD Template.](https://www.productcompass.pm/p/prd-template) — 8 节模板参考
 
 ## 产出示例 · 延伸参考 · 实战提示
 
