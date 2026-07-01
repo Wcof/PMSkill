@@ -57,9 +57,54 @@
 3. **迭代**：跑评估 → 对照 baseline → 精炼 SKILL.md/references
 4. **真实使用观察**：留意 Agent 实际访问文件的顺序、是否漏读 references、是否过度依赖某段——据此调整信息架构
 
+## 如何跑评估
+
+仓库自带评估运行器 `run-evals.sh`，可在不依赖外部模型的情况下做结构校验（CI 友好），也可在本地 Agent CLI 可用时跑真实模型分。
+
+### 结构校验（dry-run，默认）
+
+校验所有 eval JSON 结构合法、`expected_behavior` 非空、`files` 声明的夹具可达，输出 `results.tsv` + `results.json`：
+
+```bash
+bash evals/run-evals.sh --dry-run
+# 只跑单个 skill
+bash evals/run-evals.sh --dry-run --skill pm-prd
+```
+
+退出码：`0`=全 PASS/PARTIAL，`1`=存在 FAIL，`2`=参数/脚本错误。可直接接入 CI。
+
+### 真实模型跑分（live）
+
+需本地 `claude` 或 `codex` CLI 可用：
+
+```bash
+bash evals/run-evals.sh --live
+```
+
+未检测到 CLI 时自动降级为 dry-run 并警告。
+
+### 判定规则
+
+| 状态 | 条件 |
+|------|------|
+| PASS | `expected_behavior` 全部命中 |
+| PARTIAL | ≥1 项未命中但核心目标达成（命中 ≥50%） |
+| FAIL | 核心目标未达成或命中 <50% |
+
+### 产物
+
+- `evals/results.tsv` — 人读 TSV（skill / scenario_id / query / expected_count / status / note）
+- `evals/results.json` — 机读汇总（含 mode/total/pass/partial/fail/scenarios）
+
+> 注：`results.tsv` 与 `.agents/skills/darwin-skill/results.tsv` 是两套独立产物——前者是 PMSkill 自身 evals 的可复现结果，后者是 darwin-skill 优化器对 SKILL.md 结构评分的历史记录。
+
 ## 夹具文件
 
 部分评估需要预置的 PMContext 或 mock 项目结构，统一放在 `fixtures/` 下：
 
-- `fixtures/pm-context.md` — 标准化的会员体系重构 PMContext 样本
-- `fixtures/mock-project/` — 含 README/docs/TODO 标记的最小项目骨架
+- `fixtures/pm-context.md` — 标准化的会员体系重构 PMContext 样本（决策日志 8 列，对齐 ADR 0008）
+- `fixtures/mock-project/` — 含 README/docs/CHANGELOG/TODO·FIXME·HACK 标记/package.json 的最小电商项目骨架，供 `/pm-collect` 项目扫描评估
+- `fixtures/non-git-project/` — 无 `.git` 目录的扫描目标，评估 pm-collect 在非 git 仓库下的降级路径
+- `fixtures/collect-sample.md` — collect 阶段聚合材料样本
+- `fixtures/conflicting-materials.md` — 含矛盾陈述的多源材料，评估 refine 的 `[冲突]` 检测
+- `fixtures/pm-context-large.md` / `fixtures/pm-context-with-gaps.md` — 大体积与含信息缺口的 PMContext 样本

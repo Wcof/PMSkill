@@ -1,0 +1,329 @@
+{
+  "mode": "dry-run",
+  "total": 40,
+  "pass": 40,
+  "partial": 0,
+  "fail": 0,
+  "scenarios": [
+    {
+      "skill": "pm-aiprd",
+      "scenario_id": "1",
+      "query": "基于 PMContext 生成 AI 可执行的 PRD",
+      "expected_count": 4,
+      "status": "PASS",
+      "note": "4 条 expected_behavior"
+    },
+    {
+      "skill": "pm-aiprd",
+      "scenario_id": "3",
+      "query": "PMContext 中有 4 个 [待确认] 项怎么处理",
+      "expected_count": 4,
+      "status": "PASS",
+      "note": "4 条 expected_behavior"
+    },
+    {
+      "skill": "pm-aiprd",
+      "scenario_id": "4",
+      "query": "跳过 PMContext 直接从聊天生成 AI PRD",
+      "expected_count": 3,
+      "status": "PASS",
+      "note": "3 条 expected_behavior"
+    },
+    {
+      "skill": "pm-collect",
+      "scenario_id": "1",
+      "query": "从这段对话收集材料：用户反馈续费率 QoQ 下降 12%，NPS 从 32 跌到",
+      "expected_count": 5,
+      "status": "PASS",
+      "note": "5 条 expected_behavior"
+    },
+    {
+      "skill": "pm-collect",
+      "scenario_id": "2",
+      "query": "抓 https://example.com/dead-link 这个 URL",
+      "expected_count": 4,
+      "status": "PASS",
+      "note": "4 条 expected_behavior"
+    },
+    {
+      "skill": "pm-collect",
+      "scenario_id": "3",
+      "query": "扫一个非 git 仓库的目录",
+      "expected_count": 3,
+      "status": "PASS",
+      "note": "3 条 expected_behavior"
+    },
+    {
+      "skill": "pm-flow",
+      "scenario_id": "1",
+      "query": "画支付流程",
+      "expected_count": 4,
+      "status": "PASS",
+      "note": "4 条 expected_behavior"
+    },
+    {
+      "skill": "pm-flow",
+      "scenario_id": "2",
+      "query": "步骤描述含「等待用户操作」",
+      "expected_count": 3,
+      "status": "PASS",
+      "note": "3 条 expected_behavior"
+    },
+    {
+      "skill": "pm-flow",
+      "scenario_id": "3",
+      "query": "脱离 PMContext 凭经验画流程",
+      "expected_count": 3,
+      "status": "PASS",
+      "note": "3 条 expected_behavior"
+    },
+    {
+      "skill": "pm-humanprd",
+      "scenario_id": "1",
+      "query": "生成给业务方评审的 PRD",
+      "expected_count": 5,
+      "status": "PASS",
+      "note": "5 条 expected_behavior"
+    },
+    {
+      "skill": "pm-humanprd",
+      "scenario_id": "2",
+      "query": "评审者问为什么选 A 不选 B",
+      "expected_count": 3,
+      "status": "PASS",
+      "note": "3 条 expected_behavior"
+    },
+    {
+      "skill": "pm-humanprd",
+      "scenario_id": "3",
+      "query": "把 Agent Context 段塞进 human-prd",
+      "expected_count": 3,
+      "status": "PASS",
+      "note": "3 条 expected_behavior"
+    },
+    {
+      "skill": "pm-ia",
+      "scenario_id": "1",
+      "query": "画信息架构图",
+      "expected_count": 4,
+      "status": "PASS",
+      "note": "4 条 expected_behavior"
+    },
+    {
+      "skill": "pm-ia",
+      "scenario_id": "2",
+      "query": "实体超过 15 个一张图画不下",
+      "expected_count": 4,
+      "status": "PASS",
+      "note": "4 条 expected_behavior"
+    },
+    {
+      "skill": "pm-ia",
+      "scenario_id": "3",
+      "query": "脱离 PMContext 凭经验画 IA",
+      "expected_count": 3,
+      "status": "PASS",
+      "note": "3 条 expected_behavior"
+    },
+    {
+      "skill": "pm-need",
+      "scenario_id": "1",
+      "query": "/pm-need 我想做个会员体系重构 --auto",
+      "expected_count": 5,
+      "status": "PASS",
+      "note": "5 条 expected_behavior"
+    },
+    {
+      "skill": "pm-need",
+      "scenario_id": "2",
+      "query": "/pm-need 做个数据大屏，参考 https://example.com/s",
+      "expected_count": 5,
+      "status": "PASS",
+      "note": "5 条 expected_behavior"
+    },
+    {
+      "skill": "pm-need",
+      "scenario_id": "3",
+      "query": "/pm-need",
+      "expected_count": 3,
+      "status": "PASS",
+      "note": "3 条 expected_behavior"
+    },
+    {
+      "skill": "pm-need",
+      "scenario_id": "4",
+      "query": "/pm-need 会员体系 --collect-only --refine-on",
+      "expected_count": 3,
+      "status": "PASS",
+      "note": "3 条 expected_behavior"
+    },
+    {
+      "skill": "pm-prd",
+      "scenario_id": "1",
+      "query": "/pm-prd --auto",
+      "expected_count": 4,
+      "status": "PASS",
+      "note": "4 条 expected_behavior"
+    },
+    {
+      "skill": "pm-prd",
+      "scenario_id": "2",
+      "query": "/pm-prd",
+      "expected_count": 3,
+      "status": "PASS",
+      "note": "3 条 expected_behavior"
+    },
+    {
+      "skill": "pm-prd",
+      "scenario_id": "3",
+      "query": "/pm-prd --skip-human",
+      "expected_count": 3,
+      "status": "PASS",
+      "note": "3 条 expected_behavior"
+    },
+    {
+      "skill": "pm-premortem",
+      "scenario_id": "1",
+      "query": "产品下周上线，做 Pre-Mortem",
+      "expected_count": 5,
+      "status": "PASS",
+      "note": "5 条 expected_behavior"
+    },
+    {
+      "skill": "pm-premortem",
+      "scenario_id": "2",
+      "query": "发现 8 个 Tiger 怎么办",
+      "expected_count": 4,
+      "status": "PASS",
+      "note": "4 条 expected_behavior"
+    },
+    {
+      "skill": "pm-premortem",
+      "scenario_id": "3",
+      "query": "脱离 PMContext 凭经验列风险",
+      "expected_count": 3,
+      "status": "PASS",
+      "note": "3 条 expected_behavior"
+    },
+    {
+      "skill": "pm-refine",
+      "scenario_id": "1",
+      "query": "把这 3 条材料推断成 PMContext",
+      "expected_count": 4,
+      "status": "PASS",
+      "note": "4 条 expected_behavior"
+    },
+    {
+      "skill": "pm-refine",
+      "scenario_id": "2",
+      "query": "两份材料对「是否支持年付」说法矛盾",
+      "expected_count": 4,
+      "status": "PASS",
+      "note": "4 条 expected_behavior"
+    },
+    {
+      "skill": "pm-refine",
+      "scenario_id": "3",
+      "query": "已有 pm-context.md，做增量推断",
+      "expected_count": 4,
+      "status": "PASS",
+      "note": "4 条 expected_behavior"
+    },
+    {
+      "skill": "pm-setup",
+      "scenario_id": "1",
+      "query": "我要开始用 PMSkill，帮我配置",
+      "expected_count": 5,
+      "status": "PASS",
+      "note": "5 条 expected_behavior"
+    },
+    {
+      "skill": "pm-setup",
+      "scenario_id": "2",
+      "query": "我的项目里 CLAUDE.md 和 AGENTS.md 同时存在，配置写哪个？",
+      "expected_count": 5,
+      "status": "PASS",
+      "note": "5 条 expected_behavior"
+    },
+    {
+      "skill": "pm-setup",
+      "scenario_id": "3",
+      "query": "把知识库设成 /nonexistent/path",
+      "expected_count": 4,
+      "status": "PASS",
+      "note": "4 条 expected_behavior"
+    },
+    {
+      "skill": "pm-sketch",
+      "scenario_id": "1",
+      "query": "/pm-sketch --auto",
+      "expected_count": 4,
+      "status": "PASS",
+      "note": "4 条 expected_behavior"
+    },
+    {
+      "skill": "pm-sketch",
+      "scenario_id": "2",
+      "query": "/pm-sketch --prototype",
+      "expected_count": 4,
+      "status": "PASS",
+      "note": "4 条 expected_behavior"
+    },
+    {
+      "skill": "pm-sketch",
+      "scenario_id": "3",
+      "query": "脱离 PMContext 凭感觉画图",
+      "expected_count": 3,
+      "status": "PASS",
+      "note": "3 条 expected_behavior"
+    },
+    {
+      "skill": "pm-state",
+      "scenario_id": "1",
+      "query": "画订单状态机",
+      "expected_count": 5,
+      "status": "PASS",
+      "note": "5 条 expected_behavior"
+    },
+    {
+      "skill": "pm-state",
+      "scenario_id": "2",
+      "query": "订单是否需要终态？",
+      "expected_count": 3,
+      "status": "PASS",
+      "note": "3 条 expected_behavior"
+    },
+    {
+      "skill": "pm-state",
+      "scenario_id": "3",
+      "query": "脱离 PMContext 凭经验画状态机",
+      "expected_count": 3,
+      "status": "PASS",
+      "note": "3 条 expected_behavior"
+    },
+    {
+      "skill": "pm-wireframe",
+      "scenario_id": "1",
+      "query": "画会员中心页线框",
+      "expected_count": 4,
+      "status": "PASS",
+      "note": "4 条 expected_behavior"
+    },
+    {
+      "skill": "pm-wireframe",
+      "scenario_id": "2",
+      "query": "某组件在 PMContext 中无数据来源",
+      "expected_count": 3,
+      "status": "PASS",
+      "note": "3 条 expected_behavior"
+    },
+    {
+      "skill": "pm-wireframe",
+      "scenario_id": "3",
+      "query": "只用 Mermaid 画页面布局不用表格",
+      "expected_count": 3,
+      "status": "PASS",
+      "note": "3 条 expected_behavior"
+    }
+  ]
+}

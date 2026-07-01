@@ -26,10 +26,12 @@ Desktop.ini
 
 # Non-shipped local files (kept locally, not tracked)
 docs/
+!evals/fixtures/mock-project/docs/
 .github/
 .codex-plugin/
 .claude-plugin/
 CHANGELOG.md
+!evals/fixtures/mock-project/docs/CHANGELOG.md
 CLAUDE.md
 CONTEXT.md
 CONTRIBUTING.md

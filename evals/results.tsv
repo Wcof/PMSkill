@@ -1,0 +1,42 @@
+# PMSkill 评估结果 — mode=dry-run generated=2026-07-01T02:18:43Z
+skill	scenario_id	query	expected_count	status	note
+pm-aiprd	1	基于 PMContext 生成 AI 可执行的 PRD	4	PASS	4 条 expected_behavior
+pm-aiprd	3	PMContext 中有 4 个 [待确认] 项怎么处理	4	PASS	4 条 expected_behavior
+pm-aiprd	4	跳过 PMContext 直接从聊天生成 AI PRD	3	PASS	3 条 expected_behavior
+pm-collect	1	从这段对话收集材料：用户反馈续费率 QoQ 下降 12%，NPS 从 32 跌到	5	PASS	5 条 expected_behavior
+pm-collect	2	抓 https://example.com/dead-link 这个 URL	4	PASS	4 条 expected_behavior
+pm-collect	3	扫一个非 git 仓库的目录	3	PASS	3 条 expected_behavior
+pm-flow	1	画支付流程	4	PASS	4 条 expected_behavior
+pm-flow	2	步骤描述含「等待用户操作」	3	PASS	3 条 expected_behavior
+pm-flow	3	脱离 PMContext 凭经验画流程	3	PASS	3 条 expected_behavior
+pm-humanprd	1	生成给业务方评审的 PRD	5	PASS	5 条 expected_behavior
+pm-humanprd	2	评审者问为什么选 A 不选 B	3	PASS	3 条 expected_behavior
+pm-humanprd	3	把 Agent Context 段塞进 human-prd	3	PASS	3 条 expected_behavior
+pm-ia	1	画信息架构图	4	PASS	4 条 expected_behavior
+pm-ia	2	实体超过 15 个一张图画不下	4	PASS	4 条 expected_behavior
+pm-ia	3	脱离 PMContext 凭经验画 IA	3	PASS	3 条 expected_behavior
+pm-need	1	/pm-need 我想做个会员体系重构 --auto	5	PASS	5 条 expected_behavior
+pm-need	2	/pm-need 做个数据大屏，参考 https://example.com/s	5	PASS	5 条 expected_behavior
+pm-need	3	/pm-need	3	PASS	3 条 expected_behavior
+pm-need	4	/pm-need 会员体系 --collect-only --refine-on	3	PASS	3 条 expected_behavior
+pm-prd	1	/pm-prd --auto	4	PASS	4 条 expected_behavior
+pm-prd	2	/pm-prd	3	PASS	3 条 expected_behavior
+pm-prd	3	/pm-prd --skip-human	3	PASS	3 条 expected_behavior
+pm-premortem	1	产品下周上线，做 Pre-Mortem	5	PASS	5 条 expected_behavior
+pm-premortem	2	发现 8 个 Tiger 怎么办	4	PASS	4 条 expected_behavior
+pm-premortem	3	脱离 PMContext 凭经验列风险	3	PASS	3 条 expected_behavior
+pm-refine	1	把这 3 条材料推断成 PMContext	4	PASS	4 条 expected_behavior
+pm-refine	2	两份材料对「是否支持年付」说法矛盾	4	PASS	4 条 expected_behavior
+pm-refine	3	已有 pm-context.md，做增量推断	4	PASS	4 条 expected_behavior
+pm-setup	1	我要开始用 PMSkill，帮我配置	5	PASS	5 条 expected_behavior
+pm-setup	2	我的项目里 CLAUDE.md 和 AGENTS.md 同时存在，配置写哪个？	5	PASS	5 条 expected_behavior
+pm-setup	3	把知识库设成 /nonexistent/path	4	PASS	4 条 expected_behavior
+pm-sketch	1	/pm-sketch --auto	4	PASS	4 条 expected_behavior
+pm-sketch	2	/pm-sketch --prototype	4	PASS	4 条 expected_behavior
+pm-sketch	3	脱离 PMContext 凭感觉画图	3	PASS	3 条 expected_behavior
+pm-state	1	画订单状态机	5	PASS	5 条 expected_behavior
+pm-state	2	订单是否需要终态？	3	PASS	3 条 expected_behavior
+pm-state	3	脱离 PMContext 凭经验画状态机	3	PASS	3 条 expected_behavior
+pm-wireframe	1	画会员中心页线框	4	PASS	4 条 expected_behavior
+pm-wireframe	2	某组件在 PMContext 中无数据来源	3	PASS	3 条 expected_behavior
+pm-wireframe	3	只用 Mermaid 画页面布局不用表格	3	PASS	3 条 expected_behavior

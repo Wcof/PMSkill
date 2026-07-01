@@ -5,6 +5,8 @@
 从模糊想法/用户诉求出发，**一键全链路**沉淀成 PMContext → 衍生出 PRD（给 AI + 给人）→ 生成可视化草图 + HTML 可交互原型。
 
 > 经过 darwin-skill 9 轮结构化优化 + 参考 [pm-skills (PM Compass)](https://github.com/phuryn/pm-skills) 最佳实践，13 个 SKILL.md 全量覆盖角色设定、产出示例、延伸参考与实战提示。符合 [Anthropic Agent Skills 规范](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)：YAML frontmatter 渐进披露、第三人称触发描述、Level 3 references 按需加载。
+>
+> **评估闭环**：40 个评估场景（≥3/skill）经 `bash evals/run-evals.sh --dry-run` 结构校验全 PASS（详见 [evals/README.md](evals/README.md#如何跑评估) 与 [evals/results.tsv](evals/results.tsv)），CI 退出码可复现。
 
 ## 一句话价值
 
@@ -206,8 +208,11 @@ PMSkill/
 
 evals/                          ← 评估集（≥3 场景/skill + rubric）
 ├── README.md                   ← 评估方法说明
+├── run-evals.sh                ← 评估运行器（--dry-run 结构校验 / --live 真实模型跑分）
+├── results.tsv                 ← 最近一次 dry-run 结果（人读 TSV，可复现）
+├── results.json                ← 最近一次结果机读汇总
 ├── pm-*.json                   ← 13 个 skill 的评估场景
-└── fixtures/                   ← 评估夹具（PMContext 样本/矛盾材料等）
+└── fixtures/                   ← 评估夹具（PMContext 样本/mock-project/non-git-project 等）
 ```
 
 ## 渐进披露
@@ -224,7 +229,17 @@ evals/                          ← 评估集（≥3 场景/skill + rubric）
 
 ## 评估集
 
-遵循 [Anthropic「先建评估再写文档」原则](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices#evaluation-and-iteration)，每个 skill 在 `evals/` 下有 ≥3 个评估场景与可判定 rubric，夹具样本在 `evals/fixtures/`。详见 [evals/README.md](evals/README.md)。
+遵循 [Anthropic「先建评估再写文档」原则](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices#evaluation-and-iteration)，每个 skill 在 `evals/` 下有 ≥3 个评估场景与可判定 rubric，夹具样本在 `evals/fixtures/`。
+
+可复现校验：
+
+```bash
+bash evals/run-evals.sh --dry-run          # 40 场景结构校验，CI 退出码 0=全 PASS
+bash evals/run-evals.sh --dry-run --skill pm-prd   # 单 skill
+bash evals/run-evals.sh --live             # 真实模型跑分（需 claude/codex CLI）
+```
+
+详见 [evals/README.md](evals/README.md)。
 
 ## 延伸参考
 
