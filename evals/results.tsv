@@ -1,4 +1,4 @@
-# PMSkill 评估结果 — mode=dry-run generated=2026-07-01T02:18:43Z
+# PMSkill 评估结果 — mode=dry-run generated=2026-07-01T11:01:07Z
 skill	scenario_id	query	expected_count	status	note
 pm-aiprd	1	基于 PMContext 生成 AI 可执行的 PRD	4	PASS	4 条 expected_behavior
 pm-aiprd	3	PMContext 中有 4 个 [待确认] 项怎么处理	4	PASS	4 条 expected_behavior
@@ -25,14 +25,16 @@ pm-prd	3	/pm-prd --skip-human	3	PASS	3 条 expected_behavior
 pm-premortem	1	产品下周上线，做 Pre-Mortem	5	PASS	5 条 expected_behavior
 pm-premortem	2	发现 8 个 Tiger 怎么办	4	PASS	4 条 expected_behavior
 pm-premortem	3	脱离 PMContext 凭经验列风险	3	PASS	3 条 expected_behavior
-pm-refine	1	把这 3 条材料推断成 PMContext	4	PASS	4 条 expected_behavior
+pm-refine	1	把这 3 条材料推断成 PMContext --auto	5	PASS	5 条 expected_behavior
 pm-refine	2	两份材料对「是否支持年付」说法矛盾	4	PASS	4 条 expected_behavior
 pm-refine	3	已有 pm-context.md，做增量推断	4	PASS	4 条 expected_behavior
+pm-refine	4	帮我梳理这些需求材料	8	PASS	8 条 expected_behavior
+pm-refine	5	帮我梳理这些需求材料 --auto	6	PASS	6 条 expected_behavior
 pm-setup	1	我要开始用 PMSkill，帮我配置	5	PASS	5 条 expected_behavior
 pm-setup	2	我的项目里 CLAUDE.md 和 AGENTS.md 同时存在，配置写哪个？	5	PASS	5 条 expected_behavior
 pm-setup	3	把知识库设成 /nonexistent/path	4	PASS	4 条 expected_behavior
 pm-sketch	1	/pm-sketch --auto	4	PASS	4 条 expected_behavior
-pm-sketch	2	/pm-sketch --prototype	4	PASS	4 条 expected_behavior
+pm-sketch	2	/pm-sketch --prototype	5	PASS	5 条 expected_behavior
 pm-sketch	3	脱离 PMContext 凭感觉画图	3	PASS	3 条 expected_behavior
 pm-state	1	画订单状态机	5	PASS	5 条 expected_behavior
 pm-state	2	订单是否需要终态？	3	PASS	3 条 expected_behavior

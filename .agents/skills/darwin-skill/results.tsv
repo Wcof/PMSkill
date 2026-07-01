@@ -52,3 +52,8 @@ timestamp	commit	skill	old_score	new_score	status	dimension	note	eval_mode
 2026-06-28T23:40	e75f0f6	pm-state	86.5	88.5	keep	dim1	model-invoked补强中英文触发词+终态显式化	full_test
 2026-06-28T23:40	e75f0f6	pm-flow	86.0	88.0	keep	dim1	model-invoked补强中英文触发词+循环退出条件显式化	full_test
 2026-06-29T00:55	full_test	all	88.9	88.9	verify	dim8	13 skill evals场景全PASS(3个❌核实为匹配假阴性)	full_test
+2026-07-01T19:01	8a9900d	pm-sketch	88.5	90.0	keep	dim6/7	渐进披露3个HTML模板到references/prototype-templates.md(355→221行)	full_test
+2026-07-01T19:01	8a9900d	pm-refine	89.0	90.5	keep	dim5/7	披露优先级框架到references/priority-frameworks.md,精简度量准则,合并Purpose/Context	dry_run
+2026-07-01T19:01	8a9900d	pm-premortem	90.0	91.0	keep	dim6	pm-skills引用替换为中立产品文章	dry_run
+2026-07-01T19:01	8a9900d	pm-prd	90.5	91.5	keep	dim6	pm-skills引用替换为中立产品文章	dry_run
+2026-07-01T19:01	8a9900d	pm-aiprd	89.0	90.0	keep	dim6	pm-skills引用替换为中立产品文章	dry_run

@@ -4,7 +4,9 @@ A Skill toolkit for product managers working in Agents.
 
 From fuzzy ideas/user requests, **one-command full pipeline** distills PMContext → derives PRD (for AI + for human) → generates visual sketches + interactive HTML prototype.
 
-> Optimized through 9 rounds of darwin-skill structural optimization + best practices from [pm-skills (PM Compass)](https://github.com/phuryn/pm-skills). All 13 SKILL.md files cover role setup, output examples, further references, and practical tips. Compliant with [Anthropic Agent Skills specification](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview): YAML frontmatter progressive disclosure, third-person trigger descriptions, Level 3 references loaded on demand.
+> Optimized through multiple rounds of darwin-skill structural optimization + industry best practices. All 13 SKILL.md files cover role setup, output examples, further references, and practical tips. Compliant with [Anthropic Agent Skills specification](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview): YAML frontmatter progressive disclosure, third-person trigger descriptions, Level 3 references loaded on demand.
+>
+> **Evaluation loop**: 45 evaluation scenarios (≥3/skill) all PASS structural validation via `bash evals/run-evals.sh --dry-run` (see [evals/README.md](evals/README.md) and [evals/results.tsv](evals/results.tsv)), reproducible CI exit code.
 
 ## One-line Value
 
@@ -26,22 +28,24 @@ npx skills@latest add Wcof/PMSkill --all
 
 ### 3. One-command full pipeline (recommended)
 
-One sentence triggers collect → refine → PRD → prototype, zero confirmation:
+One sentence triggers collect → refine → PRD → prototype. Two refine modes:
 
 ```text
-/pm-need <requirement description> --auto
+/pm-need <requirement>           # Normal mode: refine asks PM dimension by dimension (recommended)
+/pm-need <requirement> --auto    # Zero-confirmation mode: refine auto-infers, fully automatic
 ```
 
-Example: `/pm-need membership system redesign --auto`
+Example: `/pm-need membership system redesign` → refine Q&A mode; `/pm-need membership system redesign --auto` → zero-confirmation all the way.
 
 ### 4. Step-by-step
 
 ```text
-/pm-need              # Auto-collect materials + infer clarification → produce PMContext, pause at audit gate
+/pm-need              # Auto-collect → refine Q&A mode (ask PM dimension by dimension) → pause at audit gate
+/pm-need --auto       # Auto-collect → refine auto-inference mode (zero PM involvement) → PRD → prototype
 /pm-prd               # Generate PRD from PMContext (for AI + for human)
 /pm-prd --auto        # Zero-confirmation mode: produce PRD directly, no pause
 /pm-sketch            # Generate all sketches from PMContext
-/pm-sketch --prototype # Generate Mermaid sketches + interactive HTML prototype
+/pm-sketch --prototype # Generate Mermaid sketches + interactive HTML prototype (tech-stack aware)
 ```
 
 ## Core Model
@@ -81,9 +85,9 @@ prd/*.md   premortem.md      sketch/*.md       prototype.html
 
 | Skill | Invocation | Purpose |
 |---|---|---|
-| `/pm-need` | user-invoked | 🏆 Main entry: collect → refine → audit, all automatic. `--auto` zero-confirm straight to PRD+prototype |
+| `/pm-need` | user-invoked | 🏆 Main entry: collect → refine → audit, all automatic. Normal mode refine asks PM dimension by dimension; `--auto` zero-confirm auto-inference straight to PRD+prototype |
 | `/pm-collect` | model-invoked | Deep scan (code/git/URL/knowledge base), 4 sources deduplicated, **no filtering, only organizing** |
-| `/pm-refine` | model-invoked | 8-dimension autonomous inference (P0 user scenarios/boundaries/conflicts → P1 priority/terminology/friction → P2 tech constraints/metrics), with confidence levels |
+| `/pm-refine` | model-invoked | 8-dimension inference (P0 user scenarios/boundaries/conflicts → P1 priority/terminology/friction → P2 tech constraints/metrics). Normal mode asks PM; `--auto` auto-infers with confidence levels |
 
 ### Delivery — Delivery
 
@@ -98,7 +102,7 @@ prd/*.md   premortem.md      sketch/*.md       prototype.html
 
 | Skill | Invocation | Purpose |
 |---|---|---|
-| `/pm-sketch` | user-invoked | 🏆 Main entry: output all four sketch types + HTML prototype (`--prototype`). `--auto` zero-confirm |
+| `/pm-sketch` | user-invoked | 🏆 Main entry: output all four sketch types + HTML prototype (`--prototype`). `--auto` zero-confirm. Tech-stack auto-detection/recommendation before prototype generation |
 | `/pm-wireframe` | model-invoked | Wireframe: Mermaid page navigation + Markdown table component layout |
 | `/pm-ia` | model-invoked | Information architecture: Mermaid graph, entities/pages + navigation/containment/reference edges |
 | `/pm-state` | model-invoked | State machine: Mermaid stateDiagram-v2, states + transition conditions + error paths |
@@ -115,15 +119,33 @@ prd/*.md   premortem.md      sketch/*.md       prototype.html
 All user-invoked skills support the `--auto` flag:
 
 ```text
-/pm-need <requirement> --auto        # Full pipeline: collect → refine → PRD → prototype, zero-confirm
+/pm-need <requirement> --auto        # Full pipeline: collect → refine (auto-inference) → PRD → prototype, zero PM involvement
 /pm-prd --auto                       # Generate PRD from existing PMContext directly, no pause
 /pm-sketch --auto                    # Generate all sketches + HTML prototype directly
 ```
 
 Under `--auto` mode:
+- `/pm-refine` enters auto-inference mode, completing the self-questioning loop internally
 - No waiting for PM confirmation; all outputs land immediately
 - Sub-skill failures don't block the pipeline; failed items are flagged individually
 - One-stop report with confidence distribution + information gaps for post-hoc audit
+
+## Tech Stack Awareness
+
+Before generating HTML prototype via `/pm-sketch --prototype`, the tech stack is auto-determined:
+
+- **Existing code projects**: detected by scanning `package.json`, `vite.config.ts`, `vue.config.js`, etc.
+- **New projects**: recommended by scenario (management system → Vue3 + Vite + TS, desktop client → Electron + Vue3, frontend page → Vue3 + Vite + TailwindCSS)
+- Prototype adapts to the detected/recommended tech stack using its CDN version, not plain HTML
+
+## /pm-refine Dual Execution Mode
+
+`/pm-refine` has two execution modes depending on invocation:
+
+| Mode | Trigger | Behavior |
+|------|---------|----------|
+| **Q&A Mode** (default) | `/pm-refine` or `/pm-need` (normal mode) | Agent asks PM one dimension at a time, each question with a 3-part recommended answer (recommended/basis/alternative). PM confirms → accepted as fact; says "stop" → confirmed dimensions land, unconfirmed get `[待确认]`; says "you decide the rest" → degrades to auto-inference |
+| **Auto-inference Mode** | `/pm-refine --auto` or `/pm-need <req> --auto` | Agent completes self-questioning loop internally, not exposed to conversation. Evidence → facts with source; inferable → `[假设]`+confidence; missing → `[待确认]`; conflicting → `[冲突]` |
 
 ## /pm-refine Inference Dimensions (8 dimensions full coverage)
 

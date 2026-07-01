@@ -4,9 +4,9 @@
 
 从模糊想法/用户诉求出发，**一键全链路**沉淀成 PMContext → 衍生出 PRD（给 AI + 给人）→ 生成可视化草图 + HTML 可交互原型。
 
-> 经过 darwin-skill 9 轮结构化优化 + 参考 [pm-skills (PM Compass)](https://github.com/phuryn/pm-skills) 最佳实践，13 个 SKILL.md 全量覆盖角色设定、产出示例、延伸参考与实战提示。符合 [Anthropic Agent Skills 规范](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)：YAML frontmatter 渐进披露、第三人称触发描述、Level 3 references 按需加载。
+> 经过 darwin-skill 多轮结构化优化 + 参考行业最佳实践，13 个 SKILL.md 全量覆盖角色设定、产出示例、延伸参考与实战提示。符合 [Anthropic Agent Skills 规范](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)：YAML frontmatter 渐进披露、第三人称触发描述、Level 3 references 按需加载。
 >
-> **评估闭环**：40 个评估场景（≥3/skill）经 `bash evals/run-evals.sh --dry-run` 结构校验全 PASS（详见 [evals/README.md](evals/README.md#如何跑评估) 与 [evals/results.tsv](evals/results.tsv)），CI 退出码可复现。
+> **评估闭环**：45 个评估场景（≥3/skill）经 `bash evals/run-evals.sh --dry-run` 结构校验全 PASS（详见 [evals/README.md](evals/README.md#如何跑评估) 与 [evals/results.tsv](evals/results.tsv)），CI 退出码可复现。
 
 ## 一句话价值
 
@@ -28,22 +28,24 @@ npx skills@latest add Wcof/PMSkill --all
 
 ### 3. 一键全链路（推荐）
 
-一句话触发 collect → refine → premortem → PRD → 原型，零确认：
+一句话触发 collect → refine → premortem → PRD → 原型。支持两种精炼模式：
 
 ```text
-/pm-need <需求描述> --auto
+/pm-need <需求描述>           # 正常模式：refine 逐维追问 PM（推荐）
+/pm-need <需求描述> --auto    # 零确认模式：refine 自主推断，全自动走完
 ```
 
-示例：`/pm-need 会员体系重构 --auto`
+示例：`/pm-need 会员体系重构` → refine 逐维追问确认；`/pm-need 会员体系重构 --auto` → 零确认一气呵成。
 
 ### 4. 分步执行
 
 ```text
-/pm-need              # 全自动收集材料 + 推断澄清 → 产出 PMContext，停在审计门
+/pm-need              # 全自动收集材料 → refine 追问模式（逐维向 PM 提问确认）→ 停在审计门
+/pm-need --auto       # 全自动收集材料 → refine 自主推断模式（PM 零介入）→ PRD → 原型
 /pm-prd               # 从 PMContext 生成 PRD（给 AI + 给人）
 /pm-prd --auto        # 零确认模式：直接出 PRD，不暂停
 /pm-sketch            # 从 PMContext 生成全部草图
-/pm-sketch --prototype # 生成 Mermaid 草图 + HTML 可交互原型
+/pm-sketch --prototype # 生成 Mermaid 草图 + HTML 可交互原型（按技术栈适配）
 ```
 
 ## 核心主张
@@ -83,9 +85,9 @@ prd/*.md   premortem.md      sketch/*.md       prototype.html
 
 | Skill | 调用方式 | 作用 |
 |---|---|---|
-| `/pm-need` | user-invoked | 🏆 主入口：collect → refine → audit 全自动完成。`--auto` 零确认直达 PRD+原型 |
+| `/pm-need` | user-invoked | 🏆 主入口：collect → refine → audit 全自动完成。正常模式 refine 逐维追问 PM；`--auto` 零确认自主推断直达 PRD+原型 |
 | `/pm-collect` | model-invoked | 主动深扫描（代码/git/URL/知识库），4 源去重，**不筛选只整理** |
-| `/pm-refine` | model-invoked | 8 维度自主推断（P0 用户场景/边界/冲突 → P1 优先级/术语/摩擦力 → P2 技术约束/度量），标记置信度 |
+| `/pm-refine` | model-invoked | 8 维度推断（P0 用户场景/边界/冲突 → P1 优先级/术语/摩擦力 → P2 技术约束/度量）。正常模式追问 PM；`--auto` 自主推断，标记置信度 |
 
 ### Delivery — 交付
 
@@ -100,7 +102,7 @@ prd/*.md   premortem.md      sketch/*.md       prototype.html
 
 | Skill | 调用方式 | 作用 |
 |---|---|---|
-| `/pm-sketch` | user-invoked | 🏆 主入口：输出全部四类草图 + HTML 原型（`--prototype`）。`--auto` 零确认 |
+| `/pm-sketch` | user-invoked | 🏆 主入口：输出全部四类草图 + HTML 原型（`--prototype`）。`--auto` 零确认。原型生成前自动检测/推荐技术栈 |
 | `/pm-wireframe` | model-invoked | 界面线框图：Mermaid 页面导航 + Markdown 表格组件布局 |
 | `/pm-ia` | model-invoked | 信息架构图：Mermaid graph，实体/页面 + 导航/包含/引用三类边 |
 | `/pm-state` | model-invoked | 状态机图：Mermaid stateDiagram-v2，状态 + 转移条件 + 异常路径 |
@@ -117,15 +119,33 @@ prd/*.md   premortem.md      sketch/*.md       prototype.html
 所有 user-invoked 技能均支持 `--auto` 参数：
 
 ```text
-/pm-need <需求> --auto        # 全链路：collect → refine → premortem → PRD → 原型，零确认
+/pm-need <需求> --auto        # 全链路：collect → refine（自主推断）→ premortem → PRD → 原型，PM 零介入
 /pm-prd --auto                # 直接按已有 PMContext 生成 PRD，不暂停
 /pm-sketch --auto             # 直接生成全部草图 + HTML 原型
 ```
 
 `--auto` 模式下：
+- `/pm-refine` 进入自主推断模式，逐维在内部完成自我追问 loop，不外显
 - 不等待 PM 确认，直接落盘所有产物
 - 子 skill 失败不阻塞全链路，失败项单独标注
 - 输出一站式报告含置信度分布 + 信息缺口，供 PM 事后审计
+
+## 技术栈感知（Tech Stack Awareness）
+
+`/pm-sketch --prototype` 生成 HTML 原型前，自动确定技术栈：
+
+- **已有代码的项目**：扫描 `package.json`、`vite.config.ts`、`vue.config.js` 等检测
+- **新项目**：按场景推荐当前流行技术栈（管理系统 → Vue3 + Vite + TS，桌面客户端 → Electron + Vue3，前端页面 → Vue3 + Vite + TailwindCSS）
+- 原型按技术栈适配生成，使用对应 CDN 版本，而非纯 HTML
+
+## /pm-refine 双执行模式
+
+`/pm-refine` 根据调用方式分为两种执行模式：
+
+| 模式 | 触发方式 | 行为 |
+|------|---------|------|
+| **追问模式**（默认） | `/pm-refine` 或 `/pm-need`（正常模式） | Agent 逐维向 PM 提问，每次一个问题，附三段式推荐答案（推荐/依据/备选）。PM 回答后采信为事实；说"停"→已问落盘、未问标待确认；说"剩下的你自主"→降级自主推断 |
+| **自主推断模式** | `/pm-refine --auto` 或 `/pm-need <需求> --auto` | Agent 内部完成自我追问 loop，不外显。有依据写事实，可推断标 `[假设]`+置信度，缺失标 `[待确认]`，矛盾标 `[冲突]` |
 
 ## /pm-refine 推断维度（8 维全覆盖）
 

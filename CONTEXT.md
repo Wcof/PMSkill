@@ -408,3 +408,4 @@ docs/pm-context/
 - **依赖检查失败处置**：不中止、不裸奔落盘，必须触发隐式自愈重生成（最多 3 轮）。超限降级为 `[待确认]` + 信息缺口记录断链点 + 终止当前 Skill 并告知用户。
 - **`.loop/` GC 策略已锁定**：默认写入 `.gitignore`；每次 `/pm-need <需求描述>` 入口调用时自动 Wipe 全量清空；`--incremental` 模式例外不清空。
 - **反同义反复红线**：审计三元组的转换操作必须阐明具体推导逻辑（同义词推导/多对多实体映射/边界隔离分析等），空话判定为 Failure，darwin-skill dim8 检测兜底。
+- **技术栈感知（Tech Stack Awareness）**：`/pm-sketch --prototype` 生成 HTML 原型前，必须先确定技术栈。已有代码的项目通过扫描检测技术栈（`package.json`、`vite.config.ts`、`vue.config.js` 等）；新项目推荐当前流行技术栈（业务管理系统 → Vue3 + Vite + TypeScript，桌面客户端 → Electron + Vue3，前端页面 → Vue3 + Vite + TailwindCSS）。原型按技术栈适配生成——使用技术栈的 CDN 版本，而非纯 HTML。技术栈决策是原型 View 的元约束，不是 PMContext 中的实体。

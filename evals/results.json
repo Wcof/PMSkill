@@ -1,7 +1,7 @@
 {
   "mode": "dry-run",
-  "total": 40,
-  "pass": 40,
+  "total": 42,
+  "pass": 42,
   "partial": 0,
   "fail": 0,
   "scenarios": [
@@ -208,10 +208,10 @@
     {
       "skill": "pm-refine",
       "scenario_id": "1",
-      "query": "把这 3 条材料推断成 PMContext",
-      "expected_count": 4,
+      "query": "把这 3 条材料推断成 PMContext --auto",
+      "expected_count": 5,
       "status": "PASS",
-      "note": "4 条 expected_behavior"
+      "note": "5 条 expected_behavior"
     },
     {
       "skill": "pm-refine",
@@ -228,6 +228,22 @@
       "expected_count": 4,
       "status": "PASS",
       "note": "4 条 expected_behavior"
+    },
+    {
+      "skill": "pm-refine",
+      "scenario_id": "4",
+      "query": "帮我梳理这些需求材料",
+      "expected_count": 8,
+      "status": "PASS",
+      "note": "8 条 expected_behavior"
+    },
+    {
+      "skill": "pm-refine",
+      "scenario_id": "5",
+      "query": "帮我梳理这些需求材料 --auto",
+      "expected_count": 6,
+      "status": "PASS",
+      "note": "6 条 expected_behavior"
     },
     {
       "skill": "pm-setup",
@@ -265,9 +281,9 @@
       "skill": "pm-sketch",
       "scenario_id": "2",
       "query": "/pm-sketch --prototype",
-      "expected_count": 4,
+      "expected_count": 5,
       "status": "PASS",
-      "note": "4 条 expected_behavior"
+      "note": "5 条 expected_behavior"
     },
     {
       "skill": "pm-sketch",

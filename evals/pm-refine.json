@@ -2,13 +2,14 @@
   {
     "id": 1,
     "skills": ["pm-refine"],
-    "query": "把这 3 条材料推断成 PMContext",
+    "query": "把这 3 条材料推断成 PMContext --auto",
     "files": ["fixtures/collect-sample.md"],
     "expected_behavior": [
       "完整覆盖 8 个推断维度（用户场景/边界/优先级/冲突/术语/摩擦力/技术约束/度量）",
       "有明确依据写为事实并标注来源；推断写为 [假设] 附置信度(1-10)；缺失标 [待确认]；矛盾标 [冲突]",
       "建立事实/规则/页面/验收之间的关联，无孤立项",
-      "PMContext 落盘为单文件 docs/pm-context/pm-context.md"
+      "PMContext 落盘为单文件 docs/pm-context/pm-context.md",
+      "无 PM 追问，推断不了的项直接标 [待确认] 记入信息缺口"
     ]
   },
   {
@@ -33,6 +34,36 @@
       "只推断新增部分，不重写已有事实",
       "增量写入保留历史推断",
       "输出新增条目数与置信度变化"
+    ]
+  },
+  {
+    "id": 4,
+    "skills": ["pm-refine"],
+    "query": "帮我梳理这些需求材料",
+    "files": ["fixtures/collect-sample.md"],
+    "expected_behavior": [
+      "默认进入追问模式（不是自主推断）",
+      "每次只问一个问题，不一次抛出多个问题",
+      "每个问题附三段式推荐答案（推荐/依据/备选）",
+      "每完成一个精炼维度（或每 2-4 个问题）增量落盘 PMContext 已确认项",
+      "PM 回答后采信为事实并标注来源 `← 对话: PM 确认`",
+      "PM 的回答与材料矛盾时标 [冲突] 而非反问",
+      "PM 说「停」时已问维度落盘、未问维度标 [待确认]",
+      "PM 说「剩下的你自主」时降级为自主推断，未问维度标 [假设]"
+    ]
+  },
+  {
+    "id": 5,
+    "skills": ["pm-refine"],
+    "query": "帮我梳理这些需求材料 --auto",
+    "files": ["fixtures/collect-sample.md"],
+    "expected_behavior": [
+      "进入自主推断模式，PM 零介入",
+      "内部完成自我追问 loop，不外显为对话",
+      "8 维推断全覆盖，推断不了的标 [待确认] 记入信息缺口",
+      "产出落盘路径为 `.loop/refine-step2.md / step3.md / step4.md`",
+      "不新增 `.loop/refine-discuss-*.md`",
+      "审计门展示完整置信度分布（追问模式无 PM 参与）"
     ]
   }
 ]

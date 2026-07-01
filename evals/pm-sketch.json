@@ -18,8 +18,9 @@
     "files": ["fixtures/pm-context.md"],
     "expected_behavior": [
       "生成 HTML 可交互原型 prototype.html",
-      "HTML 单页无外部 CDN 依赖，断网可预览",
-      "通过 9 项质量检查（语义化标签/响应式/可访问性等）",
+      "完成技术栈决策（新项目推荐 / 老项目检测），输出技术栈名称与依据",
+      "原型使用推荐/检测到的技术栈 CDN 版本（Vue3 / React / Plain HTML 兜底）",
+      "通过质量检查（语义化标签/响应式/图元追溯/技术栈适配）",
       "草图与 HTML 原型平级，HTML 不替代 Mermaid"
     ]
   },
